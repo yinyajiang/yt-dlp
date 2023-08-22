@@ -10,16 +10,16 @@ on:
         default: stable
         type: string
       unix:
-        default: true
+        default: false
         type: boolean
       linux_arm:
-        default: true
+        default: false
         type: boolean
       macos:
-        default: true
+        default: false
         type: boolean
       macos_legacy:
-        default: true
+        default: false
         type: boolean
       windows:
         default: true
@@ -47,19 +47,19 @@ on:
         type: string
       unix:
         description: yt-dlp, yt-dlp.tar.gz, yt-dlp_linux, yt-dlp_linux.zip
-        default: true
+        default: false
         type: boolean
       linux_arm:
         description: yt-dlp_linux_aarch64, yt-dlp_linux_armv7l
-        default: true
+        default: false
         type: boolean
       macos:
         description: yt-dlp_macos, yt-dlp_macos.zip
-        default: true
+        default: false
         type: boolean
       macos_legacy:
         description: yt-dlp_macos_legacy
-        default: true
+        default: false
         type: boolean
       windows:
         description: yt-dlp.exe, yt-dlp_min.exe, yt-dlp_win.zip

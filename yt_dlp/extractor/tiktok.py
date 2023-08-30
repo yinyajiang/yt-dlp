@@ -807,6 +807,8 @@ class TikTokUserIE(TikTokBaseIE):
         thumbnail = traverse_obj(videos, (0, 'author', 'avatar_larger', 'url_list', 0))
 
         return self.playlist_result(self._entries_api(user_id, videos), user_id, user_name, thumbnail=thumbnail)
+
+        
 class TikTokPlaylistIE(TikTokBaseIE):
     IE_NAME = 'tiktok:playlist'
     _AID = 1988

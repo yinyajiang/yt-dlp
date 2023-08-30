@@ -808,7 +808,7 @@ class TikTokUserIE(TikTokBaseIE):
 
         return self.playlist_result(self._entries_api(user_id, videos), user_id, user_name, thumbnail=thumbnail)
 
-        
+
 class TikTokPlaylistIE(TikTokBaseIE):
     IE_NAME = 'tiktok:playlist'
     _AID = 1988

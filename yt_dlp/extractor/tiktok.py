@@ -39,6 +39,7 @@ class TikTokBaseIE(InfoExtractor):
     _UPLOADER_URL_FORMAT = 'https://www.tiktok.com/@%s'
     _WEBPAGE_HOST = 'https://www.tiktok.com/'
     QUALITIES = ('360p', '540p', '720p', '1080p')
+    _API_HOSTNAME_IMPL = None
 
     @property
     def _API_HOSTNAME(self):
@@ -60,7 +61,7 @@ class TikTokBaseIE(InfoExtractor):
         if webpage_cookies.get('sid_tt'):
             self._set_cookie(self._API_HOSTNAME, 'sid_tt', webpage_cookies['sid_tt'].value)
         return self._download_json(
-            'https://%s/aweme/v1/%s/' % (self._API_HOSTNAME, ep), video_id=video_id,
+            self._API_HOSTNAME_IMPL if self._API_HOSTNAME_IMPL else 'https://%s/aweme/v1/%s/' % (self._API_HOSTNAME, ep), video_id=video_id,
             fatal=fatal, note=note, errnote=errnote, headers={
                 'User-Agent': f'com.ss.android.ugc.{self._APP_NAME}/{manifest_app_version} (Linux; U; Android 13; en_US; Pixel 7; Build/TD1A.220804.031; Cronet/58.0.2991.0)',
                 'Accept': 'application/json',
@@ -806,6 +807,113 @@ class TikTokUserIE(TikTokBaseIE):
         thumbnail = traverse_obj(videos, (0, 'author', 'avatar_larger', 'url_list', 0))
 
         return self.playlist_result(self._entries_api(user_id, videos), user_id, user_name, thumbnail=thumbnail)
+class TikTokPlaylistIE(TikTokBaseIE):
+    IE_NAME = 'tiktok:playlist'
+    _AID = 1988
+    _APP_NAME = 'tiktok_web'
+    _VALID_URL = r'https?://(?:www\.)?tiktok\.com/@(?P<user_id>[^\/]+)/playlist/(?P<name>[^\/]+)-(?P<id>\d+)'
+    _WORKING = False
+    _API_HOSTNAME_IMPL = "https://www.tiktok.com/api/mix/item_list"
+    _TESTS = [{
+        'url': 'https://www.tiktok.com/@osaudosista/playlist/cleo-7207585645509102342',
+        'playlist_mincount': 4,
+        'info_dict': {
+            'id': '7207585645509102342',
+            'title': 'cleo',
+        },
+        'expected_warnings': ['Retrying']
+    }]
+
+    def _build_api_query(self, query, app_version, manifest_app_version):
+        return {
+            **query, 'app_name': self._APP_NAME,
+            'app_language': 'en',
+            'language': 'en',
+            'channel': self._APP_NAME,
+            'aid': self._AID,
+            "browser_language": "en",
+            "browser_name": "Mozilla",
+            "browser_online": "true",
+            "browser_platform": "MacIntel",
+            "browser_version":
+            "5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/116.0.0.0 Safari/537.36",
+            "device_platform": "web_pc",
+            "focus_state": "false",
+            "from_page": "user",
+            "is_page_visible": "true",
+            "os": "mac",
+            "screen_height": "900",
+            "screen_width": "1440",
+            "tz_name": 'America/New_York',
+            "webcast_language": "en",
+            'device_id': ''.join(random.choices(string.digits, k=19))
+        }
+
+    def _video_entries_api(self, user_id, playlist_id):
+        query = {
+            'mixId': playlist_id,
+            'count': 21,
+            'cursor': 0,
+            "referer": "https://www.tiktok.com/@" + user_id,
+            "root_referer": "https://www.tiktok.com/@" + user_id,
+        }
+
+        for page in itertools.count(1):
+            for retry in self.RetryManager():
+                try:
+                    post_list = self._call_api(
+                        '',
+                        query,
+                        None,
+                        note=f'Downloading user video list page {page}',
+                        errnote='Unable to download user video list')
+                except ExtractorError as e:
+                    if isinstance(e.cause,
+                                  json.JSONDecodeError) and e.cause.pos == 0:
+                        retry.error = e
+                        continue
+                    raise
+            yield from post_list.get('itemList', [])
+            if not post_list.get('hasMore'):
+                break
+            query['cursor'] = post_list['cursor']
+
+    def _entries_api(self, user_id, videos):
+        extract_flat = self._downloader.params.get('extract_flat', False)
+        tiktokIE = TikTokIE()
+        tiktokIE._downloader = self._downloader
+        for video in videos:
+            vid = video["id"]
+            if extract_flat:
+                thumbnail = traverse_obj(video, ('video', 'shareCover', -1))
+                yield self.url_result(
+                    f'https://tiktok.com/@{user_id}/video/{vid}',
+                    TikTokIE.ie_key(),
+                    vid,
+                    video["desc"],
+                    thumbnail=thumbnail,
+                )
+            else:
+                yield {
+                    **(tiktokIE._extract_aweme_app(vid)),
+                    'extractor_key':
+                    TikTokIE.ie_key(),
+                    'extractor':
+                    'TikTok',
+                    'webpage_url':
+                    f'https://tiktok.com/@{user_id}/video/{vid}',
+                }
+
+    def _real_extract(self, url):
+        user_id, playlist_name, playlist_id = self._match_valid_url(url).group(
+            'user_id', 'name', 'id')
+
+        playlist_name = compat_urllib_parse_unquote(playlist_name)
+        videos = LazyList(self._video_entries_api(user_id, playlist_id))
+        return self.playlist_result(self._entries_api(user_id, videos),
+                                    playlist_id,
+                                    playlist_name,
+                                    extractor_key=TikTokIE.ie_key())
 
 
 class TikTokBaseListIE(TikTokBaseIE):  # XXX: Conventionally, base classes should end with BaseIE/InfoExtractor

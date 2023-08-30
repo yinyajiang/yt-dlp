@@ -887,7 +887,7 @@ class TikTokPlaylistIE(TikTokBaseIE):
         tiktokIE._downloader = self._downloader
         for video in videos:
             vid = video["id"]
-            if extract_flat and not skip_download:
+            if extract_flat and skip_download:
                 thumbnail = traverse_obj(video, ('video', 'shareCover', -1))
                 yield self.url_result(
                     f'https://tiktok.com/@{user_id}/video/{vid}',

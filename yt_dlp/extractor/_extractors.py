@@ -1996,6 +1996,7 @@ from .tiktok import (
     TikTokVMIE,
     TikTokLiveIE,
     DouyinIE,
+    TikTokPlaylistIE,
 )
 from .tinypic import TinyPicIE
 from .tmz import TMZIE

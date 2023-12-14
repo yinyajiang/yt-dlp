@@ -575,8 +575,7 @@ class ARDBetaMediathekIE(ARDMediathekBaseIE):
                     item_url,
                     ie=ARDBetaMediathekIE.ie_key()))
 
-            if (show_page['pagination']['pageSize'] * (pageNumber + 1)
-                >= show_page['pagination']['totalElements']):
+            if (show_page['pagination']['pageSize'] * (pageNumber + 1) >= show_page['pagination']['totalElements']):
                 # we've processed enough pages to get all playlist entries
                 break
             pageNumber = pageNumber + 1

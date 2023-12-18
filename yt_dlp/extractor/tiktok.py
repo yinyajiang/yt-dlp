@@ -791,19 +791,32 @@ class TikTokUserIE(TikTokBaseIE):
                 else:
                     self.report_warning(f'Unable to extract video {video_id}')
 
+            old_cursor = cursor
             cursor = traverse_obj(
                 response, ('itemList', -1, 'createTime', {lambda x: x * 1E3}, {int_or_none}))
-            if not cursor or not response.get('hasMorePrevious'):
+            if not cursor:
+                cursor = old_cursor - 604800000  # jump 1 week back in time
+            if cursor < 1472706000000 or not traverse_obj(response, 'hasMorePrevious'):
                 break
 
     def _get_sec_uid(self, user_url, user_name, msg):
         webpage = self._download_webpage(
             user_url, user_name, fatal=False, headers={'User-Agent': 'Mozilla/5.0'},
-            note=f'Downloading {msg} webpage', errnote=f'Unable to download {msg} webpage')
-        data = try_call(lambda: self._get_sigi_state(webpage, user_name))
-        return traverse_obj(
-            data, ('LiveRoom', 'liveRoomUserInfo', 'user', 'secUid'),
-            ('UserModule', 'users', ..., 'secUid'), get_all=False, expected_type=str)
+            note=f'Downloading {msg} webpage', errnote=f'Unable to download {msg} webpage') or ''
+        sec_uid = traverse_obj(self._search_json(
+            r'<script[^>]+\bid="__UNIVERSAL_DATA_FOR_REHYDRATION__"[^>]*>', webpage,
+            'rehydration data', user_name, end_pattern=r'</script>', default={}),
+            ('__DEFAULT_SCOPE__', 'webapp.user-detail', 'userInfo', 'user', 'secUid', {str}))
+        if sec_uid:
+            return sec_uid
+        try:
+            return traverse_obj(
+                self._get_sigi_state(webpage, user_name),
+                ('LiveRoom', 'liveRoomUserInfo', 'user', 'secUid'),
+                ('UserModule', 'users', ..., 'secUid'),
+                get_all=False, expected_type=str)
+        except ExtractorError:
+            return None
 
     def _real_extract(self, url):
         user_name = self._match_id(url)
@@ -820,9 +833,11 @@ class TikTokUserIE(TikTokBaseIE):
 
         if not sec_uid:
             webpage = self._download_webpage(
-                f'https://www.tiktok.com/embed/@{user_name}', user_name, note='Downloading user embed page')
+                f'https://www.tiktok.com/embed/@{user_name}', user_name,
+                note='Downloading user embed page', fatal=False) or ''
             data = traverse_obj(self._search_json(
-                r'<script[^>]+\bid=[\'"]__FRONTITY_CONNECT_STATE__[\'"][^>]*>', webpage, 'data', user_name),
+                r'<script[^>]+\bid=[\'"]__FRONTITY_CONNECT_STATE__[\'"][^>]*>',
+                webpage, 'data', user_name, default={}),
                 ('source', 'data', f'/embed/@{user_name}', {dict}))
 
             for aweme_id in traverse_obj(data, ('videoList', ..., 'id')):
@@ -834,7 +849,10 @@ class TikTokUserIE(TikTokBaseIE):
                     break
 
             if not sec_uid:
-                raise ExtractorError('Could not extract secondary user ID')
+                raise ExtractorError(
+                    'Could not extract secondary user ID. '
+                    'Try using  --extractor-arg "tiktok:sec_uid=ID"  with your command, '
+                    'replacing "ID" with the channel_id of the requested user')
 
         return self.playlist_result(self._entries(sec_uid, user_name), user_name)
 

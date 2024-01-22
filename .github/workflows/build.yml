@@ -68,11 +68,11 @@ on:
         default: false
         type: boolean
       windows:
-        description: yt-dlp.exe, yt-dlp_win_x86.exe, yt-dlp_win.zip
+        description: yt-dlp.exe, yt-dlp_win.zip
         default: true
         type: boolean
       windows32:
-        description: yt-dlp_x86.exe
+        description: yt-dlp_x86.exe, yt-dlp_win_x86.zip
         default: true
         type: boolean
       meta_files:
@@ -390,7 +390,7 @@ jobs:
         run: |
           python pyinst.py
           python pyinst.py --onedir
-          Compress-Archive -Path ./dist/yt-dlp/* -DestinationPath ./dist/yt-dlp_win_x86.zip
+          Compress-Archive -Path ./dist/yt-dlp_x86/* -DestinationPath ./dist/yt-dlp_win_x86.zip
 
       - name: Verify --update-to
         if: vars.UPDATE_TO_VERIFICATION

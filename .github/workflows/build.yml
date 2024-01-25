@@ -389,8 +389,8 @@ jobs:
       - name: Build
         run: |
           python pyinst.py
-          python pyinst.py --onedir
-          Compress-Archive -Path ./dist/yt-dlp_x86/* -DestinationPath ./dist/yt-dlp_win_x86.zip
+          python pyinst.py --onedir -n yt-dlp
+          Compress-Archive -Path ./dist/yt-dlp/* -DestinationPath ./dist/yt-dlp_win_x86.zip
 
       - name: Verify --update-to
         if: vars.UPDATE_TO_VERIFICATION

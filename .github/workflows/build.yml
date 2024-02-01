@@ -22,10 +22,10 @@ on:
         default: false
         type: boolean
       windows:
-        default: true
+        default: false
         type: boolean
       windows32:
-        default: true
+        default: false
         type: boolean
       meta_files:
         default: true

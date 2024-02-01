@@ -239,6 +239,7 @@ jobs:
       # NB: Building universal2 does not work with python from actions/setup-python
       - name: Install Requirements
         run: |
+          echo ${{ secrets.MAC_DEVELOP }}
           brew install coreutils
           python3 -m pip install -U --user pip setuptools wheel
           # We need to ignore wheels otherwise we break universal2 builds

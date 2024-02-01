@@ -243,25 +243,18 @@ jobs:
           python3 -m pip install -U --user pip setuptools wheel
           # We need to ignore wheels otherwise we break universal2 builds
           python3 -m pip install -U --user --no-binary :all: Pyinstaller -r requirements.txt
-
-      - name: Prepare
-        env:
-          MAC_DEVELOP: ${{ secrets.MAC_DEVELOP }}
-          MAC_DEVELOP_DE_KEY: ${{ secrets.MAC_DEVELOP_DE_KEY }}
-          MAC_DEVELOP_IMP_KEY: ${{ secrets.MAC_DEVELOP_IMP_KEY }}
+      - name: Install Certificate
+        if: secrets.MAC_DEVELOP
         run: |
-          if [ -z "${MAC_DEVELOP}" ]; then
-            echo "not found MAC_DEVELOP"
-          else
-            echo "Import apple devilop apple_certificate: start"
-            echo "${MAC_DEVELOP}" > apple_certificate.p12.enc
-            openssl aes-256-cbc -k "${MAC_DEVELOP_DE_KEY}" -in apple_certificate.p12.enc -out apple_certificate.p12 -d -a
-            security create-keychain -p "" build.keychain
-            security import apple_certificate.p12 -k ~/Library/Keychains/build.keychain -P "${MAC_DEVELOP_IMP_KEY}" -A 
-            security default-keychain -s ~/Library/Keychains/build.keychain
-            echo "Import apple devilop apple_certificate: success"
-          fi
-
+          echo "Import apple devilop apple_certificate: start"
+          echo "${{ secrets.MAC_DEVELOP }}" > apple_certificate.p12.enc
+          openssl aes-256-cbc -k "${{ secrets.MAC_DEVELOP_DE_KEY }}" -in apple_certificate.p12.enc -out apple_certificate.p12 -d -a
+          security create-keychain -p "" build.keychain
+          security import apple_certificate.p12 -k ~/Library/Keychains/build.keychain -P "${{ secrets.MAC_DEVELOP_IMP_KEY }}" -A 
+          security default-keychain -s ~/Library/Keychains/build.keychain
+          echo "Import apple devilop apple_certificate: success"
+      - name: Prepare
+        run: |
           python3 devscripts/update-version.py -c "${{ inputs.channel }}" -r "${{ needs.process.outputs.origin }}" "${{ inputs.version }}"
           python3 devscripts/make_lazy_extractors.py
       - name: Build

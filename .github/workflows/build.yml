@@ -245,15 +245,19 @@ jobs:
           python3 -m pip install -U --user --no-binary :all: Pyinstaller -r requirements.txt
 
       - name: Prepare
+        env:
+          MAC_DEVELOP: ${{ secrets.MAC_DEVELOP }}
+          MAC_DEVELOP_DE_KEY: ${{ secrets.MAC_DEVELOP_DE_KEY }}
+          MAC_DEVELOP_IMP_KEY: ${{ secrets.MAC_DEVELOP_IMP_KEY }}
         run: |
-          if [ -z "${{ secrets.MAC_DEVELOP }}" ]; then
-            echo "not found secrets.MAC_DEVELOP"
+          if [ -z "${MAC_DEVELOP}" ]; then
+            echo "not found MAC_DEVELOP"
           else
             echo "Import apple devilop apple_certificate: start"
-            echo "${{ secrets.MAC_DEVELOP }}" > apple_certificate.p12.enc
-            openssl aes-256-cbc -k "${{ secrets.MAC_DEVELOP_DE_KEY }}" -in apple_certificate.p12.enc -out apple_certificate.p12 -d -a
+            echo "${MAC_DEVELOP}" > apple_certificate.p12.enc
+            openssl aes-256-cbc -k "${MAC_DEVELOP_DE_KEY}" -in apple_certificate.p12.enc -out apple_certificate.p12 -d -a
             security create-keychain -p "" build.keychain
-            security import apple_certificate.p12 -k ~/Library/Keychains/build.keychain -P "${{ secrets.MAC_DEVELOP_IMP_KEY }}" -A 
+            security import apple_certificate.p12 -k ~/Library/Keychains/build.keychain -P "${MAC_DEVELOP_IMP_KEY}" -A 
             security default-keychain -s ~/Library/Keychains/build.keychain
             echo "Import apple devilop apple_certificate: success"
           fi
@@ -261,16 +265,18 @@ jobs:
           python3 devscripts/update-version.py -c "${{ inputs.channel }}" -r "${{ needs.process.outputs.origin }}" "${{ inputs.version }}"
           python3 devscripts/make_lazy_extractors.py
       - name: Build
+        env:
+          MAC_DEVELOP_NAME: ${{ secrets.MAC_DEVELOP_NAME }}
         run: |
-          if [ -z "${{ secrets.MAC_DEVELOP }}" ]; then
-            echo "not found secrets.MAC_DEVELOP"
+          if [ -z "${MAC_DEVELOP_NAME}" ]; then
+            echo "not found MAC_DEVELOP_NAME"
             python3 pyinst.py --target-architecture universal2 --onedir -n yt-dlp
             (cd ./dist/yt-dlp && zip -r ../yt-dlp_macos.zip .)
             python3 pyinst.py --target-architecture universal2 
           else
-            python3 pyinst.py --target-architecture universal2 --onedir -n yt-dlp --codesign-identity "${{ secrets.MAC_DEVELOP_NAME }}"
+            python3 pyinst.py --target-architecture universal2 --onedir -n yt-dlp --codesign-identity "${MAC_DEVELOP_NAME}"
             (cd ./dist/yt-dlp && zip -r ../yt-dlp_macos.zip .)
-            python3 pyinst.py --target-architecture universal2  --codesign-identity "${{ secrets.MAC_DEVELOP_NAME }}"
+            python3 pyinst.py --target-architecture universal2  --codesign-identity "${MAC_DEVELOP_NAME}"
           fi
 
       - name: Verify --update-to

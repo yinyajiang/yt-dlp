@@ -16,7 +16,7 @@ on:
         default: false
         type: boolean
       macos:
-        default: false
+        default: true
         type: boolean
       macos_legacy:
         default: false

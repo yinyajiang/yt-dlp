@@ -22,10 +22,10 @@ on:
         default: false
         type: boolean
       windows:
-        default: true
+        default: false
         type: boolean
       windows32:
-        default: true
+        default: false
         type: boolean
       meta_files:
         default: true
@@ -258,8 +258,6 @@ jobs:
           python3 devscripts/update-version.py -c "${{ inputs.channel }}" -r "${{ needs.process.outputs.origin }}" "${{ inputs.version }}"
           python3 devscripts/make_lazy_extractors.py
       - name: Build
-        env:
-          MAC_DEVELOP_NAME: ${{ secrets.MAC_DEVELOP_NAME }}
         run: |
           if [ -z "${MAC_DEVELOP_NAME}" ]; then
             echo "not found MAC_DEVELOP_NAME" 
@@ -269,7 +267,7 @@ jobs:
           else
             python3 pyinst.py --target-architecture universal2 --onedir -n yt-dlp --codesign-identity "${MAC_DEVELOP_NAME}"
             (cd ./dist/yt-dlp && zip -r ../yt-dlp_macos.zip .)
-            python3 pyinst.py --target-architecture universal2  --codesign-identity "${MAC_DEVELOP_NAME}"
+            python3 pyinst.py --target-architecture universal2 --codesign-identity "${MAC_DEVELOP_NAME}"
           fi
 
       - name: Verify --update-to

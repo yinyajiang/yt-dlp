@@ -20,13 +20,13 @@ on:
         type: string
     secrets:
       APPLE_CERTIFICATE:
-        required: false
+        required: true
       APPLE_CERTIFICATE_DECODE_KEY:
-        required: false
+        required: true
       APPLE_CERTIFICATE_IMPORT_KEY:
-        required: false
+        required: true
       APPLE_CERTIFICATE_NAME:
-        required: false
+        required: true
 
   workflow_dispatch:
     inputs:

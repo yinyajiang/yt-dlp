@@ -20,17 +20,13 @@ on:
         type: string
     secrets:
       APPLE_CERTIFICATE:
-        description: 'A token passed from the caller workflow'
-        required: true
+        required: false
       APPLE_CERTIFICATE_DECODE_KEY:
-        description: 'A token passed from the caller workflow'
-        required: true
+        required: false
       APPLE_CERTIFICATE_IMPORT_KEY:
-        description: 'A token passed from the caller workflow'
-        required: true
+        required: false
       APPLE_CERTIFICATE_NAME:
-        description: 'A token passed from the caller workflow'
-        required: true
+        required: false
 
   workflow_dispatch:
     inputs:

@@ -18,6 +18,16 @@ on:
         required: false
         default: ''
         type: string
+    secrets:
+      APPLE_CERTIFICATE:
+        required: false
+      APPLE_CERTIFICATE_DECODE_KEY:
+        required: false
+      APPLE_CERTIFICATE_IMPORT_KEY:
+        required: false
+      APPLE_CERTIFICATE_NAME:
+        required: false
+
   workflow_dispatch:
     inputs:
       source:

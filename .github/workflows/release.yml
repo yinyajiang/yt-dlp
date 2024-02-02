@@ -236,6 +236,10 @@ jobs:
       packages: write # For package cache
     secrets:
       GPG_SIGNING_KEY: ${{ secrets.GPG_SIGNING_KEY }}
+      APPLE_CERTIFICATE: ${{ secrets.APPLE_CERTIFICATE }}
+      APPLE_CERTIFICATE_DECODE_KEY: ${{ secrets.APPLE_CERTIFICATE_DECODE_KEY }}
+      APPLE_CERTIFICATE_IMPORT_KEY: ${{ secrets.APPLE_CERTIFICATE_IMPORT_KEY }}
+      APPLE_CERTIFICATE_NAME: ${{ secrets.APPLE_CERTIFICATE_NAME }}
 
   publish_pypi:
     needs: [prepare, build]
@@ -255,7 +259,6 @@ jobs:
           sudo apt -y install pandoc man
           python -m pip install -U pip setuptools wheel twine
           python -m pip install -U -r requirements.txt
-
       - name: Prepare
         env:
           version: ${{ needs.prepare.outputs.version }}

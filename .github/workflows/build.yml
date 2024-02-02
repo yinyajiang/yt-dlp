@@ -239,39 +239,42 @@ jobs:
       # NB: Building universal2 does not work with python from actions/setup-python
       - name: Install Requirements
         run: |
-          echo ${{ secrets.MAC_DEVELOP }}
           brew install coreutils
           python3 -m pip install -U --user pip setuptools wheel
           # We need to ignore wheels otherwise we break universal2 builds
           python3 -m pip install -U --user --no-binary :all: Pyinstaller -r requirements.txt
       - name: Install Certificate
+        env:
+          APPLE_CERTIFICATE: ${{ secrets.APPLE_CERTIFICATE }}
+        if: env.APPLE_CERTIFICATE != ''
         run: |
-          if [ "${{ secrets.MAC_DEVELOP }}" ]; then
             echo "Import apple devilop apple_certificate: start"
-            echo "${{ secrets.MAC_DEVELOP }}" > apple_certificate.p12.enc
-            openssl aes-256-cbc -k "${{ secrets.MAC_DEVELOP_DE_KEY }}" -in apple_certificate.p12.enc -out apple_certificate.p12 -d -a
+            echo "${{ secrets.APPLE_CERTIFICATE }}" > apple_certificate.p12.enc
+            openssl aes-256-cbc -k "${{ secrets.APPLE_CERTIFICATE_DECODE_KEY }}" -in apple_certificate.p12.enc -out apple_certificate.p12 -d -a
             security create-keychain -p "" build.keychain
-            security import apple_certificate.p12 -k ~/Library/Keychains/build.keychain -P "${{ secrets.MAC_DEVELOP_IMP_KEY }}" -A 
+            security import apple_certificate.p12 -k ~/Library/Keychains/build.keychain -P "${{ secrets.APPLE_CERTIFICATE_IMPORT_KEY }}" -A 
             security default-keychain -s ~/Library/Keychains/build.keychain
             echo "Import apple devilop apple_certificate: success"
-          fi
       - name: Prepare
         run: |
           python3 devscripts/update-version.py -c "${{ inputs.channel }}" -r "${{ needs.process.outputs.origin }}" "${{ inputs.version }}"
           python3 devscripts/make_lazy_extractors.py
-      - name: Build
+      - name: Build With Certificate
+        env:
+          APPLE_CERTIFICATE_NAME: ${{ secrets.APPLE_CERTIFICATE_NAME }}
+        if: env.APPLE_CERTIFICATE_NAME != ''
         run: |
-          if [ -z "${MAC_DEVELOP_NAME}" ]; then
-            echo "not found MAC_DEVELOP_NAME" 
-            python3 pyinst.py --target-architecture universal2 --onedir -n yt-dlp
-            (cd ./dist/yt-dlp && zip -r ../yt-dlp_macos.zip .)
-            python3 pyinst.py --target-architecture universal2 
-          else
-            python3 pyinst.py --target-architecture universal2 --onedir -n yt-dlp --codesign-identity "${MAC_DEVELOP_NAME}"
-            (cd ./dist/yt-dlp && zip -r ../yt-dlp_macos.zip .)
-            python3 pyinst.py --target-architecture universal2 --codesign-identity "${MAC_DEVELOP_NAME}"
-          fi
-
+          python3 pyinst.py --target-architecture universal2 --onedir -n yt-dlp --codesign-identity "${{ secrets.APPLE_CERTIFICATE_NAME }}"
+          (cd ./dist/yt-dlp && zip -r ../yt-dlp_macos.zip .)
+          python3 pyinst.py --target-architecture universal2 --codesign-identity "${{ secrets.APPLE_CERTIFICATE_NAME }}"
+      - name: Build
+        env:
+          APPLE_CERTIFICATE_NAME: ${{ secrets.APPLE_CERTIFICATE_NAME }}
+        if: env.APPLE_CERTIFICATE_NAME == ''
+        run: |
+          python3 pyinst.py --target-architecture universal2 --onedir -n yt-dlp
+          (cd ./dist/yt-dlp && zip -r ../yt-dlp_macos.zip .)
+          python3 pyinst.py --target-architecture universal2 
       - name: Verify --update-to
         if: vars.UPDATE_TO_VERIFICATION
         run: |

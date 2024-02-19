@@ -226,6 +226,7 @@ jobs:
         id: get_target
         run: |
           echo "head_sha=$(git rev-parse HEAD)" >> "$GITHUB_OUTPUT"
+          echo "head_sha: $(git rev-parse HEAD)"
 
       - name: Update master
         env:

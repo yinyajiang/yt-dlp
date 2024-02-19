@@ -51,12 +51,13 @@ on:
       version:
         description: |
           VERSION: yyyy.mm.dd[.rev] or rev
-        required: true
+        required: false
+        default: '2024.01.01'
         type: string
       channel:
         description: |
           SOURCE of this build's updates: stable/nightly/master/<repo>
-        required: true
+        required: false
         default: stable
         type: string
       unix:

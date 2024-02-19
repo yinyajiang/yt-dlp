@@ -69,7 +69,7 @@ on:
         type: boolean
       macos:
         description: yt-dlp_macos, yt-dlp_macos.zip
-        default: false
+        default: true
         type: boolean
       macos_legacy:
         description: yt-dlp_macos_legacy
@@ -254,7 +254,7 @@ jobs:
           python3 devscripts/install_deps.py --user -o --include build
           python3 devscripts/install_deps.py --print --include pyinstaller > requirements.txt
           # We need to ignore wheels otherwise we break universal2 builds
-          python3 -m pip install -U --user --no-binary :all: Pyinstaller -r requirements.txt
+          python3 -m pip install -U --user --no-binary :all: -r requirements.txt
       - name: Install Certificate
         env:
           APPLE_CERTIFICATE: ${{ secrets.APPLE_CERTIFICATE }}
@@ -288,7 +288,7 @@ jobs:
         if: env.APPLE_CERTIFICATE_NAME == ''
         run: |
           python3 -m bundle.pyinstaller --target-architecture universal2 --onedir -n yt-dlp
-          (cd ./dist/yt-dlp_macos && zip -r ../yt-dlp_macos.zip .)
+          (cd ./dist/yt-dlp && zip -r ../yt-dlp_macos.zip .)
           python3 -m bundle.pyinstaller --target-architecture universal2
 
       - name: Verify --update-to
@@ -384,8 +384,8 @@ jobs:
           python devscripts/make_lazy_extractors.py
       - name: Build
         run: |
-          python -m bundle.py2exe
-          Move-Item ./dist/yt-dlp.exe ./dist/yt-dlp_min.exe
+          # python -m bundle.py2exe
+          # Move-Item ./dist/yt-dlp.exe ./dist/yt-dlp_min.exe
           python -m bundle.pyinstaller
           python -m bundle.pyinstaller --onedir
           Compress-Archive -Path ./dist/yt-dlp/* -DestinationPath ./dist/yt-dlp_win.zip

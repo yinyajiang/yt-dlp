@@ -226,7 +226,6 @@ jobs:
         id: get_target
         run: |
           echo "head_sha=$(git rev-parse HEAD)" >> "$GITHUB_OUTPUT"
-          echo "head_sha: $(git rev-parse HEAD)"
 
       - name: Update master
         env:
@@ -361,7 +360,7 @@ jobs:
         if: |
           inputs.prerelease && env.GH_TOKEN != '' && env.GH_REPO != '' && env.GH_REPO != github.repository
         run: |
-          title="${{ contains(env.GH_REPO, 'yt-dlp') && 'yt-dlp ' || '' }}${{ env.channel }}"
+          title="${{ startswith(env.GH_REPO, 'yt-dlp/') && 'yt-dlp ' || '' }}${{ env.channel }}"
           gh release create \
             --notes-file ARCHIVE_NOTES \
             --title "${title} ${{ env.version }}" \
@@ -391,7 +390,7 @@ jobs:
         if: |
           env.target_repo == github.repository
         run: |
-          title="${{ contains(github.repository, 'yt-dlp') && 'yt-dlp ' || '' }}"
+          title="${{ github.repository == 'yt-dlp/yt-dlp' && 'yt-dlp ' || '' }}"
           title+="${{ env.target_tag != env.version && format('{0} ', env.target_tag) || '' }}"
           gh release create \
             --notes-file ${{ inputs.prerelease && 'PRERELEASE_NOTES' || 'RELEASE_NOTES' }} \

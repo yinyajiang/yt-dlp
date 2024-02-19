@@ -225,7 +225,7 @@ jobs:
       - name: Get target commitish
         id: get_target
         run: |
-          echo "head_sha=$(git rev-parse HEAD)" >> "$GITHUB_OUTPUT"
+          echo "::set-output head_sha=$(git rev-parse HEAD)" >> "$GITHUB_OUTPUT"
 
       - name: Update master
         env:

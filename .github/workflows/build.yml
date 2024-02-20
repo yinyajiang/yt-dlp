@@ -274,7 +274,7 @@ jobs:
             echo "${{ secrets.APPLE_CERTIFICATE }}" > apple_certificate.cer.enc
             openssl aes-256-cbc -k "${{ secrets.APPLE_CERTIFICATE_DECODE_KEY }}" -in apple_certificate.cer.enc -out apple_certificate.cer -d -a
             security import apple_certificate.cer -k login.keychain -A 
-            security set-keychain-settings login.keychain
+            security default-keychain -d user -s login.keychain
             echo "Import apple develop apple_certificate: success"
       - name: Prepare
         run: |

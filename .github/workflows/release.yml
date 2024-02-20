@@ -410,4 +410,5 @@ jobs:
           gh release create \
             --notes-file ${{ inputs.prerelease && 'PRERELEASE_NOTES' || 'RELEASE_NOTES' }} \
             --title "yt-dlp" \
+            ${{ github.run_id }} \
             artifact/*

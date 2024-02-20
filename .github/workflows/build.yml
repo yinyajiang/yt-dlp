@@ -248,19 +248,10 @@ jobs:
 
     steps:
       - uses: actions/checkout@v4
-      - name: Set up Python
-        uses: actions/setup-python@v5
-        with:
-          python-version: '3.12.1'
-          
-      - name: Check Python version
-        run: python3 --version
-
       # NB: Building universal2 does not work with python from actions/setup-python
       - name: Install Requirements
         run: |
           brew install coreutils
-          python3 --version
           python3 devscripts/install_deps.py --user -o --include build
           python3 devscripts/install_deps.py --print --include pyinstaller > requirements.txt
           # We need to ignore wheels otherwise we break universal2 builds

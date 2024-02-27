@@ -173,7 +173,7 @@ jobs:
       - name: Upload artifacts
         uses: actions/upload-artifact@v4
         with:
-          name: build-${{ github.job }}
+          name: build-bin-${{ github.job }}
           path: |
             yt-dlp
             yt-dlp.tar.gz
@@ -236,7 +236,7 @@ jobs:
       - name: Upload artifacts
         uses: actions/upload-artifact@v4
         with:
-          name: build-linux_${{ matrix.architecture }}
+          name: build-bin-linux_${{ matrix.architecture }}
           path: | # run-on-arch-action designates armv7l as armv7
             repo/dist/yt-dlp_linux_${{ (matrix.architecture == 'armv7' && 'armv7l') || matrix.architecture }}
           compression-level: 0
@@ -305,7 +305,7 @@ jobs:
       - name: Upload artifacts
         uses: actions/upload-artifact@v4
         with:
-          name: build-${{ github.job }}
+          name: build-bin-${{ github.job }}
           path: |
             dist/yt-dlp_macos
             dist/yt-dlp_macos.zip
@@ -358,7 +358,7 @@ jobs:
       - name: Upload artifacts
         uses: actions/upload-artifact@v4
         with:
-          name: build-${{ github.job }}
+          name: build-bin-${{ github.job }}
           path: |
             dist/yt-dlp_macos_legacy
           compression-level: 0
@@ -407,7 +407,7 @@ jobs:
       - name: Upload artifacts
         uses: actions/upload-artifact@v4
         with:
-          name: build-${{ github.job }}
+          name: build-bin-${{ github.job }}
           path: |
             dist/yt-dlp.exe
             dist/yt-dlp_win.zip
@@ -456,7 +456,7 @@ jobs:
       - name: Upload artifacts
         uses: actions/upload-artifact@v4
         with:
-          name: build-${{ github.job }}
+          name: build-bin-${{ github.job }}
           path: |
             dist/yt-dlp_x86.exe
             dist/yt-dlp_win_x86.zip
@@ -477,7 +477,7 @@ jobs:
       - uses: actions/download-artifact@v4
         with:
           path: artifact
-          pattern: build-*
+          pattern: build-bin-*
           merge-multiple: true
 
       - name: Make SHA2-SUMS files
@@ -520,3 +520,4 @@ jobs:
             _update_spec
             SHA*SUMS*
           compression-level: 0
+          overwrite: true

@@ -661,6 +661,10 @@ class FacebookIE(InfoExtractor):
                         'automatic_captions': automatic_captions,
                         'subtitles': subtitles,
                     }
+                    if traverse_obj(video, ('is_live_streaming', {bool})):
+                        info['is_live'] = True
+                        info['live_status'] = 'is_live' 
+
                     process_formats(info)
                     description = try_get(video, lambda x: x['savable_description']['text'])
                     title = video.get('name')

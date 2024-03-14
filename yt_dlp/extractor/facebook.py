@@ -663,7 +663,7 @@ class FacebookIE(InfoExtractor):
                     }
                     if traverse_obj(video, ('is_live_streaming', {bool})):
                         info['is_live'] = True
-                        info['live_status'] = 'is_live' 
+                        info['live_status'] = 'is_live'
 
                     process_formats(info)
                     description = try_get(video, lambda x: x['savable_description']['text'])

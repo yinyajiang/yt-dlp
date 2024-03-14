@@ -6,7 +6,7 @@ import string
 import time
 
 from .common import InfoExtractor
-from ..compat import compat_urllib_parse_urlparse
+from ..compat import compat_urllib_parse_urlparse, compat_urllib_parse_unquote
 from ..networking import HEADRequest
 from ..utils import (
     ExtractorError,

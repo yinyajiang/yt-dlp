@@ -144,7 +144,8 @@ class InstagramBaseIE(InfoExtractor):
         vcodec = product_media.get('video_codec')
         dash_manifest_raw = product_media.get('video_dash_manifest')
         videos_list = product_media.get('video_versions')
-        if not (dash_manifest_raw or videos_list):
+        images_list = traverse_obj(product_media, ('image_versions2', 'candidates'))
+        if not (dash_manifest_raw or videos_list or images_list):
             return {}
 
         formats = [{
@@ -157,16 +158,32 @@ class InstagramBaseIE(InfoExtractor):
         if dash_manifest_raw:
             formats.extend(self._parse_mpd_formats(self._parse_xml(dash_manifest_raw, media_id), mpd_id='dash'))
 
+        media_type = product_media.get("media_type", 0)
+        if media_type == 1:
+            media_type = 'PHOTO'
+            formats.extend([{
+                'format_id': str(item.get('width', '')) + "-" + str(item.get('height', '')),
+                'url': item.get('url'),
+                'width': item.get('width'),
+                'height': item.get('height'),
+            } for item in images_list or []])
+        elif media_type == 2:
+            media_type = 'VIDEO'
+        elif media_type == 8:
+            media_type = 'CAROUSEL'
+
         thumbnails = [{
             'url': thumbnail.get('url'),
             'width': thumbnail.get('width'),
             'height': thumbnail.get('height')
-        } for thumbnail in traverse_obj(product_media, ('image_versions2', 'candidates')) or []]
+        } for thumbnail in images_list or []]
+
         return {
             'id': media_id,
             'duration': float_or_none(product_media.get('video_duration')),
             'formats': formats,
-            'thumbnails': thumbnails
+            'thumbnails': thumbnails,
+            'media_type': media_type
         }
 
     def _extract_product(self, product_info):

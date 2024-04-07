@@ -162,10 +162,11 @@ class InstagramBaseIE(InfoExtractor):
         if media_type == 1:
             media_type = 'PHOTO'
             formats.extend([{
-                'format_id': str(item.get('width', '')) + "-" + str(item.get('height', '')),
+                'format_id':'photo-' + str(item.get('width', '')) + "-" + str(item.get('height', '')),
                 'url': item.get('url'),
                 'width': item.get('width'),
                 'height': item.get('height'),
+                '_media_type': media_type,
             } for item in images_list or []])
         elif media_type == 2:
             media_type = 'VIDEO'
@@ -183,7 +184,7 @@ class InstagramBaseIE(InfoExtractor):
             'duration': float_or_none(product_media.get('video_duration')),
             'formats': formats,
             'thumbnails': thumbnails,
-            'media_type': media_type
+            '_media_type': media_type
         }
 
     def _extract_product(self, product_info):

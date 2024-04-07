@@ -162,7 +162,7 @@ class InstagramBaseIE(InfoExtractor):
         if media_type == 1:
             media_type = 'PHOTO'
             formats.extend([{
-                'format_id':'photo-' + str(item.get('width', '')) + "-" + str(item.get('height', '')),
+                'format_id': 'photo-' + str(item.get('width', '')) + "-" + str(item.get('height', '')),
                 'url': item.get('url'),
                 'width': item.get('width'),
                 'height': item.get('height'),

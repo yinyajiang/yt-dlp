@@ -1,24 +1,13 @@
-import re
-
 from .common import InfoExtractor
 from ..utils import (
     ExtractorError,
-    clean_html,
-    float_or_none,
-    get_element_by_attribute,
-    get_element_by_class,
-    int_or_none,
-    js_to_json,
-    traverse_obj,
-    url_or_none,
 )
 
 
 class Anime1IE(InfoExtractor):
     _VALID_URL = r'https?://(?:www\.)?anime1.cc/.+'
 
-    _TESTS = [{
-    }]
+    _TESTS = []
 
     def _real_extract(self, url):
         webpage = self._download_webpage(url, None)

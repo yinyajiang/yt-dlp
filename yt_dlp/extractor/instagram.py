@@ -242,6 +242,14 @@ class InstagramBaseIE(InfoExtractor):
                 'timestamp': traverse_obj(comment_dict, ('node', 'created_at'), 'created_at', expected_type=int_or_none),
             }
 
+    def _set_csrf_token_if_not_set(self, url):
+        if self._get_cookies(url).get('csrftoken'):
+            return
+        webpage = self._download_webpage("https://www.instagram.com/facebook/", "https://www.instagram.com/")
+        csrf_token = self._search_regex(r'"csrf_token":\s*"([^"]+)"', webpage, 'csrf_token')
+        if csrf_token:
+            self._set_cookie('.instagram.com', 'csrftoken', csrf_token)
+
 
 class InstagramIOSIE(InfoExtractor):
     IE_DESC = 'IOS instagram:// URL'
@@ -413,7 +421,6 @@ class InstagramIE(InstagramBaseIE):
     def _real_extract(self, url):
         video_id, url = self._match_valid_url(url).group('id', 'url')
         media, webpage = {}, ''
-
         if self._get_cookies(url).get('sessionid'):
             info = traverse_obj(self._download_json(
                 f'{self._API_BASE_URL}/media/{_id_to_pk(video_id)}/info/', video_id,
@@ -498,8 +505,12 @@ class InstagramIE(InstagramBaseIE):
         if not video_url:
             nodes = traverse_obj(media, ('edge_sidecar_to_children', 'edges', ..., 'node'), expected_type=dict) or []
             if nodes:
-                return self.playlist_result(
-                    self._extract_nodes(nodes, True), video_id,
+                entries = []
+                for entry in self._extract_nodes(nodes, True):
+                    entries.append(entry)
+                if not entries and not self._get_cookies(url).get('sessionid'):
+                    self.raise_login_required()
+                return self.playlist_result(entries, video_id,
                     format_field(username, None, 'Post by %s'), description)
 
             video_url = self._og_search_video_url(webpage, secure=False)
@@ -667,6 +678,40 @@ class InstagramUserIE(InstagramPlaylistBaseIE):
         return {
             'id': data['entry_data']['ProfilePage'][0]['graphql']['user']['id']
         }
+    
+    def _real_extract(self, url):
+        username = self._match_id(url)
+        self._set_csrf_token_if_not_set(url, self)
+        userdata = self._download_json(
+            f'{self._API_BASE_URL}/users/web_profile_info/?username={username}',
+            username, errnote=False, fatal=False, headers=self._API_HEADERS)['data']
+
+        videos = []
+        cursor = ''
+        while(1):
+            feed_json = self._download_json(
+                f'{self._API_BASE_URL}/feed/user/{username}/username/?count=100&max_id={cursor}',
+                username, errnote=False, fatal=False, headers=self._API_HEADERS)
+            videos += traverse_obj(feed_json, 'items', expected_type=list) or []
+
+            has_next_page = traverse_obj(feed_json, 'more_available')
+            cursor = traverse_obj(feed_json, 'next_max_id', expected_type=str)
+            if not has_next_page or not cursor:
+                break
+
+        info_data = []
+        for video in videos:
+            highlight_data = self._extract_product(video)
+            if highlight_data.get('formats'):
+                info_data.append({
+                    **highlight_data,
+                    'uploader': userdata.get('user', {}).get('full_name', username),
+                    'uploader_id': userdata.get('user', {}).get('id', username),
+                })
+        if not info_data and not self._get_cookies(url).get('sessionid'):
+            self.raise_login_required()
+
+        return self.playlist_result(info_data, playlist_id=username, playlist_title=format_field(username, None, 'Posts by %s'))
 
 
 class InstagramTagIE(InstagramPlaylistBaseIE):

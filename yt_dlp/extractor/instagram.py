@@ -510,7 +510,7 @@ class InstagramIE(InstagramBaseIE):
                     entries.append(entry)
                 if not entries and not self._get_cookies(url).get('sessionid'):
                     self.raise_login_required()
-                return self.playlist_result(entries, video_id, 
+                return self.playlist_result(entries, video_id,
                                             format_field(username, None, 'Post by %s'), description)
 
             video_url = self._og_search_video_url(webpage, secure=False)
@@ -678,7 +678,7 @@ class InstagramUserIE(InstagramPlaylistBaseIE):
         return {
             'id': data['entry_data']['ProfilePage'][0]['graphql']['user']['id']
         }
-    
+
     def _real_extract(self, url):
         username = self._match_id(url)
         self._set_csrf_token_if_not_set(url, self)
@@ -688,7 +688,7 @@ class InstagramUserIE(InstagramPlaylistBaseIE):
 
         videos = []
         cursor = ''
-        while(1):
+        while(1): 
             feed_json = self._download_json(
                 f'{self._API_BASE_URL}/feed/user/{username}/username/?count=100&max_id={cursor}',
                 username, errnote=False, fatal=False, headers=self._API_HEADERS)

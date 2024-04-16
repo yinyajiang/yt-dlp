@@ -510,8 +510,8 @@ class InstagramIE(InstagramBaseIE):
                     entries.append(entry)
                 if not entries and not self._get_cookies(url).get('sessionid'):
                     self.raise_login_required()
-                return self.playlist_result(entries, video_id,
-                    format_field(username, None, 'Post by %s'), description)
+                return self.playlist_result(entries, video_id, 
+                                            format_field(username, None, 'Post by %s'), description)
 
             video_url = self._og_search_video_url(webpage, secure=False)
 

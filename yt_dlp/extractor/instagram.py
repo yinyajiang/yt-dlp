@@ -688,20 +688,20 @@ class InstagramUserIE(InstagramPlaylistBaseIE):
 
         action = self._configuration_arg(
             'custom_action', default=[''], ie_key=InstagramUserIE)[0]
-        if action == 'get_post_count' :
+        if action == 'get_post_count':
             return {
                 '_type': 'custom_action',
                 'id': username,
-                'title': format_field(username, None, 'Posts by %s'),
+                'title': userdata.get('user', {}).get('full_name', username),
                 'action_info': {
-                    'action' : action,
+                    'action': action,
                     'count': traverse_obj(userdata, ('user', 'edge_owner_to_timeline_media', 'count'), expected_type=int),
                 }
             }
 
         videos = []
         cursor = ''
-        while(1): 
+        while(1):
             feed_json = self._download_json(
                 f'{self._API_BASE_URL}/feed/user/{username}/username/?count=100&max_id={cursor}',
                 username, errnote=False, fatal=False, headers=self._API_HEADERS)

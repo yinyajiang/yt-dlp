@@ -1912,6 +1912,8 @@ class YoutubeDL:
                 for r in ie_result['entries']
             ]
             return ie_result
+        elif result_type == 'custom_action':
+            return ie_result
         else:
             raise Exception('Invalid result type: %s' % result_type)
 

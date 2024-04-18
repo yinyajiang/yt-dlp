@@ -686,14 +686,17 @@ class InstagramUserIE(InstagramPlaylistBaseIE):
             f'{self._API_BASE_URL}/users/web_profile_info/?username={username}',
             username, errnote=False, fatal=False, headers=self._API_HEADERS)['data']
 
-        if len(self._configuration_arg(
-            'only_get_count', default=[], ie_key=InstagramUserIE)) > 0:
+        action = self._configuration_arg(
+            'custom_action', default=[''], ie_key=InstagramUserIE)[0]
+        if action == 'get_post_count' :
             return {
-                '_type': 'playlist',
+                '_type': 'custom_action',
                 'id': username,
                 'title': format_field(username, None, 'Posts by %s'),
-                'entries': [],
-                'count': traverse_obj(userdata, ('user', 'edge_owner_to_timeline_media', 'count'), expected_type=int),
+                'action_info': {
+                    'action' : action,
+                    'count': traverse_obj(userdata, ('user', 'edge_owner_to_timeline_media', 'count'), expected_type=int),
+                }
             }
 
         videos = []

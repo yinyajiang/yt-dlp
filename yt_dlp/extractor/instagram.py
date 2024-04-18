@@ -701,7 +701,7 @@ class InstagramUserIE(InstagramPlaylistBaseIE):
 
         videos = []
         cursor = ''
-        while(1): 
+        while True:
             feed_json = self._download_json(
                 f'{self._API_BASE_URL}/feed/user/{username}/username/?count=100&max_id={cursor}',
                 username, errnote=False, fatal=False, headers=self._API_HEADERS)

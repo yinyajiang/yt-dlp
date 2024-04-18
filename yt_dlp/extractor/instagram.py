@@ -681,10 +681,20 @@ class InstagramUserIE(InstagramPlaylistBaseIE):
 
     def _real_extract(self, url):
         username = self._match_id(url)
-        self._set_csrf_token_if_not_set(url, self)
+        self._set_csrf_token_if_not_set(url)
         userdata = self._download_json(
             f'{self._API_BASE_URL}/users/web_profile_info/?username={username}',
             username, errnote=False, fatal=False, headers=self._API_HEADERS)['data']
+
+        if len(self._configuration_arg(
+            'only_get_count', default=[], ie_key=InstagramUserIE)) > 0:
+            return {
+                '_type': 'playlist',
+                'id': username,
+                'title': format_field(username, None, 'Posts by %s'),
+                'entries': [],
+                'count': traverse_obj(userdata, ('user', 'edge_owner_to_timeline_media', 'count'), expected_type=int),
+            }
 
         videos = []
         cursor = ''

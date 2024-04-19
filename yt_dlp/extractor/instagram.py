@@ -127,13 +127,11 @@ class InstagramBaseIE(InfoExtractor):
                     'id': video_id,
                     'url': f'https://instagram.com/p/{video_id}',
                 }
-
+            desc = traverse_obj(node, ('edge_media_to_caption', 'edges', 0, 'node', 'text'), expected_type=str)
             yield {
                 **info,
-                'title': node.get('title') or traverse_obj(
-                    node, ('edge_media_to_caption', 'edges', 0, 'node', 'text'), expected_type=str) or (f'Video {idx}' if is_direct else None),
-                'description': traverse_obj(
-                    node, ('edge_media_to_caption', 'edges', 0, 'node', 'text'), expected_type=str),
+                'title': node.get('title') or desc or (f'Video {idx}' if is_direct else None),
+                'description': desc,
                 'thumbnail': traverse_obj(
                     node, 'display_url', 'thumbnail_src', 'display_src', expected_type=url_or_none),
                 'duration': float_or_none(node.get('video_duration')),

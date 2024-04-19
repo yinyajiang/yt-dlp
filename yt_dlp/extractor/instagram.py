@@ -131,8 +131,7 @@ class InstagramBaseIE(InfoExtractor):
             yield {
                 **info,
                 'title': node.get('title') or traverse_obj(
-                         node, ('edge_media_to_caption', 'edges', 0, 'node', 'text'), expected_type=str)
-                         or (f'Video {idx}' if is_direct else None),
+                    node, ('edge_media_to_caption', 'edges', 0, 'node', 'text'), expected_type=str) or (f'Video {idx}' if is_direct else None),
                 'description': traverse_obj(
                     node, ('edge_media_to_caption', 'edges', 0, 'node', 'text'), expected_type=str),
                 'thumbnail': traverse_obj(

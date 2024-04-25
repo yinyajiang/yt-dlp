@@ -142,6 +142,13 @@ class InstagramBaseIE(InfoExtractor):
             }
 
     def _extract_product_media(self, product_media):
+        media_type = product_media.get("media_type", 0)
+        if media_type == 8:
+            return {
+                **self._extract_product(product_media),
+                '_media_type': 'CAROUSEL',
+            }
+
         media_id = product_media.get('code') or _pk_to_id(product_media.get('pk'))
         vcodec = product_media.get('video_codec')
         dash_manifest_raw = product_media.get('video_dash_manifest')
@@ -160,7 +167,6 @@ class InstagramBaseIE(InfoExtractor):
         if dash_manifest_raw:
             formats.extend(self._parse_mpd_formats(self._parse_xml(dash_manifest_raw, media_id), mpd_id='dash'))
 
-        media_type = product_media.get("media_type", 0)
         if media_type == 1:
             media_type = 'PHOTO'
             formats.extend([{
@@ -172,9 +178,9 @@ class InstagramBaseIE(InfoExtractor):
             } for item in images_list or []])
         elif media_type == 2:
             media_type = 'VIDEO'
-        elif media_type == 8:
-            media_type = 'CAROUSEL'
-
+        else:
+            self.report_warning(f'Unknown media type {media_type}')
+            return {}
         thumbnails = [{
             'url': thumbnail.get('url'),
             'width': thumbnail.get('width'),
@@ -196,7 +202,7 @@ class InstagramBaseIE(InfoExtractor):
         user_info = product_info.get('user') or {}
         info_dict = {
             'id': _pk_to_id(traverse_obj(product_info, 'pk', 'id', expected_type=str_or_none)[:19]),
-            'title': product_info.get('title') or f'Video by {user_info.get("username")}',
+            'title': product_info.get('title') or f'Post by {user_info.get("username")}',
             'description': traverse_obj(product_info, ('caption', 'text'), expected_type=str_or_none),
             'timestamp': int_or_none(product_info.get('taken_at')),
             'channel': user_info.get('username'),

@@ -220,6 +220,7 @@ class InstagramBaseIE(InfoExtractor):
         if carousel_media:
             return {
                 '_type': 'playlist',
+                '_playlist_media_type': 'CAROUSEL',
                 **info_dict,
                 'title': f'Post by {user_info.get("username")}',
                 'entries': [{

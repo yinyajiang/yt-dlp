@@ -3321,7 +3321,9 @@ class YoutubeDL:
         new_info, files_to_move = self.pre_process(info_dict, 'before_dl', files_to_move)
         replace_info_dict(new_info)
 
-        if self.params.get('skip_download'):
+        skip_media_type = self.params.get('skip_download_media_type') or []
+        media_type = info_dict.get("_media_type", "-")
+        if self.params.get('skip_download') or media_type in skip_media_type:
             info_dict['filepath'] = temp_filename
             info_dict['__finaldir'] = os.path.dirname(os.path.abspath(encodeFilename(full_filename)))
             info_dict['__files_to_move'] = files_to_move

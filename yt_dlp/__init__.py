@@ -798,6 +798,7 @@ def parse_options(argv=None):
         'force_write_download_archive': opts.force_write_download_archive,
         'simulate': (print_only or any_getting or None) if opts.simulate is None else opts.simulate,
         'skip_download': opts.skip_download,
+        'skip_download_media_type': opts.skip_download_media_type,
         'format': opts.format,
         'allow_unplayable_formats': opts.allow_unplayable_formats,
         'ignore_no_formats_error': opts.ignore_no_formats_error,

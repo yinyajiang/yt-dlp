@@ -1161,6 +1161,10 @@ def create_parser():
         action='store_true', dest='skip_download', default=False,
         help='Do not download the video but write all related files (Alias: --no-download)')
     verbosity.add_option(
+        '--skip-download-media-type',
+        dest='skip_download_media_type', metavar='MEDIA_TYPE', action='append',
+        help='Skip downloading the video if it matches the given media type')
+    verbosity.add_option(
         '-O', '--print',
         metavar='[WHEN:]TEMPLATE', dest='forceprint', **when_prefix('video'),
         help=(

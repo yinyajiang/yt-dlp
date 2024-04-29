@@ -216,6 +216,9 @@ class InstagramBaseIE(InfoExtractor):
                 'Referer': 'https://www.instagram.com/',
             }
         }
+        if product_info.get('code'):
+            info_dict["webpage_url"] = f"https://www.instagram.com/p/{product_info.get('code')}/"
+
         carousel_media = product_info.get('carousel_media')
         if carousel_media:
             return {

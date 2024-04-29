@@ -62,11 +62,11 @@ on:
         type: string
       unix:
         description: yt-dlp, yt-dlp.tar.gz
-        default: true
+        default: false
         type: boolean
       linux_static:
         description: yt-dlp_linux
-        default: true
+        default: false
         type: boolean
       linux_arm:
         description: yt-dlp_linux_aarch64, yt-dlp_linux_armv7l

@@ -21,6 +21,7 @@ from ..utils import (
     traverse_obj,
     url_or_none,
     urlencode_postdata,
+    strftime_or_none,
 )
 
 _ENCODING_CHARS = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789-_'
@@ -202,7 +203,6 @@ class InstagramBaseIE(InfoExtractor):
         user_info = product_info.get('user') or {}
         info_dict = {
             'id': _pk_to_id(traverse_obj(product_info, 'pk', 'id', expected_type=str_or_none)[:19]),
-            'title': product_info.get('title') or f'Post by {user_info.get("username")}',
             'description': traverse_obj(product_info, ('caption', 'text'), expected_type=str_or_none),
             'timestamp': int_or_none(product_info.get('taken_at')),
             'channel': user_info.get('username'),
@@ -220,10 +220,14 @@ class InstagramBaseIE(InfoExtractor):
         if webpage_is_post and product_info.get('code'):
             info_dict["webpage_url"] = f"https://www.instagram.com/p/{product_info.get('code')}/"
 
+        timestr = strftime_or_none(info_dict.get('timestamp'), "%Y-%m-%d")
+        title = product_info.get('title') or (f'Post by {user_info.get("username")} {timestr}' if timestr else f'Post by {user_info.get("username")}')
+        info_dict['title'] = title
+
         carousel_media = product_info.get('carousel_media')
         if carousel_media:
             entries = [{**info_dict, **self._extract_product_media(product_media)} for product_media in carousel_media]
-            result = self.playlist_result(entries, info_dict["id"], f'Post by {user_info.get("username")}', **info_dict)
+            result = self.playlist_result(entries, info_dict["id"], **info_dict)
             result['_playlist_media_type'] = 'CAROUSEL'
             result['extractor'] = self.IE_NAME
             result['extractor_key'] = self.ie_key()
@@ -231,7 +235,7 @@ class InstagramBaseIE(InfoExtractor):
 
         return {
             **info_dict,
-            **self._extract_product_media(product_info)
+            **self._extract_product_media(product_info),
         }
 
     def _get_comments(self, video_id):
@@ -511,6 +515,7 @@ class InstagramIE(InstagramBaseIE):
                     entries.append(entry)
                 if not entries and not self._has_session_id():
                     self.raise_login_required()
+
                 return self.playlist_result(entries, video_id,
                                             format_field(username, None, 'Post by %s'), description)
             try:

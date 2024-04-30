@@ -145,8 +145,8 @@ class InstagramBaseIE(InfoExtractor):
         media_type = product_media.get("media_type", 0)
         if media_type == 8:
             return {
-                **self._extract_product(product_media),
                 '_media_type': 'CAROUSEL',
+                **self._extract_product(product_media),
             }
 
         media_id = product_media.get('code') or _pk_to_id(product_media.get('pk'))
@@ -222,16 +222,12 @@ class InstagramBaseIE(InfoExtractor):
 
         carousel_media = product_info.get('carousel_media')
         if carousel_media:
-            return {
-                '_type': 'playlist',
-                '_playlist_media_type': 'CAROUSEL',
-                **info_dict,
-                'title': f'Post by {user_info.get("username")}',
-                'entries': [{
-                    **info_dict,
-                    **self._extract_product_media(product_media),
-                } for product_media in carousel_media],
-            }
+            entries = [{**info_dict, **self._extract_product_media(product_media)} for product_media in carousel_media]
+            result = self.playlist_result(entries, info_dict["id"], f'Post by {user_info.get("username")}')
+            result['_playlist_media_type'] = 'CAROUSEL'
+            result['extractor'] = self.IE_NAME
+            result['extractor_key'] = self.ie_key()
+            return result
 
         return {
             **info_dict,
@@ -718,7 +714,7 @@ class InstagramUserIE(InstagramPlaylistBaseIE):
                 }
             }
 
-        videos = []
+        items = []
         cursor = ''
         while True:
             feed_json = self._download_json(
@@ -726,21 +722,21 @@ class InstagramUserIE(InstagramPlaylistBaseIE):
                 username, errnote=False, fatal=False, headers=self._API_HEADERS)
             if not feed_json:
                 break
-            videos += traverse_obj(feed_json, 'items', expected_type=list) or []
+            items += traverse_obj(feed_json, 'items', expected_type=list) or []
             has_next_page = traverse_obj(feed_json, 'more_available')
             cursor = traverse_obj(feed_json, 'next_max_id', expected_type=str)
             if not has_next_page or not cursor:
                 break
 
         info_data = []
-        for video in videos:
-            highlight_data = self._extract_product(video, webpage_is_post=True)
-            if highlight_data.get('formats'):
-                info_data.append({
-                    **highlight_data,
-                    'uploader': userdata.get('user', {}).get('full_name', username),
-                    'uploader_id': userdata.get('user', {}).get('id', username),
-                })
+        for item in items:
+            entry = self._extract_product(item, webpage_is_post=True)
+            info_data.append({
+                **entry,
+                'uploader': userdata.get('user', {}).get('full_name', username),
+                'uploader_id': userdata.get('user', {}).get('id', username),
+            })
+
         if not info_data and not self._has_session_id():
             self.raise_login_required()
 

@@ -1943,8 +1943,8 @@ class YoutubeDL:
             **info,
             'playlist_index': 0,
             '__last_playlist_index': max(ie_result.get('requested_entries') or (0, 0)),
-            'extractor': ie_result['extractor'],
-            'extractor_key': ie_result['extractor_key'],
+            'extractor': ie_result.get('extractor') or "",
+            'extractor_key': ie_result.get('extractor_key') or "",
         }
 
     def __process_playlist(self, ie_result, download):
@@ -2034,10 +2034,13 @@ class YoutubeDL:
             self.to_screen('[download] Downloading item %s of %s' % (
                 self._format_screen(i + 1, self.Styles.ID), self._format_screen(n_entries, self.Styles.EMPHASIS)))
 
-            entry_result = self.__process_iterable_entry(entry, download, collections.ChainMap({
-                'playlist_index': playlist_index,
-                'playlist_autonumber': i + 1,
-            }, extra))
+            if entry.get('_playlist_media_type', '') != 'CAROUSEL':
+                entry_result = self.__process_iterable_entry(entry, download, collections.ChainMap({
+                    'playlist_index': playlist_index,
+                    'playlist_autonumber': i + 1,
+                }, extra))
+            else:
+                entry_result = entry
             if not entry_result:
                 failures += 1
             if failures >= max_failures:

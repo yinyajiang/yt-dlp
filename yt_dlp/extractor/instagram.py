@@ -195,7 +195,7 @@ class InstagramBaseIE(InfoExtractor):
             '_media_type': media_type
         }
 
-    def _extract_product(self, product_info):
+    def _extract_product(self, product_info, webpage_is_post=False):
         if isinstance(product_info, list):
             product_info = product_info[0]
 
@@ -216,7 +216,8 @@ class InstagramBaseIE(InfoExtractor):
                 'Referer': 'https://www.instagram.com/',
             }
         }
-        if product_info.get('code'):
+
+        if webpage_is_post and product_info.get('code'):
             info_dict["webpage_url"] = f"https://www.instagram.com/p/{product_info.get('code')}/"
 
         carousel_media = product_info.get('carousel_media')
@@ -733,7 +734,7 @@ class InstagramUserIE(InstagramPlaylistBaseIE):
 
         info_data = []
         for video in videos:
-            highlight_data = self._extract_product(video)
+            highlight_data = self._extract_product(video, webpage_is_post=True)
             if highlight_data.get('formats'):
                 info_data.append({
                     **highlight_data,

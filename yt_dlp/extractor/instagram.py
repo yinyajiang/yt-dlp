@@ -223,7 +223,7 @@ class InstagramBaseIE(InfoExtractor):
         carousel_media = product_info.get('carousel_media')
         if carousel_media:
             entries = [{**info_dict, **self._extract_product_media(product_media)} for product_media in carousel_media]
-            result = self.playlist_result(entries, info_dict["id"], f'Post by {user_info.get("username")}')
+            result = self.playlist_result(entries, info_dict["id"], f'Post by {user_info.get("username")}', **info_dict)
             result['_playlist_media_type'] = 'CAROUSEL'
             result['extractor'] = self.IE_NAME
             result['extractor_key'] = self.ie_key()

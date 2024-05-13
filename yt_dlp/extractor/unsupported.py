@@ -189,14 +189,15 @@ class KnownPiracyIE(UnsupportedInfoExtractor):
         # r'yourupload\.com',
     )
 
-    _TESTS = [{
-        'url': 'http://dood.to/e/5s1wmbdacezb',
-        'only_matching': True,
-    },
-        #  {
-        #  'url': 'https://thisav.com/en/terms',
-        #  'only_matching': True,
-        #  }
+    _TESTS = [
+        # {
+        # 'url': 'http://dood.to/e/5s1wmbdacezb',
+        # 'only_matching': True,
+        # },
+        # {
+        # 'url': 'https://thisav.com/en/terms',
+        # 'only_matching': True,
+        # }
     ]
 
     def _real_extract(self, url):

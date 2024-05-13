@@ -289,6 +289,7 @@ from .bundestag import BundestagIE
 from .buzzfeed import BuzzFeedIE
 from .byutv import BYUtvIE
 from .c56 import C56IE
+from .cableav import CableAVIE
 from .callin import CallinIE
 from .caltrans import CaltransIE
 from .cam4 import CAM4IE
@@ -548,6 +549,7 @@ from .egghead import (
     EggheadLessonIE,
 )
 from .eighttracks import EightTracksIE
+from .einthusan import EinthusanIE
 from .eitb import EitbIE
 from .elementorembed import ElementorEmbedIE
 from .elonet import ElonetIE
@@ -607,6 +609,7 @@ from .fc2 import (
     FC2LiveIE,
 )
 from .fczenit import FczenitIE
+from .filemoon import FileMoonIE
 from .fifa import FifaIE
 from .filmon import (
     FilmOnIE,
@@ -744,6 +747,7 @@ from .hbo import HBOIE
 from .hearthisat import HearThisAtIE
 from .heise import HeiseIE
 from .hellporno import HellPornoIE
+from .hentaistigma import HentaiStigmaIE
 from .hgtv import HGTVComShowIE
 from .hketv import HKETVIE
 from .hidive import HiDiveIE
@@ -860,6 +864,10 @@ from .iwara import (
 )
 from .ixigua import IxiguaIE
 from .izlesene import IzleseneIE
+from .jable import (
+    JableIE,
+    JablePlaylistIE,
+)
 from .jamendo import (
     JamendoIE,
     JamendoAlbumIE,
@@ -1494,6 +1502,7 @@ from .polskieradio import (
 )
 from .popcorntimes import PopcorntimesIE
 from .popcorntv import PopcornTVIE
+from .porn91 import Porn91IE
 from .pornbox import PornboxIE
 from .pornflip import PornFlipIE
 from .pornhub import (
@@ -1980,6 +1989,7 @@ from .thestar import TheStarIE
 from .thesun import TheSunIE
 from .theweatherchannel import TheWeatherChannelIE
 from .thisamericanlife import ThisAmericanLifeIE
+from .thisav import ThisAVIE
 from .thisoldhouse import ThisOldHouseIE
 from .thisvid import (
     ThisVidIE,
@@ -2372,6 +2382,7 @@ from .wykop import (
 )
 from .xanimu import XanimuIE
 from .xboxclips import XboxClipsIE
+from .xfileshare import XFileShareIE
 from .xhamster import (
     XHamsterIE,
     XHamsterEmbedIE,
@@ -2426,6 +2437,8 @@ from .younow import (
     YouNowMomentIE,
 )
 from .youporn import YouPornIE
+from .yourporn import YourPornIE
+from .yourupload import YourUploadIE
 from .zaiko import (
     ZaikoIE,
     ZaikoETicketIE,

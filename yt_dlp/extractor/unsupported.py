@@ -170,12 +170,12 @@ class KnownPiracyIE(UnsupportedInfoExtractor):
         r'dood\.(?:to|watch|so|pm|wf|re)',
         # Sites youtube-dl supports, but we won't
         r'viewsb\.com',
-        r'filemoon\.sx',
-        r'hentai\.animestigma\.com',
-        r'thisav\.com',
+        # r'filemoon\.sx',
+        # r'hentai\.animestigma\.com',
+        # r'thisav\.com',
         r'gounlimited\.to',
         r'highstream\.tv',
-        r'uqload\.com',
+        # r'uqload\.com',
         r'vedbam\.xyz',
         r'vadbam\.net'
         r'vidlo\.us',
@@ -183,19 +183,21 @@ class KnownPiracyIE(UnsupportedInfoExtractor):
         r'xvideosharing\.com',
         r'(?:\w+\.)?viidshar\.com',
         r'sxyprn\.com',
-        r'jable\.tv',
-        r'91porn\.com',
-        r'einthusan\.(?:tv|com|ca)',
-        r'yourupload\.com',
+        # r'jable\.tv',
+        # r'91porn\.com',
+        # r'einthusan\.(?:tv|com|ca)',
+        # r'yourupload\.com',
     )
 
     _TESTS = [{
         'url': 'http://dood.to/e/5s1wmbdacezb',
         'only_matching': True,
-    }, {
-        'url': 'https://thisav.com/en/terms',
-        'only_matching': True,
-    }]
+    },
+        #  {
+        #  'url': 'https://thisav.com/en/terms',
+        #  'only_matching': True,
+        #  }
+    ]
 
     def _real_extract(self, url):
         raise ExtractorError(

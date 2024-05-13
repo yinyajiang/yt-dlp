@@ -13,7 +13,7 @@ class UnsupportedInfoExtractor(InfoExtractor):
     @classproperty
     def _VALID_URL(cls):
         if not cls.URLS:
-            return r'^$'
+            return r''
         return rf'https?://(?:www\.)?(?:{"|".join(cls.URLS)})'
 
 

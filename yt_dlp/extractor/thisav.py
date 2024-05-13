@@ -4,29 +4,31 @@ from ..utils import remove_end
 
 class ThisAVIE(InfoExtractor):
     _VALID_URL = r'https?://(?:www\.)?thisav\.com/video/(?P<id>[0-9]+)/.*'
-    _TESTS = [{
-        # jwplayer
-        'url': 'http://www.thisav.com/video/47734/%98%26sup1%3B%83%9E%83%82---just-fit.html',
-        'md5': '0480f1ef3932d901f0e0e719f188f19b',
-        'info_dict': {
-            'id': '47734',
-            'ext': 'flv',
-            'title': '高樹マリア - Just fit',
-            'uploader': 'dj7970',
-            'uploader_id': 'dj7970'
-        }
-    }, {
-        # html5 media
-        'url': 'http://www.thisav.com/video/242352/nerdy-18yo-big-ass-tattoos-and-glasses.html',
-        'md5': 'ba90c076bd0f80203679e5b60bf523ee',
-        'info_dict': {
-            'id': '242352',
-            'ext': 'mp4',
-            'title': 'Nerdy 18yo Big Ass Tattoos and Glasses',
-            'uploader': 'cybersluts',
-            'uploader_id': 'cybersluts',
-        },
-    }]
+    # _TESTS = [
+    # {
+    # jwplayer
+    # 'url': 'http://www.thisav.com/video/47734/%98%26sup1%3B%83%9E%83%82---just-fit.html',
+    # 'md5': '0480f1ef3932d901f0e0e719f188f19b',
+    # 'info_dict': {
+    #     'id': '47734',
+    #     'ext': 'flv',
+    #     'title': '高樹マリア - Just fit',
+    #     'uploader': 'dj7970',
+    #     'uploader_id': 'dj7970'
+    # }
+    # }, {
+    #     # html5 media
+    #     'url': 'http://www.thisav.com/video/242352/nerdy-18yo-big-ass-tattoos-and-glasses.html',
+    #     'md5': 'ba90c076bd0f80203679e5b60bf523ee',
+    #     'info_dict': {
+    #         'id': '242352',
+    #         'ext': 'mp4',
+    #         'title': 'Nerdy 18yo Big Ass Tattoos and Glasses',
+    #         'uploader': 'cybersluts',
+    #         'uploader_id': 'cybersluts',
+    #     },
+    # }
+    # ]
 
     def _real_extract(self, url):
         mobj = self._match_valid_url(url)

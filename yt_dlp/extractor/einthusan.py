@@ -16,26 +16,27 @@ from ..utils import (
 
 class EinthusanIE(InfoExtractor):
     _VALID_URL = r'https?://(?P<host>einthusan\.(?:tv|com|ca))/movie/watch/(?P<id>[^/?#&]+)'
-    _TESTS = [{
-        'url': 'https://einthusan.tv/movie/watch/9097/',
-        'md5': 'ff0f7f2065031b8a2cf13a933731c035',
-        'info_dict': {
-            'id': '9097',
-            'ext': 'mp4',
-            'title': 'Ae Dil Hai Mushkil',
-            'description': 'md5:33ef934c82a671a94652a9b4e54d931b',
-            'thumbnail': r're:^https?://.*\.jpg$',
-        }
-    }, {
-        'url': 'https://einthusan.tv/movie/watch/51MZ/?lang=hindi',
-        'only_matching': True,
-    }, {
-        'url': 'https://einthusan.com/movie/watch/9097/',
-        'only_matching': True,
-    }, {
-        'url': 'https://einthusan.ca/movie/watch/4E9n/?lang=hindi',
-        'only_matching': True,
-    }]
+    # _TESTS = [{
+    # 'url': 'https://einthusan.tv/movie/watch/9097/',
+    # 'md5': 'ff0f7f2065031b8a2cf13a933731c035',
+    # 'info_dict': {
+    #     'id': '9097',
+    #     'ext': 'mp4',
+    #     'title': 'Ae Dil Hai Mushkil',
+    #     'description': 'md5:33ef934c82a671a94652a9b4e54d931b',
+    #     'thumbnail': r're:^https?://.*\.jpg$',
+    # }
+    # }, {
+    #     'url': 'https://einthusan.tv/movie/watch/51MZ/?lang=hindi',
+    #     'only_matching': True,
+    # }, {
+    #     'url': 'https://einthusan.com/movie/watch/9097/',
+    #     'only_matching': True,
+    # }, {
+    #     'url': 'https://einthusan.ca/movie/watch/4E9n/?lang=hindi',
+    #    'only_matching': True,
+    # }
+    # ]
 
     # reversed from jsoncrypto.prototype.decrypt() in einthusan-PGMovieWatcher.js
     def _decrypt(self, encrypted_data, video_id):

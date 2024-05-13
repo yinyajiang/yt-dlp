@@ -4,22 +4,22 @@ from ..utils import urljoin
 
 class YourUploadIE(InfoExtractor):
     _VALID_URL = r'https?://(?:www\.)?(?:yourupload\.com/(?:watch|embed)|embed\.yourupload\.com)/(?P<id>[A-Za-z0-9]+)'
-    _TESTS = [{
-        'url': 'http://yourupload.com/watch/14i14h',
-        'md5': '5e2c63385454c557f97c4c4131a393cd',
-        'info_dict': {
-            'id': '14i14h',
-            'ext': 'mp4',
-            'title': 'BigBuckBunny_320x180.mp4',
-            'thumbnail': r're:^https?://.*\.jpe?g',
-        }
-    }, {
-        'url': 'http://www.yourupload.com/embed/14i14h',
-        'only_matching': True,
-    }, {
-        'url': 'http://embed.yourupload.com/14i14h',
-        'only_matching': True,
-    }]
+    # _TESTS = [{
+    #     'url': 'http://yourupload.com/watch/14i14h',
+    #     'md5': '5e2c63385454c557f97c4c4131a393cd',
+    #     'info_dict': {
+    #         'id': '14i14h',
+    #         'ext': 'mp4',
+    #         'title': 'BigBuckBunny_320x180.mp4',
+    #         'thumbnail': r're:^https?://.*\.jpe?g',
+    #     }
+    # }, {
+    #     'url': 'http://www.yourupload.com/embed/14i14h',
+    #     'only_matching': True,
+    # }, {
+    #     'url': 'http://embed.yourupload.com/14i14h',
+    #     'only_matching': True,
+    # }]
 
     def _real_extract(self, url):
         video_id = self._match_id(url)

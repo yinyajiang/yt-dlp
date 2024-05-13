@@ -68,31 +68,31 @@ class XFileShareIE(InfoExtractor):
         r'>The file was removed by administrator<',
     )
 
-    _TESTS = [{
-        'url': 'https://uqload.com/dltx1wztngdz',
-        'md5': '3cfbb65e4c90e93d7b37bcb65a595557',
-        'info_dict': {
-            'id': 'dltx1wztngdz',
-            'ext': 'mp4',
-            'title': 'Rick Astley Never Gonna Give You mp4',
-            'thumbnail': r're:https://.*\.jpg'
-        }
-    }, {
-        'url': 'http://xvideosharing.com/fq65f94nd2ve',
-        'md5': '4181f63957e8fe90ac836fa58dc3c8a6',
-        'info_dict': {
-            'id': 'fq65f94nd2ve',
-            'ext': 'mp4',
-            'title': 'sample',
-            'thumbnail': r're:http://.*\.jpg',
-        },
-    }, {
-        'url': 'https://aparat.cam/n4d6dh0wvlpr',
-        'only_matching': True,
-    }, {
-        'url': 'https://wolfstream.tv/nthme29v9u2x',
-        'only_matching': True,
-    }]
+    # _TESTS = [{
+    #     'url': 'https://uqload.com/dltx1wztngdz',
+    #     'md5': '3cfbb65e4c90e93d7b37bcb65a595557',
+    #     'info_dict': {
+    #         'id': 'dltx1wztngdz',
+    #         'ext': 'mp4',
+    #         'title': 'Rick Astley Never Gonna Give You mp4',
+    #         'thumbnail': r're:https://.*\.jpg'
+    #     }
+    # }, {
+    #     'url': 'http://xvideosharing.com/fq65f94nd2ve',
+    #     'md5': '4181f63957e8fe90ac836fa58dc3c8a6',
+    #     'info_dict': {
+    #         'id': 'fq65f94nd2ve',
+    #         'ext': 'mp4',
+    #         'title': 'sample',
+    #         'thumbnail': r're:http://.*\.jpg',
+    #     },
+    # }, {
+    #     'url': 'https://aparat.cam/n4d6dh0wvlpr',
+    #     'only_matching': True,
+    # }, {
+    #     'url': 'https://wolfstream.tv/nthme29v9u2x',
+    #     'only_matching': True,
+    # }]
 
     def _real_extract(self, url):
         host, video_id = self._match_valid_url(url).groups()

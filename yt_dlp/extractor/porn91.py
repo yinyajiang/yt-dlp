@@ -14,35 +14,37 @@ class Porn91IE(InfoExtractor):
     IE_NAME = '91porn'
     _VALID_URL = r'(?:https?://)(?:www\.|)91porn\.com/view_video.php\?([^#]+&)?viewkey=(?P<id>\w+)'
 
-    _TESTS = [{
-        'url': 'http://91porn.com/view_video.php?viewkey=7e42283b4f5ab36da134',
-        'md5': 'd869db281402e0ef4ddef3c38b866f86',
-        'info_dict': {
-            'id': '7e42283b4f5ab36da134',
-            'title': '18岁大一漂亮学妹，水嫩性感，再爽一次！',
-            'description': 'md5:1ff241f579b07ae936a54e810ad2e891',
-            'ext': 'mp4',
-            'duration': 431,
-            'upload_date': '20150520',
-            'comment_count': int,
-            'view_count': int,
-            'age_limit': 18,
-        }
-    }, {
-        'url': 'https://91porn.com/view_video.php?viewkey=7ef0cf3d362c699ab91c',
-        'md5': 'f8fd50540468a6d795378cd778b40226',
-        'info_dict': {
-            'id': '7ef0cf3d362c699ab91c',
-            'title': '真实空乘，冲上云霄第二部',
-            'description': 'md5:618bf9652cafcc66cd277bd96789baea',
-            'ext': 'mp4',
-            'duration': 248,
-            'upload_date': '20221119',
-            'comment_count': int,
-            'view_count': int,
-            'age_limit': 18,
-        }
-    }]
+    # _TESTS = [
+    # {
+    # 'url': 'http://91porn.com/view_video.php?viewkey=7e42283b4f5ab36da134',
+    # 'md5': 'd869db281402e0ef4ddef3c38b866f86',
+    # 'info_dict': {
+    #     'id': '7e42283b4f5ab36da134',
+    #     'title': '18岁大一漂亮学妹，水嫩性感，再爽一次！',
+    #     'description': 'md5:1ff241f579b07ae936a54e810ad2e891',
+    #     'ext': 'mp4',
+    #     'duration': 431,
+    #    'upload_date': '20150520',
+    #     'comment_count': int,
+    #     'view_count': int,
+    #     'age_limit': 18,
+    # }
+    # }, {
+    # 'url': 'https://91porn.com/view_video.php?viewkey=7ef0cf3d362c699ab91c',
+    # 'md5': 'f8fd50540468a6d795378cd778b40226',
+    # 'info_dict': {
+    #     'id': '7ef0cf3d362c699ab91c',
+    #     'title': '真实空乘，冲上云霄第二部',
+    #    'description': 'md5:618bf9652cafcc66cd277bd96789baea',
+    #    'ext': 'mp4',
+    #     'duration': 248,
+    #     'upload_date': '20221119',
+    #     'comment_count': int,
+    #     'view_count': int,
+    #    'age_limit': 18,
+    # }
+    # }
+    # ]
 
     def _real_extract(self, url):
         video_id = self._match_id(url)

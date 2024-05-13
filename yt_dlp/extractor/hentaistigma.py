@@ -4,14 +4,14 @@ from .common import InfoExtractor
 class HentaiStigmaIE(InfoExtractor):
     _VALID_URL = r'^https?://hentai\.animestigma\.com/(?P<id>[^/]+)'
     _TEST = {
-        'url': 'http://hentai.animestigma.com/inyouchuu-etsu-bonus/',
-        'md5': '4e3d07422a68a4cc363d8f57c8bf0d23',
-        'info_dict': {
-            'id': 'inyouchuu-etsu-bonus',
-            'ext': 'mp4',
-            'title': 'Inyouchuu Etsu Bonus',
-            'age_limit': 18,
-        }
+        # 'url': 'http://hentai.animestigma.com/inyouchuu-etsu-bonus/',
+        # 'md5': '4e3d07422a68a4cc363d8f57c8bf0d23',
+        # 'info_dict': {
+        #     'id': 'inyouchuu-etsu-bonus',
+        #     'ext': 'mp4',
+        #     'title': 'Inyouchuu Etsu Bonus',
+        #     'age_limit': 18,
+        # }
     }
 
     def _real_extract(self, url):

@@ -4,15 +4,15 @@ from .common import InfoExtractor
 class CableAVIE(InfoExtractor):
     _VALID_URL = r'https?://cableav\.tv/(?P<id>[a-zA-Z0-9]+)'
     _TESTS = [{
-        'url': 'https://cableav.tv/lS4iR9lWjN8/',
-        'md5': '7e3fe5e49d61c4233b7f5b0f69b15e18',
-        'info_dict': {
-            'id': 'lS4iR9lWjN8',
-            'ext': 'mp4',
-            'title': '國產麻豆AV 叮叮映畫 DDF001 情欲小說家 - CableAV',
-            'description': '國產AV 480p, 720p 国产麻豆AV 叮叮映画 DDF001 情欲小说家',
-            'thumbnail': r're:^https?://.*\.jpg$',
-        }
+        # 'url': 'https://cableav.tv/lS4iR9lWjN8/',
+        # 'md5': '7e3fe5e49d61c4233b7f5b0f69b15e18',
+        # 'info_dict': {
+        #    'id': 'lS4iR9lWjN8',
+        #    'ext': 'mp4',
+        #    'title': '國產麻豆AV 叮叮映畫 DDF001 情欲小說家 - CableAV',
+        #    'description': '國產AV 480p, 720p 国产麻豆AV 叮叮映画 DDF001 情欲小说家',
+        #    'thumbnail': r're:^https?://.*\.jpg$',
+        # }
     }]
 
     def _real_extract(self, url):

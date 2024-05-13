@@ -4,7 +4,7 @@ import re
 
 
 class FileMoonIE(InfoExtractor):
-    _VALID_URL = r'https?://filemoon\.sx/[e,d]/(?P<id>[^\/$]+)' 
+    _VALID_URL = r'https?://filemoon\.sx/[e,d]/(?P<id>[^\/$]+)'
     _SITE_URL = 'https://filemoon.sx'
 
     def _real_extract(self, url):
@@ -13,7 +13,7 @@ class FileMoonIE(InfoExtractor):
         webpage = try_get(self._download_webpage(_url, videoid), lambda x: re.sub('[\t\n]', '', x))
         packed = self._search_regex(r'<script data-cfasync=[^>]+>eval\((.+)\)</script>', webpage, 'packed code')
         unpacked = decode_packed_codes(packed)
-        m3u8_url = try_get(re.search(r'file:"(?P<url>[^"]+)"', unpacked), lambda x: x.group('url'))        
+        m3u8_url = try_get(re.search(r'file:"(?P<url>[^"]+)"', unpacked), lambda x: x.group('url'))
         formats = self._extract_m3u8_formats(m3u8_url, videoid, ext="mp4", entry_protocol='m3u8_native', m3u8_id="hls")
         title = self._html_extract_title(webpage)
         return {

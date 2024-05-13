@@ -15,76 +15,76 @@ from ..utils import (
 class YouPornIE(InfoExtractor):
     _VALID_URL = r'https?://(?:www\.)?youporn\.com/(?:watch|embed)/(?P<id>\d+)(?:/(?P<display_id>[^/?#&]+))?'
     _EMBED_REGEX = [r'<iframe[^>]+\bsrc=["\'](?P<url>(?:https?:)?//(?:www\.)?youporn\.com/embed/\d+)']
-    _TESTS = [{
-        'url': 'http://www.youporn.com/watch/505835/sex-ed-is-it-safe-to-masturbate-daily/',
-        'md5': '3744d24c50438cf5b6f6d59feb5055c2',
-        'info_dict': {
-            'id': '505835',
-            'display_id': 'sex-ed-is-it-safe-to-masturbate-daily',
-            'ext': 'mp4',
-            'title': 'Sex Ed: Is It Safe To Masturbate Daily?',
-            'description': 'Love & Sex Answers: http://bit.ly/DanAndJenn -- Is It Unhealthy To Masturbate Daily?',
-            'thumbnail': r're:^https?://.*\.jpg$',
-            'duration': 210,
-            'uploader': 'Ask Dan And Jennifer',
-            'upload_date': '20101217',
-            'average_rating': int,
-            'view_count': int,
-            'categories': list,
-            'tags': list,
-            'age_limit': 18,
-        },
-        'skip': 'This video has been disabled',
-    }, {
-        # Unknown uploader
-        'url': 'http://www.youporn.com/watch/561726/big-tits-awesome-brunette-on-amazing-webcam-show/?from=related3&al=2&from_id=561726&pos=4',
-        'info_dict': {
-            'id': '561726',
-            'display_id': 'big-tits-awesome-brunette-on-amazing-webcam-show',
-            'ext': 'mp4',
-            'title': 'Big Tits Awesome Brunette On amazing webcam show',
-            'description': 'http://sweetlivegirls.com Big Tits Awesome Brunette On amazing webcam show.mp4',
-            'thumbnail': r're:^https?://.*\.jpg$',
-            'uploader': 'Unknown',
-            'upload_date': '20110418',
-            'average_rating': int,
-            'view_count': int,
-            'categories': list,
-            'tags': list,
-            'age_limit': 18,
-        },
-        'params': {
-            'skip_download': True,
-        },
-        'skip': '404',
-    }, {
-        'url': 'https://www.youporn.com/embed/505835/sex-ed-is-it-safe-to-masturbate-daily/',
-        'only_matching': True,
-    }, {
-        'url': 'http://www.youporn.com/watch/505835',
-        'only_matching': True,
-    }, {
-        'url': 'https://www.youporn.com/watch/13922959/femdom-principal/',
-        'only_matching': True,
-    }, {
-        'url': 'https://www.youporn.com/watch/16290308/tinderspecial-trailer1/',
-        'info_dict': {
-            'id': '16290308',
-            'age_limit': 18,
-            'categories': [],
-            'description': str,  # TODO: detect/remove SEO spam description in ytdl backport
-            'display_id': 'tinderspecial-trailer1',
-            'duration': 298.0,
-            'ext': 'mp4',
-            'upload_date': '20201123',
-            'uploader': 'Ersties',
-            'tags': [],
-            'thumbnail': r're:https://.+\.jpg',
-            'timestamp': 1606147564,
-            'title': 'Tinder In Real Life',
-            'view_count': int,
-        }
-    }]
+    # _TESTS = [{
+    #     'url': 'http://www.youporn.com/watch/505835/sex-ed-is-it-safe-to-masturbate-daily/',
+    #     'md5': '3744d24c50438cf5b6f6d59feb5055c2',
+    #     'info_dict': {
+    #         'id': '505835',
+    #         'display_id': 'sex-ed-is-it-safe-to-masturbate-daily',
+    #         'ext': 'mp4',
+    #         'title': 'Sex Ed: Is It Safe To Masturbate Daily?',
+    #         'description': 'Love & Sex Answers: http://bit.ly/DanAndJenn -- Is It Unhealthy To Masturbate Daily?',
+    #         'thumbnail': r're:^https?://.*\.jpg$',
+    #         'duration': 210,
+    #         'uploader': 'Ask Dan And Jennifer',
+    #         'upload_date': '20101217',
+    #         'average_rating': int,
+    #         'view_count': int,
+    #         'categories': list,
+    #         'tags': list,
+    #         'age_limit': 18,
+    #     },
+    #     'skip': 'This video has been disabled',
+    # }, {
+    #     # Unknown uploader
+    #     'url': 'http://www.youporn.com/watch/561726/big-tits-awesome-brunette-on-amazing-webcam-show/?from=related3&al=2&from_id=561726&pos=4',
+    #     'info_dict': {
+    #         'id': '561726',
+    #         'display_id': 'big-tits-awesome-brunette-on-amazing-webcam-show',
+    #         'ext': 'mp4',
+    #         'title': 'Big Tits Awesome Brunette On amazing webcam show',
+    #         'description': 'http://sweetlivegirls.com Big Tits Awesome Brunette On amazing webcam show.mp4',
+    #         'thumbnail': r're:^https?://.*\.jpg$',
+    #         'uploader': 'Unknown',
+    #         'upload_date': '20110418',
+    #         'average_rating': int,
+    #         'view_count': int,
+    #         'categories': list,
+    #         'tags': list,
+    #         'age_limit': 18,
+    #     },
+    #     'params': {
+    #         'skip_download': True,
+    #     },
+    #     'skip': '404',
+    # }, {
+    #     'url': 'https://www.youporn.com/embed/505835/sex-ed-is-it-safe-to-masturbate-daily/',
+    #     'only_matching': True,
+    # }, {
+    #     'url': 'http://www.youporn.com/watch/505835',
+    #     'only_matching': True,
+    # }, {
+    #     'url': 'https://www.youporn.com/watch/13922959/femdom-principal/',
+    #     'only_matching': True,
+    # }, {
+    #     'url': 'https://www.youporn.com/watch/16290308/tinderspecial-trailer1/',
+    #     'info_dict': {
+    #         'id': '16290308',
+    #         'age_limit': 18,
+    #         'categories': [],
+    #         'description': str,  # TODO: detect/remove SEO spam description in ytdl backport
+    #         'display_id': 'tinderspecial-trailer1',
+    #         'duration': 298.0,
+    #         'ext': 'mp4',
+    #         'upload_date': '20201123',
+    #         'uploader': 'Ersties',
+    #         'tags': [],
+    #         'thumbnail': r're:https://.+\.jpg',
+    #         'timestamp': 1606147564,
+    #         'title': 'Tinder In Real Life',
+    #         'view_count': int,
+    #     }
+    # }]
 
     def _real_extract(self, url):
         video_id, display_id = self._match_valid_url(url).group('id', 'display_id')

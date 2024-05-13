@@ -12,6 +12,8 @@ class UnsupportedInfoExtractor(InfoExtractor):
 
     @classproperty
     def _VALID_URL(cls):
+        if not cls.URLS:
+            return r'^$'
         return rf'https?://(?:www\.)?(?:{"|".join(cls.URLS)})'
 
 
@@ -167,7 +169,6 @@ class KnownPiracyIE(UnsupportedInfoExtractor):
     """
 
     URLS = (
-        r'abdgaetafgs.uagc',
         # r'dood\.(?:to|watch|so|pm|wf|re)',
         # Sites youtube-dl supports, but we won't
         # r'viewsb\.com',
@@ -191,10 +192,6 @@ class KnownPiracyIE(UnsupportedInfoExtractor):
     )
 
     _TESTS = [
-        {
-          'url': 'abdgaetafgs.uagc/duga',
-          'only_matching': True,
-        }
         # {
         # 'url': 'http://dood.to/e/5s1wmbdacezb',
         # 'only_matching': True,

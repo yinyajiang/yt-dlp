@@ -851,28 +851,11 @@ class TikTokUserIE(TikTokBaseIE):
 
             for video in traverse_obj(response, ('itemList', lambda _, v: v['id'])):
                 video_id = video['id']
-
-                if not self._configuration_arg('web_fallback', ie_key=TikTokIE):
-                    yield self.url_result(self._create_url(user_name, video_id), TikTokIE, video_id)
-                    continue
-
-                entry = {}
-                try:
-                    entry = self._extract_aweme_app(video_id)
-                except ExtractorError as e:
-                    self.report_warning(
-                        f'{e.orig_msg}. Failed to extract from feed; falling back to web API response')
-                    if traverse_obj(video, ('video', 'playAddr')):
-                        entry = self._parse_aweme_video_web(video, self._create_url(user_name, video_id), video_id)
-                if entry:
-                    yield {
-                        **entry,
-                        'extractor_key': TikTokIE.ie_key(),
-                        'extractor': 'TikTok',
-                        'webpage_url': self._create_url(user_name, video_id),
-                    }
-                else:
-                    self.report_warning(f'Unable to extract video {video_id}')
+                webpage_url = self._create_url(user_name, video_id)
+                info = try_call(
+                    lambda: self._parse_aweme_video_web(video, webpage_url, video_id)) or {'id': video_id}
+                info.pop('formats', None)
+                yield self.url_result(webpage_url, TikTokIE, **info)
 
             old_cursor = cursor
             cursor = traverse_obj(
@@ -882,28 +865,39 @@ class TikTokUserIE(TikTokBaseIE):
             if cursor < 1472706000000 or not traverse_obj(response, 'hasMorePrevious'):
                 break
 
+    # For compat until required yt-dlp version is bumped
+    def _get_universal_data(self, webpage, display_id):
+        return traverse_obj(self._search_json(
+            r'<script[^>]+\bid="__UNIVERSAL_DATA_FOR_REHYDRATION__"[^>]*>', webpage,
+            'universal data', display_id, end_pattern=r'</script>', default={}),
+            ('__DEFAULT_SCOPE__', {dict})) or {}
+
     def _get_sec_uid(self, user_url, user_name, msg):
         webpage = self._download_webpage(
             user_url, user_name, fatal=False, headers={'User-Agent': 'Mozilla/5.0'},
             note=f'Downloading {msg} webpage', errnote=f'Unable to download {msg} webpage') or ''
-        sec_uid = traverse_obj(self._search_json(
-            r'<script[^>]+\bid="__UNIVERSAL_DATA_FOR_REHYDRATION__"[^>]*>', webpage,
-            'rehydration data', user_name, end_pattern=r'</script>', default={}),
-            ('__DEFAULT_SCOPE__', 'webapp.user-detail', 'userInfo', 'user', 'secUid', {str}))
-        if sec_uid:
-            return sec_uid
-        try:
-            return traverse_obj(
-                self._get_sigi_state(webpage, user_name),
-                ('LiveRoom', 'liveRoomUserInfo', 'user', 'secUid'),
-                ('UserModule', 'users', ..., 'secUid'),
-                get_all=False, expected_type=str)
-        except ExtractorError:
-            return None
+        return traverse_obj(
+            self._get_universal_data(webpage, user_name),
+            ('webapp.user-detail', 'userInfo', 'user', 'secUid', {str})) or traverse_obj(
+            try_call(lambda: self._get_sigi_state(webpage, user_name)),  # try_call is compat
+            ('LiveRoom', 'liveRoomUserInfo', 'user', 'secUid'),
+            ('UserModule', 'users', ..., 'secUid'),
+            get_all=False, expected_type=str)
 
     def _real_extract(self, url):
         user_name = self._match_id(url)
-        sec_uid = self._configuration_arg('sec_uid', [None], ie_key=TikTokIE, casesense=True)[0]
+
+        input_map = {
+            k: v for (k, _, v) in map(
+                lambda x: x.rpartition(':'),
+                self._configuration_arg('sec_uid', ie_key=TikTokIE, casesense=True))
+        }
+        sec_uid = input_map.get(user_name)
+        if not sec_uid and input_map.get(''):
+            self.report_warning(
+                '--extractor-args "tiktok:sec_uid=SECUID" has been deprecated. Use the new syntax: '
+                '--extractor-args "tiktok:sec_uid=USERNAME1:SECUID1,USERNAME2:SECUID2"')
+            sec_uid = input_map['']
 
         if not sec_uid:
             for user_url, msg in (
@@ -934,7 +928,8 @@ class TikTokUserIE(TikTokBaseIE):
             if not sec_uid:
                 raise ExtractorError(
                     'Could not extract secondary user ID. '
-                    'Try using  --extractor-arg "tiktok:sec_uid=ID"  with your command, '
+                    'Try using  --extractor-args "tiktok:sec_uid=USERNAME:ID"  with your command, '
+                    'replacing "USERNAME" with the requested username and '
                     'replacing "ID" with the channel_id of the requested user')
 
         return self.playlist_result(self._entries(sec_uid, user_name), user_name)

@@ -109,6 +109,7 @@ from .americastestkitchen import (
     AmericasTestKitchenIE,
     AmericasTestKitchenSeasonIE,
 )
+from .amvnews import AMVNewsIE
 from .anchorfm import AnchorFMEpisodeIE
 from .angel import AngelIE
 from .anvato import AnvatoIE
@@ -767,6 +768,7 @@ from .hotstar import (
     HotStarSeasonIE,
     HotStarSeriesIE,
 )
+from .hqporner import HqpornerIE
 from .hrefli import HrefLiRedirectIE
 from .hrfensehen import HRFernsehenIE
 from .hrti import (
@@ -881,6 +883,11 @@ from .japandiet import (
     SangiinIE,
 )
 from .jeuxvideo import JeuxVideoIE
+from .jiocinema import (
+    JioCinemaTVIE,
+    JioCinemaMovieIE,
+    JioCinemaTVSeasonIE
+)
 from .jiosaavn import (
     JioSaavnSongIE,
     JioSaavnAlbumIE,
@@ -1124,6 +1131,7 @@ from .motherless import (
     MotherlessUploaderIE,
 )
 from .motorsport import MotorsportIE
+from .mover import MoverIE
 from .moviepilot import MoviepilotIE
 from .moview import MoviewPlayIE
 from .moviezine import MoviezineIE
@@ -1501,6 +1509,7 @@ from .polskieradio import (
     PolskieRadioPodcastIE,
     PolskieRadioPodcastListIE,
 )
+from .pomftv import PomfTVLiveIE
 from .popcorntimes import PopcorntimesIE
 from .popcorntv import PopcornTVIE
 from .porn91 import Porn91IE

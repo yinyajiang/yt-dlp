@@ -1999,6 +1999,10 @@ from .theplatform import (
 from .thestar import TheStarIE
 from .thesun import TheSunIE
 from .theweatherchannel import TheWeatherChannelIE
+from .thirtydaysinger import (
+    ThirtyDaySingerIE,
+    ThirtyDaySingerPlaylistIE
+)
 from .thisamericanlife import ThisAmericanLifeIE
 from .thisav import ThisAVIE
 from .thisoldhouse import ThisOldHouseIE

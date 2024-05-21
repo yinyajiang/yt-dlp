@@ -529,6 +529,7 @@ from .deuxm import (
     DeuxMNewsIE
 )
 from .digitalconcerthall import DigitalConcertHallIE
+from .digiview import DigiviewIE
 from .discogs import DiscogsReleasePlaylistIE
 from .discovery import DiscoveryIE
 from .disney import DisneyIE

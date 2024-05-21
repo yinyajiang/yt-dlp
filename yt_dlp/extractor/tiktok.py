@@ -5,6 +5,7 @@ import random
 import re
 import time
 import uuid
+import string
 
 from .common import InfoExtractor
 from ..compat import compat_urllib_parse_urlparse, compat_urllib_parse_unquote
@@ -1049,7 +1050,7 @@ class TikTokPlaylistIE(TikTokBaseIE):
             "screen_width": "1440",
             "tz_name": 'America/New_York',
             "webcast_language": "en",
-            'device_id': ''.join(random.choices(string.digits, k=19))
+            'device_id': self._DEVICE_ID,
         }
 
     def _video_entries_api(self, user_id, playlist_id):

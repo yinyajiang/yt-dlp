@@ -408,17 +408,17 @@ jobs:
         run: |
           python -m bundle.pyinstaller
           python -m bundle.pyinstaller --onedir
-          Move-Item ./dist/yt-dlp.exe ./dist/yt-dlp_real.exe
+          # Move-Item ./dist/yt-dlp.exe ./dist/yt-dlp_real.exe
           Compress-Archive -Path ./dist/yt-dlp/* -DestinationPath ./dist/yt-dlp_win.zip
 
-      - name: Install Requirements (py2exe)
-        run: |
-          python devscripts/install_deps.py --include py2exe
-      - name: Build (py2exe)
-        run: |
-          python -m bundle.py2exe
-          Move-Item ./dist/yt-dlp.exe ./dist/yt-dlp_min.exe
-          Move-Item ./dist/yt-dlp_real.exe ./dist/yt-dlp.exe
+      #- name: Install Requirements (py2exe)
+      #  run: |
+      #    python devscripts/install_deps.py --include py2exe
+      #- name: Build (py2exe)
+      #  run: |
+      #    python -m bundle.py2exe
+      #    Move-Item ./dist/yt-dlp.exe ./dist/yt-dlp_min.exe
+      #    Move-Item ./dist/yt-dlp_real.exe ./dist/yt-dlp.exe
 
       - name: Verify --update-to
         if: vars.UPDATE_TO_VERIFICATION

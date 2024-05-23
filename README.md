@@ -263,7 +263,7 @@ You can also run `make yt-dlp` instead to compile only the binary without updati
 
 ### Standalone Py2Exe Builds (Windows)
 
-While we provide the option to build with [py2exe](https://www.py2exe.org), it is recommended to build [using PyInstaller](#standalone-pyinstaller-builds) instead since the py2exe builds **cannot contain `pycryptodomex`/`certifi`/`requests` and need VC++14** on the target computer to run.
+While we provide the option to build with [py2exe](https://www.py2exe.org), it is recommended to build [using PyInstaller](#standalone-pyinstaller-builds) instead since the py2exe builds **cannot contain `pycryptodomex`/`certifi` and need VC++14** on the target computer to run.
 
 If you wish to build it anyway, install Python (if it is not already installed) and you can run the following commands:
 
@@ -1840,6 +1840,9 @@ The following extractors use this feature:
 
 #### afreecatvlive
 * `cdn`: One or more CDN IDs to use with the API call for stream URLs, e.g. `gcp_cdn`, `gs_cdn_pc_app`, `gs_cdn_mobile_web`, `gs_cdn_pc_web`
+
+#### soundcloud
+* `formats`: Formats to request from the API. Requested values should be in the format of `{protocol}_{extension}` (omitting the bitrate), e.g. `hls_opus,http_aac`. The `*` character functions as a wildcard, e.g. `*_mp3`, and can passed by itself to request all formats. Known protocols include `http`, `hls` and `hls-aes`; known extensions include `aac`, `opus` and `mp3`. Original `download` formats are always extracted. Default is `http_aac,hls_aac,http_opus,hls_opus,http_mp3,hls_mp3`
 
 **Note**: These options may be changed/removed in the future without concern for backward compatibility
 

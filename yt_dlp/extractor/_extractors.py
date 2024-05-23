@@ -2034,6 +2034,7 @@ from .tiktok import (
     TikTokLiveIE,
     DouyinIE,
     TikTokPlaylistIE,
+    TikTokCollectionIE,
 )
 from .tmz import TMZIE
 from .tnaflix import (

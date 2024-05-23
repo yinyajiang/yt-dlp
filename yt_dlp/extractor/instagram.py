@@ -696,17 +696,22 @@ class InstagramUserIE(InstagramPlaylistBaseIE):
             'id': data['entry_data']['ProfilePage'][0]['graphql']['user']['id']
         }
 
+    def _download_usedata(self, username):
+        return self._download_json(
+            f'{self._API_BASE_URL}/users/web_profile_info/?username={username}&count=100',
+            username, errnote=False, fatal=False, headers=self._API_HEADERS)
+
     def _real_extract(self, url):
         username = self._match_id(url)
         action = self._configuration_arg(
             'custom_action', default=[''], ie_key=InstagramUserIE)[0]
-        userdata = self._download_json(
-            f'{self._API_BASE_URL}/users/web_profile_info/?username={username}&count=100',
-            username, errnote=False, fatal=False, headers=self._API_HEADERS)
+        userdata = self._download_usedata(username)
         if not userdata:
             self.report_warning('userdata extraction failed', username)
-            if not self._has_session_id():
+            userdata = self._download_usedata(username)
+            if not userdata:
                 self.raise_login_required()
+
         userdata = userdata['data']
         if action == 'get_post_count':
             return {

@@ -105,6 +105,10 @@ class TikTokBaseIE(InfoExtractor):
     def _create_url(user_id, video_id):
         return f'https://www.tiktok.com/@{user_id or "_"}/video/{video_id}'
 
+    @staticmethod
+    def _create_collection_url(user_id, collection_id, count=30, cursor=0):
+        return f'https://www.tiktok.com/api/collection/item_list/?aid=1988&collectionId={collection_id}&count={count}&cursor={cursor}&sourceType=113'
+
     def _get_sigi_state(self, webpage, display_id):
         return self._search_json(
             r'<script[^>]+\bid="(?:SIGI_STATE|sigi-persisted-data)"[^>]*>', webpage,
@@ -1610,3 +1614,52 @@ class TikTokLiveIE(TikTokBaseIE):
                 'concurrent_view_count': (('user_count', ('liveRoomStats', 'userCount')), {int_or_none}),
             }, get_all=False),
         }
+
+
+class TikTokCollectionIE(TikTokBaseIE):
+    _VALID_URL = r'https?://www\.tiktok\.com/@(?P<user_id>[\w\.-]+)/collection/(?P<title>[^/]+)-(?P<id>\d+)(?=\?|$)'
+    _TESTS = [{
+        # playlist should have exactly 9 videos
+        'url': 'https://www.tiktok.com/@imanoreotwe/collection/count-test-7371330159376370462',
+        'info_dict': {
+            'id': '7371330159376370462',
+            'title': 'count-test'
+        },
+        'playlist_count': 9
+    }, {
+        # tests returning multiple pages of a large collection
+        'url': 'https://www.tiktok.com/@imanoreotwe/collection/%F0%9F%98%82-7111887189571160875',
+        'info_dict': {
+            'id': '7111887189571160875',
+            'title': '%F0%9F%98%82'
+        },
+        'playlist_mincount': 100
+    }]
+
+    def _real_extract(self, url):
+        collection_id, collection_title, user_id = self._match_valid_url(url).group('id', 'title', 'user_id')
+
+        hasMore = True
+        entries = []
+        count = 30
+        cursor = 0
+
+        while hasMore:
+            url = self._create_collection_url(user_id, collection_id, count=count, cursor=cursor)
+            webpage = self._download_json(url, collection_id, headers={'User-Agent': 'Mozilla/5.0'})
+
+            hasMore = webpage.get('hasMore')
+            cursor = cursor + count
+
+            videos = webpage.get('itemList') or []
+            for vid in videos:
+                entries.append(self._parse_aweme_video_web(vid, url, vid.get('id')))
+
+        if len(entries) == 0:
+            raise ExtractorError('Collection is either empty, private, or the URL is incorrect')
+
+        return self.playlist_result(
+            entries,
+            collection_id,
+            collection_title
+        )

@@ -1793,6 +1793,10 @@ class YoutubeDL:
             extra_info = {}
         result_type = ie_result.get('_type', 'video')
 
+        if self.params.get('plain_entries', False):
+            self._plain_ie_result(ie_result)
+            result_type = ie_result.get('_type', 'video')
+
         if result_type in ('url', 'url_transparent'):
             ie_result['url'] = sanitize_url(
                 ie_result['url'], scheme='http' if self.params.get('prefer_insecure') else 'https')
@@ -4397,3 +4401,20 @@ class YoutubeDL:
             if ret and not write_all:
                 break
         return ret
+
+    def _plain_ie_result(self, ie_result):
+        if ie_result.get('entries', []):
+            ie_result['entries'] = self._plain_entries(ie_result['entries'])
+            if ie_result.get('_playlist_media_type', '') == 'CAROUSEL':
+                del ie_result['_playlist_media_type']
+            if ie_result.get('_type', '') == 'video':
+                ie_result['_type'] = 'playlist'
+
+    def _plain_entries(self, entries):
+        returns = []
+        for entry in entries:
+            if entry.get('entries', None):
+                returns.extend(self._plain_entries(entry['entries']))
+            else:
+                returns.append(entry)
+        return returns

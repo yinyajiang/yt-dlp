@@ -1165,6 +1165,10 @@ def create_parser():
         dest='skip_download_media_type', metavar='MEDIA_TYPE', action='append',
         help='Skip downloading the video if it matches the given media type')
     verbosity.add_option(
+        '--plain-entries',
+        action='store_true', dest='plain_entries', default=False,
+        help='Flatten the entries field')
+    verbosity.add_option(
         '-O', '--print',
         metavar='[WHEN:]TEMPLATE', dest='forceprint', **when_prefix('video'),
         help=(

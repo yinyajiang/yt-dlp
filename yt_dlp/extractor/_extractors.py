@@ -1410,7 +1410,6 @@ from .openrec import (
 )
 from .ora import OraTVIE
 from .orf import (
-    ORFTVthekIE,
     ORFFM4StoryIE,
     ORFONIE,
     ORFRadioIE,
@@ -1931,6 +1930,12 @@ from .syvdk import SYVDKIE
 from .syfy import SyfyIE
 from .sztvhu import SztvHuIE
 from .tagesschau import TagesschauIE
+from .taptap import (
+    TapTapMomentIE,
+    TapTapAppIE,
+    TapTapAppIntlIE,
+    TapTapPostIntlIE,
+)
 from .tass import TassIE
 from .tbs import TBSIE
 from .tbsjp import (

@@ -6,10 +6,9 @@ import re
 import string
 import time
 import uuid
-import string
 
 from .common import InfoExtractor
-from ..compat import compat_urllib_parse_urlparse, compat_urllib_parse_unquote
+from ..compat import compat_urllib_parse_urlparse
 from ..networking import HEADRequest
 from ..utils import (
     ExtractorError,
@@ -38,7 +37,6 @@ class TikTokBaseIE(InfoExtractor):
     _UPLOADER_URL_FORMAT = 'https://www.tiktok.com/@%s'
     _WEBPAGE_HOST = 'https://www.tiktok.com/'
     QUALITIES = ('360p', '540p', '720p', '1080p')
-    _API_HOSTNAME_IMPL = None
 
     _APP_INFO_DEFAULTS = {
         # unique "install id"
@@ -105,10 +103,6 @@ class TikTokBaseIE(InfoExtractor):
     def _create_url(user_id, video_id):
         return f'https://www.tiktok.com/@{user_id or "_"}/video/{video_id}'
 
-    @staticmethod
-    def _create_collection_url(user_id, collection_id, count=30, cursor=0):
-        return f'https://www.tiktok.com/api/collection/item_list/?aid=1988&collectionId={collection_id}&count={count}&cursor={cursor}&sourceType=113'
-
     def _get_sigi_state(self, webpage, display_id):
         return self._search_json(
             r'<script[^>]+\bid="(?:SIGI_STATE|sigi-persisted-data)"[^>]*>', webpage,
@@ -127,7 +121,7 @@ class TikTokBaseIE(InfoExtractor):
         if webpage_cookies.get('sid_tt'):
             self._set_cookie(self._API_HOSTNAME, 'sid_tt', webpage_cookies['sid_tt'].value)
         return self._download_json(
-            self._API_HOSTNAME_IMPL if self._API_HOSTNAME_IMPL else 'https://%s/aweme/v1/%s/' % (self._API_HOSTNAME, ep), video_id=video_id,
+            'https://%s/aweme/v1/%s/' % (self._API_HOSTNAME, ep), video_id=video_id,
             fatal=fatal, note=note, errnote=errnote, headers={
                 'User-Agent': self._APP_USER_AGENT,
                 'Accept': 'application/json',
@@ -879,8 +873,8 @@ class TikTokUserIE(TikTokBaseIE):
     IE_NAME = 'tiktok:user'
     _VALID_URL = r'(?:tiktokuser:|https?://(?:www\.)?tiktok\.com/@)(?P<id>[\w.-]+)/?(?:$|[#?])'
     _TESTS = [{
-        'url': 'https://tiktok.com/@therock?lang=en',
-        'playlist_mincount': 25,
+        'url': 'https://tiktok.com/@corgibobaa?lang=en',
+        'playlist_mincount': 45,
         'info_dict': {
             'id': 'MS4wLjABAAAAepiJKgwWhulvCpSuUVsp7sgVVsFJbbNaLeQ6OQ0oAJERGDUIXhb2yxxHZedsItgT',
             'title': 'corgibobaa',
@@ -1183,6 +1177,36 @@ class TikTokCollectionIE(TikTokBaseIE):
 
         return self.playlist_result(
             self._entries(collection_id), collection_id, '-'.join((user_name, title)))
+    
+
+
+class TikTokPlaylistIE(TikTokCollectionIE):
+    IE_NAME = 'tiktok:playlist'
+    _VALID_URL = r'https?://www\.tiktok\.com/@(?P<user_id>[\w.-]+)/playlist/(?P<title>[^/?#]+)-(?P<id>\d+)/?(?:[?#]|$)'
+    _TESTS = [
+        {
+        # playlist should have exactly 9 videos
+        'url': 'https://www.tiktok.com/@skanteryt/playlist/Wifey%F0%9F%92%95-7372469466678053678',
+        'info_dict': {
+            'id': '7372469466678053678',
+            'title': 'Wifey💕'
+        },
+        'playlist_count': 6
+    }]
+    _API_BASE_URL = 'https://www.tiktok.com/api/mix/item_list/'
+
+    def _build_web_query(self, playlist_id, cursor):
+        return {
+            'aid': '1988',
+            'mixId': playlist_id,
+            'count': self._PAGE_COUNT,
+            'cursor': cursor,
+        }
+
+    def _real_extract(self, url):
+        playlist_id, title, user_name = self._match_valid_url(url).group('id', 'title', 'user_id')
+        return self.playlist_result(
+            self._entries(playlist_id), playlist_id, '-'.join((user_name, title)))
 
 
 class DouyinIE(TikTokBaseIE):
@@ -1552,52 +1576,3 @@ class TikTokLiveIE(TikTokBaseIE):
                 'concurrent_view_count': (('user_count', ('liveRoomStats', 'userCount')), {int_or_none}),
             }, get_all=False),
         }
-
-
-class TikTokCollectionIE(TikTokBaseIE):
-    _VALID_URL = r'https?://www\.tiktok\.com/@(?P<user_id>[\w\.-]+)/collection/(?P<title>[^/]+)-(?P<id>\d+)(?=\?|$)'
-    _TESTS = [{
-        # playlist should have exactly 9 videos
-        'url': 'https://www.tiktok.com/@imanoreotwe/collection/count-test-7371330159376370462',
-        'info_dict': {
-            'id': '7371330159376370462',
-            'title': 'count-test'
-        },
-        'playlist_count': 9
-    }, {
-        # tests returning multiple pages of a large collection
-        'url': 'https://www.tiktok.com/@imanoreotwe/collection/%F0%9F%98%82-7111887189571160875',
-        'info_dict': {
-            'id': '7111887189571160875',
-            'title': '%F0%9F%98%82'
-        },
-        'playlist_mincount': 100
-    }]
-
-    def _real_extract(self, url):
-        collection_id, collection_title, user_id = self._match_valid_url(url).group('id', 'title', 'user_id')
-
-        hasMore = True
-        entries = []
-        count = 30
-        cursor = 0
-
-        while hasMore:
-            url = self._create_collection_url(user_id, collection_id, count=count, cursor=cursor)
-            webpage = self._download_json(url, collection_id, headers={'User-Agent': 'Mozilla/5.0'})
-
-            hasMore = webpage.get('hasMore')
-            cursor = cursor + count
-
-            videos = webpage.get('itemList') or []
-            for vid in videos:
-                entries.append(self._parse_aweme_video_web(vid, url, vid.get('id')))
-
-        if len(entries) == 0:
-            raise ExtractorError('Collection is either empty, private, or the URL is incorrect')
-
-        return self.playlist_result(
-            entries,
-            collection_id,
-            collection_title
-        )

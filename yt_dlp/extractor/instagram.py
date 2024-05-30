@@ -429,6 +429,7 @@ class InstagramIE(InstagramBaseIE):
     def _real_extract(self, url):
         video_id, url = self._match_valid_url(url).group('id', 'url')
         media, webpage = {}, ''
+
         if self._get_cookies(url).get('sessionid'):
             info = traverse_obj(self._download_json(
                 f'{self._API_BASE_URL}/media/{_id_to_pk(video_id)}/info/', video_id,

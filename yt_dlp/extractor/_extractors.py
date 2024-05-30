@@ -127,13 +127,13 @@ from .americastestkitchen import (
 from .amvnews import AMVNewsIE
 from .anchorfm import AnchorFMEpisodeIE
 from .angel import AngelIE
+from .anime1 import Anime1IE
 from .antenna import (
     Ant1NewsGrArticleIE,
     Ant1NewsGrEmbedIE,
     AntennaGrWatchIE,
 )
 from .anvato import AnvatoIE
-from .anime1 import Anime1IE
 from .aol import AolIE
 from .apa import APAIE
 from .aparat import AparatIE
@@ -219,9 +219,6 @@ from .bbc import (
     BBCCoUkPlaylistIE,
 )
 from .beacon import BeaconTvIE
-from .beeg import BeegIE
-from .behindkink import BehindKinkIE
-from .bellmedia import BellMediaIE
 from .beatbump import (
     BeatBumpPlaylistIE,
     BeatBumpVideoIE,
@@ -314,8 +311,8 @@ from .businessinsider import BusinessInsiderIE
 from .buzzfeed import BuzzFeedIE
 from .byutv import BYUtvIE
 from .c56 import C56IE
-from .caffeinetv import CaffeineTVIE
 from .cableav import CableAVIE
+from .caffeinetv import CaffeineTVIE
 from .callin import CallinIE
 from .caltrans import CaltransIE
 from .cam4 import CAM4IE
@@ -510,6 +507,7 @@ from .dfb import DFBIE
 from .dhm import DHMIE
 from .digitalconcerthall import DigitalConcertHallIE
 from .digiteka import DigitekaIE
+from .digiview import DigiviewIE
 from .discogs import DiscogsReleasePlaylistIE
 from .discovery import DiscoveryIE
 from .disney import DisneyIE
@@ -522,6 +520,7 @@ from .dlive import (
     DLiveStreamIE,
     DLiveVODIE,
 )
+from .doodstream import DoodStreamIE
 from .douyutv import (
     DouyuShowIE,
     DouyuTVIE,
@@ -573,22 +572,6 @@ from .duboku import (
     DubokuPlaylistIE,
 )
 from .dumpert import DumpertIE
-from .deuxm import (
-    DeuxMIE,
-    DeuxMNewsIE
-)
-from .digitalconcerthall import DigitalConcertHallIE
-from .digiview import DigiviewIE
-from .discogs import DiscogsReleasePlaylistIE
-from .discovery import DiscoveryIE
-from .disney import DisneyIE
-from .dispeak import DigitallySpeakingIE
-from .doodstream import DoodStreamIE
-from .dropbox import DropboxIE
-from .dropout import (
-    DropoutSeasonIE,
-    DropoutIE
-)
 from .duoplay import DuoplayIE
 from .dvtv import DVTVIE
 from .dw import (
@@ -668,8 +651,8 @@ from .fc2 import (
     FC2LiveIE,
 )
 from .fczenit import FczenitIE
-from .filemoon import FileMoonIE
 from .fifa import FifaIE
+from .filemoon import FileMoonIE
 from .filmon import (
     FilmOnChannelIE,
     FilmOnIE,
@@ -2098,10 +2081,7 @@ from .theplatform import (
 from .thestar import TheStarIE
 from .thesun import TheSunIE
 from .theweatherchannel import TheWeatherChannelIE
-from .thirtydaysinger import (
-    ThirtyDaySingerIE,
-    ThirtyDaySingerPlaylistIE
-)
+from .thirtydaysinger import ThirtyDaySingerIE, ThirtyDaySingerPlaylistIE
 from .thisamericanlife import ThisAmericanLifeIE
 from .thisav import ThisAVIE
 from .thisoldhouse import ThisOldHouseIE
@@ -2110,11 +2090,8 @@ from .thisvid import (
     ThisVidMemberIE,
     ThisVidPlaylistIE,
 )
+from .threads import ThreadsIE, ThreadsIOSIE
 from .threeqsdn import ThreeQSDNIE
-from .threads import (
-    ThreadsIE,
-    ThreadsIOSIE
-)
 from .threespeak import (
     ThreeSpeakIE,
     ThreeSpeakUserIE,
@@ -2125,14 +2102,11 @@ from .tiktok import (
     TikTokEffectIE,
     TikTokIE,
     TikTokLiveIE,
+    TikTokPlaylistIE,
     TikTokSoundIE,
     TikTokTagIE,
     TikTokUserIE,
     TikTokVMIE,
-    TikTokLiveIE,
-    DouyinIE,
-    TikTokPlaylistIE,
-    TikTokCollectionIE,
 )
 from .tmz import TMZIE
 from .tnaflix import (

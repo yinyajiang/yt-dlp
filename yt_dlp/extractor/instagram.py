@@ -18,10 +18,10 @@ from ..utils import (
     lowercase_escape,
     str_or_none,
     str_to_int,
+    strftime_or_none,
     traverse_obj,
     url_or_none,
     urlencode_postdata,
-    strftime_or_none,
 )
 
 _ENCODING_CHARS = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789-_'

@@ -1,6 +1,7 @@
+import re
+
 from .common import InfoExtractor
 from ..utils import decode_packed_codes, try_get
-import re
 
 
 class FileMoonIE(InfoExtractor):

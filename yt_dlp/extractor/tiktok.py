@@ -1177,14 +1177,12 @@ class TikTokCollectionIE(TikTokBaseIE):
 
         return self.playlist_result(
             self._entries(collection_id), collection_id, '-'.join((user_name, title)))
-    
 
 
 class TikTokPlaylistIE(TikTokCollectionIE):
     IE_NAME = 'tiktok:playlist'
     _VALID_URL = r'https?://www\.tiktok\.com/@(?P<user_id>[\w.-]+)/playlist/(?P<title>[^/?#]+)-(?P<id>\d+)/?(?:[?#]|$)'
-    _TESTS = [
-        {
+    _TESTS = [{
         # playlist should have exactly 9 videos
         'url': 'https://www.tiktok.com/@skanteryt/playlist/Wifey%F0%9F%92%95-7372469466678053678',
         'info_dict': {

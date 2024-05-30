@@ -5,16 +5,16 @@ import time
 
 from .common import InfoExtractor
 from ..utils import (
+    ExtractorError,
     clean_html,
     int_or_none,
     join_nonempty,
     js_to_json,
-    strip_jsonp,
     str_or_none,
+    strip_jsonp,
     traverse_obj,
     unescapeHTML,
     url_or_none,
-    ExtractorError,
 )
 
 

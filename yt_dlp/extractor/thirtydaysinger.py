@@ -1,10 +1,7 @@
 import re
 
 from .wistia import WistiaBaseIE
-from ..utils import (
-    clean_html,
-    get_elements_html_by_class
-)
+from ..utils import clean_html, get_elements_html_by_class
 
 
 class ThirtyDaySingerBase(WistiaBaseIE):

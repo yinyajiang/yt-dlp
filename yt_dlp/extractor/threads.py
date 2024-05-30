@@ -1,10 +1,5 @@
 from .common import InfoExtractor
-from ..utils import (
-    strftime_or_none,
-    traverse_obj,
-    remove_end,
-    strip_or_none
-)
+from ..utils import remove_end, strftime_or_none, strip_or_none, traverse_obj
 
 
 class ThreadsIE(InfoExtractor):

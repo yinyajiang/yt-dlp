@@ -272,7 +272,6 @@ class DailyWireShowIE(DailyWireBaseIE):
                 'season_id': 'what-we-saw-season-3-an-empire-of-terror-season',
                 'ext': 'mp4',
                 'display_id': 'season-3-an-empire-of-terror',
-                'display_id': 'season-3-an-empire-of-terror',
                 'series_id': 'ckixsvamonvl40862ysxve50i',
                 'title': 'Season 3: An Empire of Terror',
                 'description': 'What We Saw: An Empire of Terror premieres on March 6, 2024.',

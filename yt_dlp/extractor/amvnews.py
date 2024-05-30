@@ -4,8 +4,8 @@ from collections import defaultdict
 from .common import InfoExtractor
 from ..utils import (
     clean_html,
-    int_or_none,
     float_or_none,
+    int_or_none,
     parse_duration,
     unescapeHTML,
     urljoin,

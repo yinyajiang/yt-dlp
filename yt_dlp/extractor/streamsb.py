@@ -4,7 +4,7 @@ import re
 import string
 
 from .common import InfoExtractor
-from ..utils import urljoin, url_basename
+from ..utils import url_basename, urljoin
 
 
 def to_ascii_hex(str1):

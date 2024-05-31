@@ -3691,7 +3691,7 @@ class YoutubeDL:
         except PostProcessingError as e:
             # Must be True and not 'only_download'
             if self.params.get('ignoreerrors') is True or self.params.get('ignore_postproc_errors') is True:
-                self.report_error('Postprocessing: %s' % str(e), is_error=False)
+                self.report_warning('Postprocessing: %s' % str(e))
                 return infodict
             raise
 

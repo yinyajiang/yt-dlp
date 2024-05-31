@@ -1793,6 +1793,10 @@ def create_parser():
             '"after_video" (after downloading and processing all formats of a video), '
             'or "playlist" (at end of playlist). '
             'This option can be used multiple times to add different postprocessors'))
+    postproc.add_option(
+        '--ignore-postproc-errors',
+        action='store_true', dest='ignore_postproc_errors', default=False,
+        help='Ignore postprocessing errors.')
 
     sponsorblock = optparse.OptionGroup(parser, 'SponsorBlock Options', description=(
         'Make chapter entries for, or remove various segments (sponsor, introductions, etc.) '

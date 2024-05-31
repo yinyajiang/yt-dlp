@@ -917,6 +917,7 @@ def parse_options(argv=None):
         'merge_output_format': opts.merge_output_format,
         'final_ext': final_ext,
         'postprocessors': postprocessors,
+        'ignore_postproc_errors': opts.ignore_postproc_errors,
         'fixup': opts.fixup,
         'source_address': opts.source_address,
         'impersonate': opts.impersonate,

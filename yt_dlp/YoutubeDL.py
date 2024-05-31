@@ -3690,8 +3690,8 @@ class YoutubeDL:
             files_to_delete, infodict = pp.run(infodict)
         except PostProcessingError as e:
             # Must be True and not 'only_download'
-            if self.params.get('ignoreerrors') is True:
-                self.report_error(e)
+            if self.params.get('ignoreerrors') is True or self.params.get('ignore_postproc_errors') is True:
+                self.report_error('Postprocessing: %s' % str(e), is_error=False)
                 return infodict
             raise
 

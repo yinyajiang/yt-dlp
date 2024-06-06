@@ -986,6 +986,10 @@ from .la7 import (
     LA7PodcastEpisodeIE,
     LA7PodcastIE,
 )
+from .laracasts import (
+    LaracastsIE,
+    LaracastsPlaylistIE,
+)
 from .lastfm import (
     LastFMIE,
     LastFMPlaylistIE,

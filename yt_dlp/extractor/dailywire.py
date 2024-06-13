@@ -1,5 +1,6 @@
 from .common import InfoExtractor
 from ..utils import (
+    ExtractorError,
     determine_ext,
     float_or_none,
     join_nonempty,
@@ -111,3 +112,57 @@ class DailyWirePodcastIE(DailyWireBaseIE):
             'thumbnail': episode_info.get('thumbnail'),
             'description': episode_info.get('description'),
         }
+
+
+class DailyWireShowIE(DailyWireBaseIE):
+    _VALID_URL = r'https?://(?:www\.)dailywire(?:\.com)/(?P<sites_type>show)/(?P<id>[\w-]+)'
+    _TESTS = [{
+        'skip': 'premium only',
+        'url': 'https://www.dailywire.com/show/apollo-11-what-we-saw',
+        'playlist_mincount': 28,
+        'info_dict': {
+            'id': 'ckixsvamonvl40862ysxve50i',
+            'thumbnail': 'https://daily-wire-production.imgix.net/shows/ckixsvamonvl40862ysxve50i-1679082975554.jpg',
+            'title': 'What We Saw',
+            'description': 'md5:98d2a7d5cc8175494a4ca611058ed440',
+        },
+        'params': {
+            'skip_download': True,
+        },
+        'playlist': [{
+            'info_dict': {
+                'id': 'cltf80tk79fxi0942c7h394b5',
+                'season_id': 'what-we-saw-season-3-an-empire-of-terror-season',
+                'ext': 'mp4',
+                'display_id': 'season-3-an-empire-of-terror',
+                'series_id': 'ckixsvamonvl40862ysxve50i',
+                'title': 'Season 3: An Empire of Terror',
+                'description': 'What We Saw: An Empire of Terror premieres on March 6, 2024.',
+                'creators': ['Scott Bowler '],
+                'upload_date': '20240306',
+                'timestamp': 1709704832,
+                'thumbnail': 'https://daily-wire-production.imgix.net/episodes/cltf80tk79fxi0942c7h394b5/cltf80tk79fxi0942c7h394b5-1709694601671.png',
+                'series': 'What We Saw',
+            }}]
+    }]
+
+    def _real_extract(self, url):
+        slug = self._match_valid_url(url).group('id')
+
+        show_data = self._call_api(slug, 'getShowBySlug', {'slug': slug})
+        if not show_data:
+            raise ExtractorError('Show not found')
+
+        for season_data in show_data.get('seasons', []):
+            season_data['episodes'] = [
+                episode for page in
+                self._paginate(season_data.get('slug'), 'getSeasonEpisodes', {'season': {'id': season_data.get('id')}})
+                for episode in page
+            ]
+
+        return self.playlist_result(
+            [self.url_result(f'https://www.dailywire.com/episode/{episode_slug}',
+             season_id=season_data.get('slug'), season=season_data.get('title'), url_transparent=True)
+             for season_data in show_data.get('seasons', []) for episode_slug in season_data['episodes']],
+            show_data.get('id'), show_data.get('name'), show_data.get('description'),
+            thumbnail=show_data.get('image'))

@@ -1,5 +1,4 @@
 from .common import InfoExtractor
-from ..compat import compat_str
 from ..utils import (
     parse_duration,
     urljoin,
@@ -42,7 +41,7 @@ class YourPornIE(InfoExtractor):
         for c in parts[6] + parts[7]:
             if c.isnumeric():
                 num += int(c)
-        parts[5] = compat_str(int(parts[5]) - num)
+        parts[5] = str(int(parts[5]) - num)
         parts[1] += '8'
         video_url = urljoin(url, '/'.join(parts))
 

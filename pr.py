@@ -12,16 +12,16 @@ def main():
     parser.add_argument('--branch', default='', help='signature is not required')
     parser.add_argument('--commitid', default='', help='signature is not required')
     args = parser.parse_args()
-    subprocess.run(["git", "remote", "-v"]).check_returncode()
-    subprocess.run(["git", "remote", "add", args.branch, args.git]).check_returncode()
-    subprocess.run(["git", "fetch", args.branch]).check_returncode()
+    subprocess.run(['git', 'remote', '-v']).check_returncode()
+    subprocess.run(['git', 'remote', 'add', args.branch, args.git]).check_returncode()
+    subprocess.run(['git', 'fetch', args.branch]).check_returncode()
     if args.commitid:
-        subprocess.run(["git", "cherry-pick", args.commitid]).check_returncode()
+        subprocess.run(['git', 'cherry-pick', args.commitid]).check_returncode()
     else:
-        subprocess.run(["git", "merge", args.branch + "/" + args.branch]).check_returncode()
-    subprocess.run(["git", "remote", "rm", args.branch]).check_returncode()
-    subprocess.run(["git", "remote", "-v"]).check_returncode()
+        subprocess.run(['git', 'merge', args.branch + '/' + args.branch]).check_returncode()
+    subprocess.run(['git', 'remote', 'rm', args.branch]).check_returncode()
+    subprocess.run(['git', 'remote', '-v']).check_returncode()
 
 
-if __name__ == "__main__":
+if __name__ == '__main__':
     main()

@@ -22,8 +22,8 @@ class HqpornerIE(InfoExtractor):
             'ext': 'mp4',
             'age_limit': 18,
             'duration': 2434.0,
-            'tags': 'count:13'
-        }
+            'tags': 'count:13',
+        },
     }]
 
     def _real_extract(self, url):
@@ -59,5 +59,5 @@ class HqpornerIE(InfoExtractor):
             'age_limit': 18,
             'duration': parse_duration(get_element_by_class('fa-clock-o', webpage)),
             'tags': [mobj.group(1)
-                     for mobj in re.finditer(r'<a[^>]+class=[\'"]tag-link click-trigger[\'"]>([^>]+)</a>', webpage)]
+                     for mobj in re.finditer(r'<a[^>]+class=[\'"]tag-link click-trigger[\'"]>([^>]+)</a>', webpage)],
         }

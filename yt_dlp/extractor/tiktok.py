@@ -1187,9 +1187,9 @@ class TikTokPlaylistIE(TikTokCollectionIE):
         'url': 'https://www.tiktok.com/@skanteryt/playlist/Wifey%F0%9F%92%95-7372469466678053678',
         'info_dict': {
             'id': '7372469466678053678',
-            'title': 'Wifey💕'
+            'title': 'Wifey💕',
         },
-        'playlist_count': 6
+        'playlist_count': 6,
     }]
     _API_BASE_URL = 'https://www.tiktok.com/api/mix/item_list/'
 

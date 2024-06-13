@@ -50,9 +50,9 @@ class AMVNewsIE(InfoExtractor):
                     'width': 3840,
                     'height': 2160,
                     'fps': 23.98,
-                }
+                },
             ],
-        }
+        },
     }]
 
     def _real_extract(self, html_url):

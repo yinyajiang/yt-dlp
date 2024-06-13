@@ -48,14 +48,14 @@ class LaracastsIE(InfoExtractor):
             'ext': 'mp4',
             'duration': 519,
             'thumbnail': 'https://i.vimeocdn.com/video/1812897371-64aac3913bc92e99c5a56ff58fa0d4894993ba04bd2e6703d3f2295e998d5548-d_1280',
-        }
+        },
     }]
 
     def extract_vimeo_id(self, url):
         mobj = self._match_valid_url(url)
 
         series, episode_number = mobj.group('series', 'episode_number')
-        display_id = '%s/%s' % (series, episode_number)
+        display_id = f'{series}/{episode_number}'
 
         webpage = self._download_webpage(url, display_id)
         app_element = get_element_html_by_id('app', webpage)

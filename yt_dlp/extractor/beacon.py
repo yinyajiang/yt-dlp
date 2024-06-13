@@ -20,7 +20,7 @@ class BeaconTvIE(InfoExtractor):
             'thumbnail': 'https://imagedelivery.net/_18WuG-hYMyVquF6KgU_xQ/critrole-beacon-staging-backend/beacon_trailer_thumbnail_beacon_website-5-600x600.png/format=auto',
             'title': 'Your home for Critical Role!',
             'timestamp': 1715227200,
-        }
+        },
     }]
 
     def _real_extract(self, url):

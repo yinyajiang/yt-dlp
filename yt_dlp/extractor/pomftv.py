@@ -33,7 +33,7 @@ class PomfTVLiveIE(InfoExtractor):
             'ext': 'm3u8',
             'channel_follower_count': int,
         },
-        'skip': 'livestream not always online'
+        'skip': 'livestream not always online',
     }]
 
     def _real_extract(self, url):

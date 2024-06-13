@@ -143,7 +143,7 @@ class DailyWireShowIE(DailyWireBaseIE):
                 'timestamp': 1709704832,
                 'thumbnail': 'https://daily-wire-production.imgix.net/episodes/cltf80tk79fxi0942c7h394b5/cltf80tk79fxi0942c7h394b5-1709694601671.png',
                 'series': 'What We Saw',
-            }}]
+            }}],
     }]
 
     def _real_extract(self, url):

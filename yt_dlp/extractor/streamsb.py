@@ -17,7 +17,7 @@ def generate_random_string(length):
 
 class StreamsbIE(InfoExtractor):
     _DOMAINS = ('viewsb.com', )
-    _VALID_URL = r'https://(?P<domain>%s)/(?P<id>.+)' % '|'.join(_DOMAINS)
+    _VALID_URL = r'https://(?P<domain>{})/(?P<id>.+)'.format('|'.join(_DOMAINS))
     # _TEST = {
     #     'url': 'https://viewsb.com/dxfvlu4qanjx',
     #     'md5': '488d111a63415369bf90ea83adc8a325',
@@ -42,7 +42,7 @@ class StreamsbIE(InfoExtractor):
 
         length = 12
         req = '||'.join((generate_random_string(length), video_code, generate_random_string(length), 'streamsb'))
-        ereq = 'https://{0}/sources{1}/{2}'.format(domain, app_version, to_ascii_hex(req))
+        ereq = f'https://{domain}/sources{app_version}/{to_ascii_hex(req)}'
 
         video_data = self._download_webpage(ereq, video_id, headers={
             'Referer': iframe_url,

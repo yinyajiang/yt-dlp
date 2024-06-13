@@ -53,7 +53,7 @@ class InstagramBaseIE(InfoExtractor):
     }
 
     def _has_session_id(self):
-        return self._get_cookies("https://www.instagram.com/").get('sessionid')
+        return self._get_cookies('https://www.instagram.com/').get('sessionid')
 
     def _perform_login(self, username, password):
         if self._IS_LOGGED_IN:
@@ -143,7 +143,7 @@ class InstagramBaseIE(InfoExtractor):
             }
 
     def _extract_product_media(self, product_media):
-        media_type = product_media.get("media_type", 0)
+        media_type = product_media.get('media_type', 0)
         if media_type == 8:
             return {
                 '_media_type': 'CAROUSEL',
@@ -171,7 +171,7 @@ class InstagramBaseIE(InfoExtractor):
         if media_type == 1:
             media_type = 'PHOTO'
             formats.extend([{
-                'format_id': 'photo-' + str(item.get('width', '')) + "-" + str(item.get('height', '')),
+                'format_id': 'photo-' + str(item.get('width', '')) + '-' + str(item.get('height', '')),
                 'url': item.get('url'),
                 'width': item.get('width'),
                 'height': item.get('height'),
@@ -185,7 +185,7 @@ class InstagramBaseIE(InfoExtractor):
         thumbnails = [{
             'url': thumbnail.get('url'),
             'width': thumbnail.get('width'),
-            'height': thumbnail.get('height')
+            'height': thumbnail.get('height'),
         } for thumbnail in images_list or []]
 
         return {
@@ -193,7 +193,7 @@ class InstagramBaseIE(InfoExtractor):
             'duration': float_or_none(product_media.get('video_duration')),
             'formats': formats,
             'thumbnails': thumbnails,
-            '_media_type': media_type
+            '_media_type': media_type,
         }
 
     def _extract_product(self, product_info, webpage_is_post=False):
@@ -218,16 +218,16 @@ class InstagramBaseIE(InfoExtractor):
         }
 
         if webpage_is_post and product_info.get('code'):
-            info_dict["webpage_url"] = f"https://www.instagram.com/p/{product_info.get('code')}/"
+            info_dict['webpage_url'] = f"https://www.instagram.com/p/{product_info.get('code')}/"
 
-        timestr = strftime_or_none(info_dict.get('timestamp'), "%Y-%m-%d")
+        timestr = strftime_or_none(info_dict.get('timestamp'), '%Y-%m-%d')
         title = product_info.get('title') or (f'Post by {user_info.get("username")} {timestr}' if timestr else f'Post by {user_info.get("username")}')
         info_dict['title'] = title
 
         carousel_media = product_info.get('carousel_media')
         if carousel_media:
             entries = [{**info_dict, **self._extract_product_media(product_media)} for product_media in carousel_media]
-            result = self.playlist_result(entries, info_dict["id"], **info_dict)
+            result = self.playlist_result(entries, info_dict['id'], **info_dict)
             result['_playlist_media_type'] = 'CAROUSEL'
             result['extractor'] = self.IE_NAME
             result['extractor_key'] = self.ie_key()
@@ -726,7 +726,7 @@ class InstagramUserIE(InstagramPlaylistBaseIE):
                 'action_info': {
                     'action': action,
                     'count': traverse_obj(userdata, ('user', 'edge_owner_to_timeline_media', 'count'), expected_type=int),
-                }
+                },
             }
 
         items = []

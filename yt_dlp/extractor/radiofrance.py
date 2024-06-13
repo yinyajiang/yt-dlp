@@ -271,7 +271,7 @@ class RadioFrancePlaylistBaseIE(RadioFranceBaseIE):
         raise NotImplementedError('This method must be implemented by subclasses')
 
     def _generate_playlist_entries(self, station, content_id, content_response):
-        for page_num in itertools.count(2):
+        for _page_num in itertools.count(2):
             for entry in content_response['items']:
                 yield self.url_result(
                     f'https://www.radiofrance.fr/{entry["path"]}', url_transparent=True, **traverse_obj(entry, {
@@ -370,7 +370,7 @@ class RadioFrancePodcastIE(RadioFrancePlaylistBaseIE):
         url = 'https://www.radiofrance.fr/' + station + '/podcasts/' + podcast_id + '?p=' + str(cursor)
         webpage = self._download_webpage(url, podcast_id, note=f'Downloading {podcast_id} page {cursor}')
 
-        resp = dict()
+        resp = {}
 
         # _search_json cannot parse the data as it contains javascript
         # Therefore, parse the episodes objects array separately
@@ -421,7 +421,7 @@ class RadioFranceProfileIE(RadioFrancePlaylistBaseIE):
         url = 'https://www.radiofrance.fr/personnes/' + profile_id + '?p=' + str(cursor)
         webpage = self._download_webpage(url, profile_id, note=f'Downloading {profile_id} page {cursor}')
 
-        resp = dict()
+        resp = {}
 
         # On profile pages, the data is stored in a javascript array in the final <script>
         # Each episode is stored as
@@ -450,7 +450,7 @@ class RadioFranceProfileIE(RadioFrancePlaylistBaseIE):
                                              transform_source=js_to_json)
         # If the image data is stored separately rather than in the main content area
         if resp['metadata']['visual'] and isinstance(resp['metadata']['visual'], str):
-            imagedata = dict()
+            imagedata = {}
             imagedata['src'] = self._og_search_thumbnail(webpage)
             resp['metadata']['visual'] = imagedata
 

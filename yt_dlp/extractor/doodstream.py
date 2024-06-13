@@ -56,7 +56,7 @@ class DoodStreamIE(InfoExtractor):
 
         headers = {
             'User-Agent': 'Mozilla/5.0 (Windows NT 6.1; WOW64; rv:53.0) Gecko/20100101 Firefox/66.0',
-            'referer': url
+            'referer': url,
         }
 
         pass_md5 = self._html_search_regex(r'(/pass_md5.*?)\'', webpage, 'pass_md5')

@@ -12,7 +12,7 @@ class FYPTTIE(InfoExtractor):
             'id': '203',
             'ext': 'mp4',
             'title': 'Gorgeous, naughty blonde with beautiful curves shows her naked boobies on NSFW TikTok',
-            'age_limit': 18
+            'age_limit': 18,
         },
     }, {
         'url': 'https://fyptt.to/10382/beautiful-livestream-tits-and-nipples-slip-from-girls-who-loves-talking-with-their-viewers/',
@@ -52,5 +52,5 @@ class FYPTTIE(InfoExtractor):
             'title': title,
             'formats': formats,
             'age_limit': 18,
-            'http_headers': http_headers
+            'http_headers': http_headers,
         }

@@ -1,11 +1,8 @@
+import base64
 import json
+import urllib
 
 from .common import InfoExtractor
-from ..compat import (
-    compat_b64decode,
-    compat_str,
-    compat_urlparse,
-)
 from ..utils import (
     ExtractorError,
     extract_attributes,
@@ -40,9 +37,9 @@ class EinthusanIE(InfoExtractor):
 
     # reversed from jsoncrypto.prototype.decrypt() in einthusan-PGMovieWatcher.js
     def _decrypt(self, encrypted_data, video_id):
-        return self._parse_json(compat_b64decode((
-            encrypted_data[:10] + encrypted_data[-1] + encrypted_data[12:-1]
-        )).decode('utf-8'), video_id)
+        return self._parse_json(base64.b64decode(
+            encrypted_data[:10] + encrypted_data[-1] + encrypted_data[12:-1],
+        ).decode('utf-8'), video_id)
 
     def _real_extract(self, url):
         mobj = self._match_valid_url(url)
@@ -59,19 +56,19 @@ class EinthusanIE(InfoExtractor):
         page_id = self._html_search_regex(
             '<html[^>]+data-pageid="([^"]+)"', webpage, 'page ID')
         video_data = self._download_json(
-            'https://%s/ajax/movie/watch/%s/' % (host, video_id), video_id,
+            f'https://{host}/ajax/movie/watch/{video_id}/', video_id,
             data=urlencode_postdata({
                 'xEvent': 'UIVideoPlayer.PingOutcome',
                 'xJson': json.dumps({
                     'EJOutcomes': player_params['data-ejpingables'],
-                    'NativeHLS': False
+                    'NativeHLS': False,
                 }),
                 'arcVersion': 3,
                 'appVersion': 59,
                 'gorilla.csrf.Token': page_id,
             }))['Data']
 
-        if isinstance(video_data, compat_str) and video_data.startswith('/ratelimited/'):
+        if isinstance(video_data, str) and video_data.startswith('/ratelimited/'):
             raise ExtractorError(
                 'Download rate reached. Please try again later.', expected=True)
 
@@ -95,7 +92,7 @@ class EinthusanIE(InfoExtractor):
             r'''<img[^>]+src=(["'])(?P<url>(?!\1).+?/moviecovers/(?!\1).+?)\1''',
             webpage, 'thumbnail url', fatal=False, group='url')
         if thumbnail is not None:
-            thumbnail = compat_urlparse.urljoin(url, thumbnail)
+            thumbnail = urllib.parse.urljoin(url, thumbnail)
 
         return {
             'id': video_id,

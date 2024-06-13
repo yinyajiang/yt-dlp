@@ -1945,8 +1945,8 @@ class YoutubeDL:
             **info,
             'playlist_index': 0,
             '__last_playlist_index': max(ie_result.get('requested_entries') or (0, 0)),
-            'extractor': ie_result.get('extractor') or "",
-            'extractor_key': ie_result.get('extractor_key') or "",
+            'extractor': ie_result.get('extractor') or '',
+            'extractor_key': ie_result.get('extractor_key') or '',
         }
 
     def __process_playlist(self, ie_result, download):
@@ -3339,7 +3339,7 @@ class YoutubeDL:
         replace_info_dict(new_info)
 
         skip_media_type = self.params.get('skip_download_media_type') or []
-        media_type = info_dict.get("_media_type", "-")
+        media_type = info_dict.get('_media_type', '-')
         if self.params.get('skip_download') or media_type in skip_media_type:
             info_dict['filepath'] = temp_filename
             info_dict['__finaldir'] = os.path.dirname(os.path.abspath(encodeFilename(full_filename)))
@@ -3690,7 +3690,7 @@ class YoutubeDL:
         except PostProcessingError as e:
             # Must be True and not 'only_download'
             if self.params.get('ignoreerrors') is True or self.params.get('ignore_postproc_errors') is True:
-                self.report_warning('Postprocessing: %s' % str(e))
+                self.report_warning(f'Postprocessing: {e!s}')
                 return infodict
             raise
 

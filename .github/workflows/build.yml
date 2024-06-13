@@ -310,7 +310,7 @@ jobs:
           APPLE_CERTIFICATE_NAME: ${{ secrets.APPLE_CERTIFICATE_NAME }}
         if: env.APPLE_CERTIFICATE_NAME != ''
         run: |
-          python3 -m bundle.pyinstaller --target-architecture universal2 --onedir -n yt-dlp --codesign-identity "${{ secrets.APPLE_CERTIFICATE_NAME }}"
+          python3 -m bundle.pyinstaller --target-architecture universal2 --onedir -n yt-dlp --codesign-identity "${{ secrets.APPLE_CERTIFICATE_NAME }}" --deep
           codesign -f -s "${{ secrets.APPLE_CERTIFICATE_NAME }}" "./dist/yt-dlp/_internal/librtmp.1.dylib"
           codesign -f -s "${{ secrets.APPLE_CERTIFICATE_NAME }}" "./dist/yt-dlp/_internal/libzstd.1.5.5.dylib"
 

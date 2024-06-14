@@ -78,7 +78,7 @@ test = [
     "pytest~=8.1",
 ]
 pyinstaller = [
-    "pyinstaller>=6.8.0",  # for compat with setuptools>=70
+    "pyinstaller>=6.7.0",  # for compat with setuptools>=70
 ]
 py2exe = [
     "py2exe>=0.12",

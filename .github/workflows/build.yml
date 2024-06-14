@@ -352,9 +352,9 @@ jobs:
       - name: Verify --update-to
         if: vars.UPDATE_TO_VERIFICATION
         run: |
-          chmod +x ./dist/yt-dlp_macos
-          cp ./dist/yt-dlp_macos ./dist/yt-dlp_macos_downgraded
-          version="$(./dist/yt-dlp_macos --version)"
+          chmod +x ./dist/yt-dlp
+          cp ./dist/yt-dlp ./dist/yt-dlp_macos_downgraded
+          version="$(./dist/yt-dlp --version)"
           ./dist/yt-dlp_macos_downgraded -v --update-to yt-dlp/yt-dlp@2023.03.04
           downgraded_version="$(./dist/yt-dlp_macos_downgraded --version)"
           [[ "$version" != "$downgraded_version" ]]

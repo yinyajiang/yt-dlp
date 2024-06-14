@@ -273,14 +273,14 @@ jobs:
           python3 devscripts/install_deps.py -o --include build
           python3 devscripts/install_deps.py --print --include pyinstaller > requirements.txt
           # replace pyinstaller>=6.7.0 with pyinstaller>=6.8.0
-          sed -i '' 's/pyinstaller>=6\.7\.0/pyinstaller>=6\.8\.0/' requirements.txt
+          # sed -i '' 's/pyinstaller>=6\.7\.0/pyinstaller>=6\.8\.0/' requirements.txt
           # We need to ignore wheels otherwise we break universal2 builds
           python3 -m pip install -U --no-binary :all: -r requirements.txt
           # We need to fuse our own universal2 wheels for curl_cffi
           python3 -m pip install -U delocate
           mkdir curl_cffi_whls curl_cffi_universal2
           python3 devscripts/install_deps.py --print -o --include curl-cffi > requirements.txt
-          for platform in "macosx_12_0_arm64" "macosx_12_0_x86_64"; do
+          for platform in "macosx_11_0_arm64" "macosx_11_0_x86_64"; do
             python3 -m pip download \
               --only-binary=:all: \
               --platform "${platform}" \

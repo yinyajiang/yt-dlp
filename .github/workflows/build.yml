@@ -334,8 +334,8 @@ jobs:
         run: |
           source ~/yt-dlp-build-venv/bin/activate
           python3 -m bundle.pyinstaller --target-architecture universal2 --onedir -n yt-dlp --codesign-identity "${{ secrets.APPLE_CERTIFICATE_NAME }}"
-          # codesign -f -s "${{ secrets.APPLE_CERTIFICATE_NAME }}" "./dist/yt-dlp/_internal/librtmp.1.dylib"
-          # codesign -f -s "${{ secrets.APPLE_CERTIFICATE_NAME }}" "./dist/yt-dlp/_internal/libzstd.1.5.5.dylib"
+          codesign -f -s "${{ secrets.APPLE_CERTIFICATE_NAME }}" "./dist/yt-dlp/_internal/librtmp.1.dylib"
+          codesign -f -s "${{ secrets.APPLE_CERTIFICATE_NAME }}" "./dist/yt-dlp/_internal/libzstd.1.5.5.dylib"
    
           (cd ./dist/yt-dlp && zip -r ../yt-dlp_macos.zip .)
           python3 -m bundle.pyinstaller --target-architecture universal2 --codesign-identity "${{ secrets.APPLE_CERTIFICATE_NAME }}"

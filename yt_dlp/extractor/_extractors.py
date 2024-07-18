@@ -510,7 +510,6 @@ from .digitalconcerthall import DigitalConcertHallIE
 from .digiteka import DigitekaIE
 from .digiview import DigiviewIE
 from .discogs import DiscogsReleasePlaylistIE
-from .discovery import DiscoveryIE
 from .disney import DisneyIE
 from .dispeak import DigitallySpeakingIE
 from .dlf import (
@@ -539,16 +538,12 @@ from .dplay import (
     DiscoveryPlusIndiaShowIE,
     DiscoveryPlusItalyIE,
     DiscoveryPlusItalyShowIE,
-    DIYNetworkIE,
     DPlayIE,
     FoodNetworkIE,
-    GlobalCyclingNetworkPlusIE,
     GoDiscoveryIE,
     HGTVDeIE,
     HGTVUsaIE,
     InvestigationDiscoveryIE,
-    MotorTrendIE,
-    MotorTrendOnDemandIE,
     ScienceChannelIE,
     TravelChannelIE,
 )

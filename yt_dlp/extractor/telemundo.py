@@ -1,50 +1,55 @@
 from .common import InfoExtractor
 from ..networking import HEADRequest
-from ..utils import try_get, unified_timestamp
+from ..utils import determine_ext, try_get
 
 
 class TelemundoIE(InfoExtractor):
-    _WORKING = False
-    _VALID_URL = r'https?:\/\/(?:www\.)?telemundo\.com\/.+?video\/[^\/]+(?P<id>tmvo\d{7})'
-    _TESTS = [{
-        'url': 'https://www.telemundo.com/noticias/noticias-telemundo-en-la-noche/empleo/video/esta-aplicacion-gratuita-esta-ayudando-los-latinos-encontrar-trabajo-en-estados-unidos-tmvo9829325',
-        'info_dict': {
-            'id': 'tmvo9829325',
-            'timestamp': 1621396800,
-            'title': 'Esta aplicación gratuita está ayudando a los latinos a encontrar trabajo en Estados Unidos',
-            'uploader': 'Telemundo',
-            'uploader_id': 'NBCU_Telemundo',
-            'ext': 'mp4',
-            'upload_date': '20210519',
-        },
-        'params': {
-            'skip_download': True,
-        },
-    }, {
-        'url': 'https://www.telemundo.com/shows/al-rojo-vivo/empleo/video/personajes-de-times-square-piden-que-la-ciudad-de-nueva-york-los-deje-volver-trabajar-tmvo9816272',
-        'only_matching': True,
-    }]
+    _VALID_URL = r'https?:\/\/(?:www\.)?telemundo\.com\/.+(?P<id>\d{5,})'
+    _TESTS = []
 
     def _real_extract(self, url):
         video_id = self._match_id(url)
         webpage = self._download_webpage(url, video_id)
         metadata = self._search_nextjs_data(webpage, video_id)
-        redirect_url = try_get(
-            metadata,
-            lambda x: x['props']['initialState']['video']['associatedPlaylists'][0]['videos'][0]['videoAssets'][0]['publicUrl'])
 
-        m3u8_url = self._request_webpage(HEADRequest(
-            redirect_url + '?format=redirect&manifest=m3u&format=redirect&Tracking=true&Embedded=true&formats=MPEG4'),
-            video_id, 'Processing m3u8').url
-        formats = self._extract_m3u8_formats(m3u8_url, video_id, 'mp4')
-        date = unified_timestamp(try_get(
-            metadata, lambda x: x['props']['initialState']['video']['associatedPlaylists'][0]['videos'][0]['datePublished'].split(' ', 1)[1]))
+        format_url = try_get(
+            metadata,
+            lambda x: x['props']['initialState']['article']['content'][0]['primaryMedia']['video']['videoAssets'][0]['publicUrl'])
+        if not format_url:
+            self.raise_no_formats('not found video format: x[props][initialState][article][content][0][primaryMedia][video][videoAssets][0][publicUrl]', expected=True, video_id=video_id)
+
+        ext = determine_ext(format_url, '')
+        if ext == '':
+            redirect_url = self._request_webpage(HEADRequest(format_url), video_id, 'Processing format url', fatal=False).url
+            format_url = redirect_url if redirect_url else format_url
+
+        ext = determine_ext(format_url)
+        if ext == 'm3u8':
+            formats = self._extract_m3u8_formats(
+                format_url, video_id, 'mp4', m3u8_id='hls')
+        else:
+            formats = [{
+                'url': format_url,
+                'ext': ext if ext else 'mp4',
+                'format_id': 'http',
+            }]
+
         return {
             'url': url,
             'id': video_id,
             'title': self._search_regex(r'<h1[^>]+>([^<]+)', webpage, 'title', fatal=False),
             'formats': formats,
-            'timestamp': date,
-            'uploader': 'Telemundo',
-            'uploader_id': self._search_regex(r'https?:\/\/(?:[^/]+\/){3}video\/(?P<id>[^\/]+)', m3u8_url, 'Akamai account', fatal=False),
         }
+        # redirect_url = try_get(
+        #     metadata,
+        #     lambda x: x['props']['initialState']['video']['associatedPlaylists'][0]['videos'][0]['videoAssets'][0]['publicUrl'])
+        # m3u8_url = self._request_webpage(HEADRequest(
+        #     redirect_url + '?format=redirect&manifest=m3u&format=redirect&Tracking=true&Embedded=true&formats=MPEG4'),
+        #     video_id, 'Processing m3u8').url
+        # formats = self._extract_m3u8_formats(m3u8_url, video_id, 'mp4')
+        # return {
+        #     'url': url,
+        #     'id': video_id,
+        #     'title': self._search_regex(r'<h1[^>]+>([^<]+)', webpage, 'title', fatal=False),
+        #     'formats': formats,
+        # }

@@ -2,30 +2,32 @@ from .common import InfoExtractor
 from ..utils import int_or_none, try_get
 
 
-class OlympicsReplayIE(InfoExtractor):
-    _VALID_URL = r'https?://(?:www\.)?olympics\.com(?:/tokyo-2020)?/[a-z]{2}/(?:replay|video)/(?P<id>[^/#&?]+)'
-    _TESTS = [{
-        'url': 'https://olympics.com/fr/video/men-s-109kg-group-a-weightlifting-tokyo-2020-replays',
-        'info_dict': {
-            'id': 'f6a0753c-8e6f-4b7d-a435-027054a4f8e9',
-            'ext': 'mp4',
-            'title': '+109kg (H) Groupe A - Haltérophilie | Replay de Tokyo 2020',
-            'upload_date': '20210801',
-            'timestamp': 1627783200,
-            'description': 'md5:c66af4a5bc7429dbcc43d15845ff03b3',
-            'uploader': 'International Olympic Committee',
-        },
-        'params': {
-            'skip_download': True,
-        },
-    }, {
-        'url': 'https://olympics.com/tokyo-2020/en/replay/bd242924-4b22-49a5-a846-f1d4c809250d/mens-bronze-medal-match-hun-esp',
-        'only_matching': True,
-    }]
+class OlympicsBaseIE(InfoExtractor):
+    def _nextjs_video_info_extract(self, url, url_id):
+        webpage = self._download_webpage(url, url_id)
+        title = self._html_search_meta(('title', 'og:title', 'twitter:title'), webpage)
+        nextjsData = self._search_nextjs_data(webpage, url_id)
 
-    def _real_extract(self, url):
-        video_id = self._match_id(url)
+        for item in try_get(nextjsData, lambda x: x['props']['pageProps']['page']['items']):
+            if item.get('name') == 'videoPlaylist':
+                currentVideo = try_get(item, lambda x: x['data']['currentVideo'], expected_type=dict)
+                break
+        else:
+            self._raise_extractor_error('No video found in playlist')
 
+        video_id = currentVideo.get('videoID')
+        m3u8_url = currentVideo.get('videoUrl')
+        m3u8_url = self._download_json(
+            f'https://olympics.com/tokenGenerator?url={m3u8_url}', video_id, note='Downloading m3u8 url')
+        formats, subtitles = self._extract_m3u8_formats_and_subtitles(m3u8_url, video_id, 'mp4', m3u8_id='hls')
+        return {
+            'id': video_id,
+            'title': title,
+            'formats': formats,
+            'subtitles': subtitles,
+        }
+
+    def _meta_video_info_extract(self, url, video_id):
         webpage = self._download_webpage(url, video_id)
         title = self._html_search_meta(('title', 'og:title', 'twitter:title'), webpage)
         uuid = self._html_search_meta('episode_uid', webpage)
@@ -60,3 +62,38 @@ class OlympicsReplayIE(InfoExtractor):
             'subtitles': subtitles,
             **json_ld,
         }
+
+
+class OlympicsVideosIE(OlympicsBaseIE):
+    _VALID_URL = r'https?://(?:www\.)?olympics\.com/.*?/(?:videos)/(?P<id>[^/#&?]+)'
+    _TESTS = []
+
+    def _real_extract(self, url):
+        url_id = self._match_id(url)
+        return self._nextjs_video_info_extract(url, url_id)
+
+
+class OlympicsReplayIE(OlympicsBaseIE):
+    _VALID_URL = r'https?://(?:www\.)?olympics\.com(?:/tokyo-2020)?/[a-z]{2}/(?:replay|video)/(?P<id>[^/#&?]+)'
+    _TESTS = [{
+        'url': 'https://olympics.com/fr/video/men-s-109kg-group-a-weightlifting-tokyo-2020-replays',
+        'info_dict': {
+            'id': 'f6a0753c-8e6f-4b7d-a435-027054a4f8e9',
+            'ext': 'mp4',
+            'title': '+109kg (H) Groupe A - Haltérophilie | Replay de Tokyo 2020',
+            'upload_date': '20210801',
+            'timestamp': 1627783200,
+            'description': 'md5:c66af4a5bc7429dbcc43d15845ff03b3',
+            'uploader': 'International Olympic Committee',
+        },
+        'params': {
+            'skip_download': True,
+        },
+    }, {
+        'url': 'https://olympics.com/tokyo-2020/en/replay/bd242924-4b22-49a5-a846-f1d4c809250d/mens-bronze-medal-match-hun-esp',
+        'only_matching': True,
+    }]
+
+    def _real_extract(self, url):
+        video_id = self._match_id(url)
+        return self._meta_video_info_extract(url, video_id)

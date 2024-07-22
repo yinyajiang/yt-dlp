@@ -1440,7 +1440,7 @@ from .oftv import (
     OfTVPlaylistIE,
 )
 from .oktoberfesttv import OktoberfestTVIE
-from .olympics import OlympicsReplayIE
+from .olympics import OlympicsReplayIE, OlympicsVideosIE
 from .on24 import On24IE
 from .ondemandkorea import (
     OnDemandKoreaIE,

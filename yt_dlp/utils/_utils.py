@@ -5603,3 +5603,33 @@ class _YDLLogger:
     def stderr(self, message):
         if self._ydl:
             self._ydl.to_stderr(message)
+
+
+def find_json(string, key, fatal=False):
+    if not isinstance(string, str):
+        string = json.dumps(string)
+    start_match = re.search(f'"{key}"' + r'\s*:\s*(?P<bracket>[{\[])', string)
+    if not start_match:
+        return None
+    bracketPair = ('[',']') if start_match.group('bracket') == '[' else ('{','}')
+    start_index = start_match.end() - 1
+
+    bracket_count = 1
+    end_index = start_index
+    for i in range(start_index + 1, len(string)):
+        if string[i] == bracketPair[0]:
+            bracket_count += 1
+        elif string[i] == bracketPair[1]:
+            bracket_count -= 1
+            if bracket_count == 0:
+                end_index = i
+                break
+
+    if bracket_count != 0:
+        return None
+
+    try:
+        return json.loads(string[start_index:end_index + 1])
+    except json.JSONDecodeError as e:
+        if fatal:
+            raise ExtractorError(f'Not found json with key "{key}"')

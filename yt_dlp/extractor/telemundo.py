@@ -1,6 +1,6 @@
 from .common import InfoExtractor
 from ..networking import HEADRequest
-from ..utils import determine_ext, try_get
+from ..utils import determine_ext, find_json
 
 
 class TelemundoIE(InfoExtractor):
@@ -12,11 +12,7 @@ class TelemundoIE(InfoExtractor):
         webpage = self._download_webpage(url, video_id)
         metadata = self._search_nextjs_data(webpage, video_id)
 
-        format_url = try_get(
-            metadata,
-            lambda x: x['props']['initialState']['article']['content'][0]['primaryMedia']['video']['videoAssets'][0]['publicUrl'])
-        if not format_url:
-            self.raise_no_formats('not found video format: x[props][initialState][article][content][0][primaryMedia][video][videoAssets][0][publicUrl]', expected=True, video_id=video_id)
+        format_url = find_json(metadata, 'videoAssets', fatal=True)[0]['publicUrl']
 
         ext = determine_ext(format_url, '')
         if ext == '':

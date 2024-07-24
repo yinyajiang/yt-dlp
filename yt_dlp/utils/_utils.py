@@ -5611,7 +5611,7 @@ def find_json(string, key, fatal=False):
     start_match = re.search(f'"{key}"' + r'\s*:\s*(?P<bracket>[{\[])', string)
     if not start_match:
         return None
-    bracketPair = ('[',']') if start_match.group('bracket') == '[' else ('{','}')
+    bracketPair = ('[', ']') if start_match.group('bracket') == '[' else ('{', '}')
     start_index = start_match.end() - 1
 
     bracket_count = 1
@@ -5630,6 +5630,6 @@ def find_json(string, key, fatal=False):
 
     try:
         return json.loads(string[start_index:end_index + 1])
-    except json.JSONDecodeError as e:
+    except json.JSONDecodeError:
         if fatal:
             raise ExtractorError(f'Not found json with key "{key}"')

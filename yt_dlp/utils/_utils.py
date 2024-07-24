@@ -5641,6 +5641,8 @@ def find_json_str(string, key, fatal=False):
 
 def find_json(string, key, fatal=False):
     jsonStr, _ = find_json_str(string, key, fatal=fatal)
+    if not jsonStr:
+        return None
     return json.loads(jsonStr)
 
 

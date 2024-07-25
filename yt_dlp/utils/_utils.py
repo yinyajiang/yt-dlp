@@ -5605,13 +5605,11 @@ class _YDLLogger:
             self._ydl.to_stderr(message)
 
 
-def find_json_str(string, key, fatal=False):
+def find_json_possible_str(string, key):
     if not isinstance(string, str):
         string = json.dumps(string)
     start_match = re.search(f'"{key}"' + r'\s*:\s*(?P<bracket>[{\[])', string)
     if not start_match:
-        if fatal:
-            raise ExtractorError(f'Not found json with key "{key}"')
         return None
     bracketPair = ('[', ']') if start_match.group('bracket') == '[' else ('{', '}')
     start_index = start_match.end() - 1
@@ -5628,32 +5626,41 @@ def find_json_str(string, key, fatal=False):
                 break
 
     if bracket_count != 0:
-        if fatal:
-            raise ExtractorError(f'Not found json with key "{key}"')
         return None
 
-    try:
-        return (string[start_index:end_index + 1], end_index if end_index < len(string) - 1 else -1)
-    except json.JSONDecodeError:
-        if fatal:
-            raise ExtractorError(f'Not found json with key "{key}"')
+    return (string[start_index:end_index + 1], end_index if end_index < len(string) - 1 else -1)
 
 
 def find_json(string, key, fatal=False):
-    jsonStr, _ = find_json_str(string, key, fatal=fatal)
-    if not jsonStr:
-        return None
-    return json.loads(jsonStr)
+    end_index = 0
+    while end_index != -1:
+        jsonStr, end_index = find_json_possible_str(string, key)
+        if not jsonStr:
+            if fatal:
+                raise ExtractorError(f'Unable to find JSON object with key {key}')
+            return None
+
+        try:
+            return json.loads(jsonStr)
+        except Exception:
+            pass
+        string = string[end_index + 1:]
+
+    if fatal:
+        raise ExtractorError(f'Unable to parse JSON object with key {key}')
 
 
 def find_json_all(string, key, fatal=False):
     end_index = 0
     jsonList = []
     while end_index != -1:
-        jsonStr, end_index = find_json_str(string, key, fatal=fatal and len(jsonList) == 0)
-        if jsonStr:
-            jsonList.append(json.loads(jsonStr))
-            string = string[end_index + 1:]
-        else:
+        jsonStr, end_index = find_json_possible_str(string, key)
+        if not jsonStr:
             break
+        with contextlib.suppress(Exception):
+            jsonList.append(json.loads(jsonStr))
+        string = string[end_index + 1:]
+
+    if not jsonList and fatal:
+        raise ExtractorError(f'Unable to find JSON object with key {key}')
     return jsonList

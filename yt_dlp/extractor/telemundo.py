@@ -33,7 +33,7 @@ class TelemundoIE(InfoExtractor):
         return {
             'url': url,
             'id': video_id,
-            'title': self._search_regex(r'<h1[^>]+>([^<]+)', webpage, 'title', fatal=False),
+            'title': self._html_search_meta(['name', 'og:title'], webpage, fatal=False),
             'formats': formats,
         }
         # redirect_url = try_get(

@@ -36,16 +36,3 @@ class TelemundoIE(InfoExtractor):
             'title': self._html_search_meta(['name', 'og:title'], webpage, fatal=False),
             'formats': formats,
         }
-        # redirect_url = try_get(
-        #     metadata,
-        #     lambda x: x['props']['initialState']['video']['associatedPlaylists'][0]['videos'][0]['videoAssets'][0]['publicUrl'])
-        # m3u8_url = self._request_webpage(HEADRequest(
-        #     redirect_url + '?format=redirect&manifest=m3u&format=redirect&Tracking=true&Embedded=true&formats=MPEG4'),
-        #     video_id, 'Processing m3u8').url
-        # formats = self._extract_m3u8_formats(m3u8_url, video_id, 'mp4')
-        # return {
-        #     'url': url,
-        #     'id': video_id,
-        #     'title': self._search_regex(r'<h1[^>]+>([^<]+)', webpage, 'title', fatal=False),
-        #     'formats': formats,
-        # }

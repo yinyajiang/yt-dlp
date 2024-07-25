@@ -5664,3 +5664,46 @@ def find_json_all(string, key, fatal=False):
     if not jsonList and fatal:
         raise ExtractorError(f'Unable to find JSON object with key {key}')
     return jsonList
+
+
+def find_json_all_by(string, key, filter, fatal=False):
+    jsonListAll = find_json_all(string, key, fatal=fatal)
+    jsonList = []
+    for js in jsonListAll:
+        if try_call(filter, args=[js]):
+            jsonList.append(js)
+
+    if not jsonList and fatal:
+        raise ExtractorError(f'Unable to find JSON object with key {key}')
+    return jsonList
+
+
+def find_json_by(string, key, filter, fatal=False):
+    jsonby = None
+
+    def sink(js):
+        nonlocal jsonby
+        if try_call(filter, args=[js]):
+            jsonby = js
+            return False
+        return True
+    walk_json(string, key, sink, fatal=fatal)
+    return jsonby
+
+
+def walk_json(string, key, sink, fatal=False):
+    has = False
+    end_index = 0
+    while end_index != -1:
+        jsonStr, end_index = find_json_possible_str(string, key)
+        if not jsonStr:
+            break
+        with contextlib.suppress(Exception):
+            js = json.loads(jsonStr)
+            has = True
+            if not try_call(sink, args=[js]):
+                return
+        string = string[end_index + 1:]
+
+    if not has and fatal:
+        raise ExtractorError(f'Unable to find JSON object with key {key}')

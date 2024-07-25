@@ -1,5 +1,5 @@
 from .common import InfoExtractor
-from ..utils import int_or_none, try_get
+from ..utils import find_json_by, int_or_none, try_get
 
 
 class OlympicsBaseIE(InfoExtractor):
@@ -8,12 +8,7 @@ class OlympicsBaseIE(InfoExtractor):
         title = self._html_search_meta(('title', 'og:title', 'twitter:title'), webpage)
         nextjsData = self._search_nextjs_data(webpage, url_id)
 
-        for item in try_get(nextjsData, lambda x: x['props']['pageProps']['page']['items']):
-            if item.get('name') == 'videoPlaylist':
-                currentVideo = try_get(item, lambda x: x['data']['currentVideo'], expected_type=dict)
-                break
-        else:
-            self._raise_extractor_error('No video found in playlist')
+        currentVideo = find_json_by(nextjsData, 'currentVideo', lambda c: c.get('videoUrl'), fatal=True)
 
         video_id = currentVideo.get('videoID')
         m3u8_url = currentVideo.get('videoUrl')

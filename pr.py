@@ -39,8 +39,8 @@ def main():
     subprocess.run(['git', 'remote', 'rm', args.branch]).check_returncode()
     subprocess.run(['git', 'remote', '-v']).check_returncode()
 
-    subprocess.run(['ruff', 'check', './yt-dlp', '--fix', '--unsafe-fixes']).check_returncode()
-    subprocess.run(['autopep8', '-i', './yt-dlp']).check_returncode()
+    subprocess.run(['ruff', 'check', './yt_dlp', '--fix', '--unsafe-fixes']).check_returncode()
+    subprocess.run(['autopep8', '-i', './yt_dlp']).check_returncode()
 
 
 if __name__ == '__main__':

@@ -8,9 +8,9 @@ def main():
     os.chdir(current_directory)
 
     parser = argparse.ArgumentParser(description='Command Line Parser')
-    parser.add_argument('--git', default='', help='Special Config')
-    parser.add_argument('--branch', default='', help='signature is not required')
-    parser.add_argument('--commitid', default='', help='signature is not required')
+    parser.add_argument('--git', default='', help='git url is required')
+    parser.add_argument('--branch', default='', help='git branch is required')
+    parser.add_argument('--commitid', default='', help='git commit id is optional')
     args = parser.parse_args()
     subprocess.run(['git', 'remote', '-v']).check_returncode()
     subprocess.run(['git', 'remote', 'add', args.branch, args.git]).check_returncode()

@@ -1,33 +1,40 @@
 from .common import InfoExtractor
-from ..utils import find_json_by, int_or_none, try_get
+from ..utils import int_or_none, try_get
 
 
-class OlympicsBaseIE(InfoExtractor):
-    def _nextjs_video_info_extract(self, url, url_id):
-        webpage = self._download_webpage(url, url_id)
-        title = self._html_search_meta(('title', 'og:title', 'twitter:title'), webpage)
-        nextjsData = self._search_nextjs_data(webpage, url_id)
+class OlympicsReplayIE(InfoExtractor):
+    _VALID_URL = r'https?://(?:www\.)?olympics\.com(?:/tokyo-2020)?/[a-z]{2}/(?:replay|video)/(?P<id>[^/#&?]+)'
+    _TESTS = [{
+        'url': 'https://olympics.com/fr/video/men-s-109kg-group-a-weightlifting-tokyo-2020-replays',
+        'info_dict': {
+            'id': 'f6a0753c-8e6f-4b7d-a435-027054a4f8e9',
+            'ext': 'mp4',
+            'title': '+109kg (H) Groupe A - Haltérophilie | Replay de Tokyo 2020',
+            'upload_date': '20210801',
+            'timestamp': 1627783200,
+            'description': 'md5:c66af4a5bc7429dbcc43d15845ff03b3',
+            'uploader': 'International Olympic Committee',
+        },
+        'params': {
+            'skip_download': True,
+        },
+    }, {
+        'url': 'https://olympics.com/tokyo-2020/en/replay/bd242924-4b22-49a5-a846-f1d4c809250d/mens-bronze-medal-match-hun-esp',
+        'only_matching': True,
+    }]
 
-        currentVideo = find_json_by(nextjsData, 'currentVideo', lambda c: c.get('videoUrl'), fatal=True)
+    def _real_extract(self, url):
+        video_id = self._match_id(url)
 
-        video_id = currentVideo.get('videoID')
-        m3u8_url = currentVideo.get('videoUrl')
-        m3u8_url = self._download_json(
-            f'https://olympics.com/tokenGenerator?url={m3u8_url}', video_id, note='Downloading m3u8 url')
-        formats, subtitles = self._extract_m3u8_formats_and_subtitles(m3u8_url, video_id, 'mp4', m3u8_id='hls')
-        return {
-            'id': video_id,
-            'title': title,
-            'formats': formats,
-            'subtitles': subtitles,
-        }
-
-    def _meta_video_info_extract(self, url, video_id):
         webpage = self._download_webpage(url, video_id)
+
+        if info := self._extract_from_nextjs_data(webpage, video_id):
+            return info
+
         title = self._html_search_meta(('title', 'og:title', 'twitter:title'), webpage)
-        uuid = self._html_search_meta('episode_uid', webpage)
+        video_uuid = self._html_search_meta('episode_uid', webpage)
         m3u8_url = self._html_search_meta('video_url', webpage)
-        json_ld = self._search_json_ld(webpage, uuid)
+        json_ld = self._search_json_ld(webpage, video_uuid)
         thumbnails_list = json_ld.get('image')
         if not thumbnails_list:
             thumbnails_list = self._html_search_regex(
@@ -45,12 +52,12 @@ class OlympicsBaseIE(InfoExtractor):
                 'width': width,
                 'height': int_or_none(try_get(width, lambda x: x * height_a / width_a)),
             })
-        m3u8_url = self._download_json(
-            f'https://olympics.com/tokenGenerator?url={m3u8_url}', uuid, note='Downloading m3u8 url')
-        formats, subtitles = self._extract_m3u8_formats_and_subtitles(m3u8_url, uuid, 'mp4', m3u8_id='hls')
+
+        formats, subtitles = self._extract_m3u8_formats_and_subtitles(
+            self._tokenize_url(m3u8_url, video_uuid), video_uuid, 'mp4', m3u8_id='hls')
 
         return {
-            'id': uuid,
+            'id': video_uuid,
             'title': title,
             'thumbnails': thumbnails,
             'formats': formats,

@@ -1445,7 +1445,7 @@ from .oftv import (
     OfTVPlaylistIE,
 )
 from .oktoberfesttv import OktoberfestTVIE
-from .olympics import OlympicsReplayIE, OlympicsVideosIE
+from .olympics import OlympicsReplayIE
 from .on24 import On24IE
 from .ondemandkorea import (
     OnDemandKoreaIE,

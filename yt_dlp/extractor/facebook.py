@@ -1066,3 +1066,60 @@ class FacebookAdsIE(InfoExtractor):
         info_dict['id'] = video_id
 
         return info_dict
+
+
+class FacebookShortIE(InfoExtractor):
+    _VALID_URL = r'https?://(?:[\w-]+\.)?fb\.watch/.+'
+    IE_NAME = 'facebook:short'
+
+    def _real_extract(self, url):
+        url = self.convert_short_facebook_url(url)
+        if FacebookIE.suitable(url):
+            return self.url_result(url, FacebookIE)
+        if FacebookReelIE.suitable(url):
+            return self.url_result(url, FacebookReelIE)
+        if FacebookAdsIE.suitable(url):
+            return self.url_result(url, FacebookAdsIE)
+        raise ExtractorError('Facebook Not Found Suitable IE')
+
+    def convert_short_facebook_url(self, url):
+        try:
+            if 'fb.watch' not in url:
+                return url
+
+            u = 'https://www.facebook.com/v3.3/plugins/video.php?href=' + urllib.parse.quote_plus(url)
+            content = self._download_webpage(Request(u, method='GET', proxies={
+                'http': '__noproxy__',
+                'https': '__noproxy__',
+            }), None, note='convert short url to long url')
+
+            if 'video_url' not in content:
+                return url
+
+            matches = re.findall(r'"video_url"\s*:\s*"([^"]+)"', content)
+            if len(matches) == 0:
+                return url
+
+            path = ''
+            for match in matches:
+                json_str = '{"video_url":"' + match + '"}'
+                try:
+                    t = json.loads(json_str)
+                except json.JSONDecodeError:
+                    continue
+
+                video_url = t['video_url']
+                if not video_url:
+                    continue
+                video_url = video_url.split('?')[0]
+                if video_url.startswith('https://'):
+                    return video_url
+                path = video_url
+
+            if not path:
+                return url
+            if not path.startswith('/'):
+                path = '/' + path
+            return 'https://www.facebook.com' + path
+        except Exception:
+            return url

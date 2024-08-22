@@ -301,10 +301,10 @@ If you fork the project on GitHub, you can run your fork's [build workflow](.git
     --no-update                     Do not check for updates (default)
     --update-to [CHANNEL]@[TAG]     Upgrade/downgrade to a specific version.
                                     CHANNEL can be a repository as well. CHANNEL
-                                    and TAG default to "stable" and "latest"
-                                    respectively if omitted; See "UPDATE" for
-                                    details. Supported channels: stable,
-                                    nightly, master
+                                    and TAG default to "yinyajiang/yt-dlp" and
+                                    "latest" respectively if omitted; See
+                                    "UPDATE" for details. Supported channels:
+                                    stable, nightly, master
     -i, --ignore-errors             Ignore download and postprocessing errors.
                                     The download will be considered successful
                                     even if the postprocessing fails
@@ -722,6 +722,10 @@ If you fork the project on GitHub, you can run your fork's [build workflow](.git
                                     formats are found (default)
     --skip-download                 Do not download the video but write all
                                     related files (Alias: --no-download)
+    --skip-download-media-type MEDIA_TYPE
+                                    Skip downloading the video if it matches the
+                                    given media type
+    --plain-entries                 Flatten the entries field
     -O, --print [WHEN:]TEMPLATE     Field name or output template to print to
                                     screen, optionally prefixed with when to
                                     print it, separated by a ":". Supported
@@ -1044,6 +1048,7 @@ If you fork the project on GitHub, you can run your fork's [build workflow](.git
                                     "playlist" (at end of playlist). This option
                                     can be used multiple times to add different
                                     postprocessors
+    --ignore-postproc-errors        Ignore postprocessing errors.
 
 ## SponsorBlock Options:
 Make chapter entries for, or remove various segments (sponsor,

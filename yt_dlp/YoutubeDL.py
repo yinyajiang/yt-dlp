@@ -3045,7 +3045,7 @@ class YoutubeDL:
         # We update the info dict with the selected best quality format (backwards compatibility)
         info_dict.update(best_format)
 
-        if 'formats' not in info_dict:
+        if 'formats' not in info_dict and best_format:
             info_dict['formats'] = copy.deepcopy(best_format)
 
         return info_dict

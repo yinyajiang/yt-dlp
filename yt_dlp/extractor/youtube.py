@@ -3951,10 +3951,10 @@ class YoutubeIE(YoutubeBaseInfoExtractor):
             except ExtractorError as e:
                 self.report_warning(e)
                 continue
-                
+
             if pr:
                 pr[STREAMING_DATA_CLIENT_NAME] = client
-            
+
             if pr_id := self._invalid_player_response(pr, video_id):
                 skipped_clients[client] = pr_id
             elif pr:
@@ -4354,14 +4354,14 @@ class YoutubeIE(YoutubeBaseInfoExtractor):
         player_responses, player_url = self._extract_player_responses(
             self._get_requested_clients(url, smuggled_data),
             video_id, webpage, master_ytcfg, smuggled_data)
-        
+
         self._report_invalid_clients(player_responses)
 
         return webpage, master_ytcfg, player_responses, player_url
 
     def _report_invalid_clients(self, player_responses):
         invalid_client = []
-        valid_client=[]
+        valid_client = []
         if player_responses and isinstance(player_responses, list):
             for resp in player_responses:
                 if not resp or 'playabilityStatus' not in resp:
@@ -4371,7 +4371,7 @@ class YoutubeIE(YoutubeBaseInfoExtractor):
                     continue
                 if 'status' not in status:
                     continue
-                client = resp[STREAMING_DATA_CLIENT_NAME] if STREAMING_DATA_CLIENT_NAME in resp else ''
+                client = resp.get(STREAMING_DATA_CLIENT_NAME, '')
                 if not client:
                     continue
                 if status['status'] != 'OK':
@@ -4417,7 +4417,7 @@ class YoutubeIE(YoutubeBaseInfoExtractor):
 
         playability_statuses = traverse_obj(
             player_responses, (..., 'playabilityStatus'), expected_type=dict)
-        
+
         trailer_video_id = get_first(
             playability_statuses,
             ('errorScreen', 'playerLegacyDesktopYpcTrailerRenderer', 'trailerVideoId'),

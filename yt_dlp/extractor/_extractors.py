@@ -807,7 +807,6 @@ from .hidive import HiDiveIE
 from .historicfilms import HistoricFilmsIE
 from .hitrecord import HitRecordIE
 from .hketv import HKETVIE
-from .hockeycanada import HockeyCanadaIE
 from .hollywoodreporter import (
     HollywoodReporterIE,
     HollywoodReporterPlaylistIE,

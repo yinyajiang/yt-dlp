@@ -81,7 +81,7 @@ INNERTUBE_CLIENTS = {
             },
         },
         'INNERTUBE_CONTEXT_CLIENT_NAME': 1,
-        'REQUIRE_PO_TOKEN': True,
+        'REQUIRE_PO_TOKEN': False,
     },
     # Safari UA returns pre-merged video+audio 144p/240p/360p/720p/1080p HLS formats
     'web_safari': {
@@ -93,7 +93,7 @@ INNERTUBE_CLIENTS = {
             },
         },
         'INNERTUBE_CONTEXT_CLIENT_NAME': 1,
-        'REQUIRE_PO_TOKEN': True,
+        'REQUIRE_PO_TOKEN': False,
     },
     'web_embedded': {
         'INNERTUBE_CONTEXT': {
@@ -136,7 +136,7 @@ INNERTUBE_CLIENTS = {
         },
         'INNERTUBE_CONTEXT_CLIENT_NAME': 3,
         'REQUIRE_JS_PLAYER': False,
-        'REQUIRE_PO_TOKEN': True,
+        'REQUIRE_PO_TOKEN': False,
     },
     'android_music': {
         'INNERTUBE_CONTEXT': {
@@ -151,7 +151,7 @@ INNERTUBE_CLIENTS = {
         },
         'INNERTUBE_CONTEXT_CLIENT_NAME': 21,
         'REQUIRE_JS_PLAYER': False,
-        'REQUIRE_PO_TOKEN': True,
+        'REQUIRE_PO_TOKEN': False,
     },
     'android_creator': {
         'INNERTUBE_CONTEXT': {
@@ -166,7 +166,7 @@ INNERTUBE_CLIENTS = {
         },
         'INNERTUBE_CONTEXT_CLIENT_NAME': 14,
         'REQUIRE_JS_PLAYER': False,
-        'REQUIRE_PO_TOKEN': True,
+        'REQUIRE_PO_TOKEN': False,
     },
     # YouTube Kids videos aren't returned on this client for some reason
     'android_vr': {
@@ -3732,7 +3732,7 @@ class YoutubeIE(YoutubeBaseInfoExtractor):
                 self.report_warning('Invalid po_token configuration format. Expected "client+po_token"')
                 continue
             po_token_client, po_token = token_str.split('+')
-            if not client or po_token_client == client:
+            if not client or po_token_client == client or po_token_client == 'all':
                 return po_token
 
     def fetch_po_token(self, client='web', visitor_data=None, data_sync_id=None, player_url=None, **kwargs):
@@ -3951,7 +3951,10 @@ class YoutubeIE(YoutubeBaseInfoExtractor):
             except ExtractorError as e:
                 self.report_warning(e)
                 continue
-
+                
+            if pr:
+                pr[STREAMING_DATA_CLIENT_NAME] = client
+            
             if pr_id := self._invalid_player_response(pr, video_id):
                 skipped_clients[client] = pr_id
             elif pr:
@@ -4351,8 +4354,34 @@ class YoutubeIE(YoutubeBaseInfoExtractor):
         player_responses, player_url = self._extract_player_responses(
             self._get_requested_clients(url, smuggled_data),
             video_id, webpage, master_ytcfg, smuggled_data)
+        
+        self._report_invalid_clients(player_responses)
 
         return webpage, master_ytcfg, player_responses, player_url
+
+    def _report_invalid_clients(self, player_responses):
+        invalid_client = []
+        valid_client=[]
+        if player_responses and isinstance(player_responses, list):
+            for resp in player_responses:
+                if not resp or 'playabilityStatus' not in resp:
+                    continue
+                status = resp['playabilityStatus']
+                if not status or not isinstance(status, dict):
+                    continue
+                if 'status' not in status:
+                    continue
+                client = resp[STREAMING_DATA_CLIENT_NAME] if STREAMING_DATA_CLIENT_NAME in resp else ''
+                if not client:
+                    continue
+                if status['status'] != 'OK':
+                    invalid_client.append(client)
+                else:
+                    valid_client.append(client)
+        if invalid_client:
+            self.report_warning(f'Invalid youtube clients: {", ".join(invalid_client)}')
+        if valid_client:
+            self.to_screen(f'Valid youtube clients: {", ".join(valid_client)}')
 
     def _list_formats(self, video_id, microformats, video_details, player_responses, player_url, duration=None):
         live_broadcast_details = traverse_obj(microformats, (..., 'liveBroadcastDetails'))
@@ -4388,7 +4417,7 @@ class YoutubeIE(YoutubeBaseInfoExtractor):
 
         playability_statuses = traverse_obj(
             player_responses, (..., 'playabilityStatus'), expected_type=dict)
-
+        
         trailer_video_id = get_first(
             playability_statuses,
             ('errorScreen', 'playerLegacyDesktopYpcTrailerRenderer', 'trailerVideoId'),

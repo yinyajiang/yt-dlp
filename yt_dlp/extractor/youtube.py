@@ -81,7 +81,7 @@ INNERTUBE_CLIENTS = {
             },
         },
         'INNERTUBE_CONTEXT_CLIENT_NAME': 1,
-        'REQUIRE_PO_TOKEN': False,
+        'REQUIRE_PO_TOKEN': True,
     },
     # Safari UA returns pre-merged video+audio 144p/240p/360p/720p/1080p HLS formats
     'web_safari': {
@@ -93,7 +93,7 @@ INNERTUBE_CLIENTS = {
             },
         },
         'INNERTUBE_CONTEXT_CLIENT_NAME': 1,
-        'REQUIRE_PO_TOKEN': False,
+        'REQUIRE_PO_TOKEN': True,
     },
     'web_embedded': {
         'INNERTUBE_CONTEXT': {
@@ -136,7 +136,7 @@ INNERTUBE_CLIENTS = {
         },
         'INNERTUBE_CONTEXT_CLIENT_NAME': 3,
         'REQUIRE_JS_PLAYER': False,
-        'REQUIRE_PO_TOKEN': False,
+        'REQUIRE_PO_TOKEN': True,
     },
     'android_music': {
         'INNERTUBE_CONTEXT': {
@@ -151,7 +151,7 @@ INNERTUBE_CLIENTS = {
         },
         'INNERTUBE_CONTEXT_CLIENT_NAME': 21,
         'REQUIRE_JS_PLAYER': False,
-        'REQUIRE_PO_TOKEN': False,
+        'REQUIRE_PO_TOKEN': True,
     },
     'android_creator': {
         'INNERTUBE_CONTEXT': {
@@ -166,7 +166,7 @@ INNERTUBE_CLIENTS = {
         },
         'INNERTUBE_CONTEXT_CLIENT_NAME': 14,
         'REQUIRE_JS_PLAYER': False,
-        'REQUIRE_PO_TOKEN': False,
+        'REQUIRE_PO_TOKEN': True,
     },
     # YouTube Kids videos aren't returned on this client for some reason
     'android_vr': {
@@ -701,9 +701,9 @@ class YoutubeBaseInfoExtractor(InfoExtractor):
             return
         # datasyncid is of the form "channel_syncid||user_syncid" for secondary channel
         # and just "user_syncid||" for primary channel. We only want the channel_syncid
-        session_ids = data_sync_id.split('||')
-        if len(session_ids) >= 2 and session_ids[1]:
-            return session_ids[0]
+        channel_syncid, _, user_syncid = data_sync_id.partition('||')
+        if user_syncid:
+            return channel_syncid
 
     def _extract_account_syncid(self, *args):
         """
@@ -711,9 +711,7 @@ class YoutubeBaseInfoExtractor(InfoExtractor):
         @params response and/or ytcfg
         """
         # ytcfg includes channel_syncid if on secondary channel
-        delegated_sid = traverse_obj(
-            args, (..., 'DELEGATED_SESSION_ID'), expected_type=str, get_all=False)
-        if delegated_sid:
+        if delegated_sid := traverse_obj(args, (..., 'DELEGATED_SESSION_ID', {str}, any)):
             return delegated_sid
 
         data_sync_id = self._extract_data_sync_id(*args)
@@ -729,10 +727,7 @@ class YoutubeBaseInfoExtractor(InfoExtractor):
             return data_sync_id
 
         return traverse_obj(
-            args, (
-                ..., ('DATASYNC_ID', (
-                    'responseContext', 'mainAppWebResponseContext', 'datasyncId'))),
-            expected_type=str, get_all=False)
+            args, (..., ('DATASYNC_ID', ('responseContext', 'mainAppWebResponseContext', 'datasyncId')), {str}, any))
 
     def _extract_visitor_data(self, *args):
         """
@@ -1362,7 +1357,6 @@ class YoutubeIE(YoutubeBaseInfoExtractor):
         '401': {'ext': 'mp4', 'height': 2160, 'format_note': 'DASH video', 'vcodec': 'av01.0.12M.08'},
     }
     _SUBTITLE_FORMATS = ('json3', 'srv1', 'srv2', 'srv3', 'ttml', 'vtt')
-    _BROKEN_CLIENTS = ()
     _DEFAULT_CLIENTS = ('ios', 'web_creator')
 
     _GEO_BYPASS = False
@@ -3728,11 +3722,12 @@ class YoutubeIE(YoutubeBaseInfoExtractor):
     def _get_config_po_token(self, client):
         po_token_strs = self._configuration_arg('po_token', [], ie_key=YoutubeIE, casesense=True)
         for token_str in po_token_strs:
-            if '+' not in token_str:
-                self.report_warning('Invalid po_token configuration format. Expected "client+po_token"')
+            po_token_client, sep, po_token = token_str.partition('+')
+            if not sep:
+                self.report_warning(
+                    f'Invalid po_token configuration format. Expected "client+po_token", got "{token_str}"', only_once=True)
                 continue
-            po_token_client, po_token = token_str.split('+')
-            if not client or po_token_client == client or po_token_client == 'all':
+            if po_token_client == 'all' or po_token_client == client:
                 return po_token
 
     def fetch_po_token(self, client='web', visitor_data=None, data_sync_id=None, player_url=None, **kwargs):
@@ -3740,8 +3735,7 @@ class YoutubeIE(YoutubeBaseInfoExtractor):
         if not visitor_data and not self.is_authenticated and player_url:
             self.report_warning(
                 f'Unable to fetch PO Token for {client} client: Missing required Visitor Data. '
-                f'You may need to pass Visitor Data with --extractor-args youtube:visitor_data=XXX',
-            )
+                f'You may need to pass Visitor Data with --extractor-args "youtube:visitor_data=XXX"')
             return
 
         config_po_token = self._get_config_po_token(client)
@@ -3751,8 +3745,7 @@ class YoutubeIE(YoutubeBaseInfoExtractor):
             if not data_sync_id and self.is_authenticated and player_url:
                 self.report_warning(
                     f'Got a PO Token for {client} client, but missing Data Sync ID for account. Formats may not work.'
-                    f'You may need to pass a Data Sync ID with --extractor-args youtube:data_sync_id=XXX',
-                )
+                    f'You may need to pass a Data Sync ID with --extractor-args "youtube:data_sync_id=XXX"')
 
             return config_po_token
 
@@ -3760,8 +3753,7 @@ class YoutubeIE(YoutubeBaseInfoExtractor):
         if not data_sync_id and self.is_authenticated and player_url:
             self.report_warning(
                 f'Unable to fetch PO Token for {client} client: Missing required Data Sync ID for account. '
-                f'You may need to pass a Data Sync ID with --extractor-args youtube:data_sync_id=XXX',
-            )
+                f'You may need to pass a Data Sync ID with --extractor-args "youtube:data_sync_id=XXX"')
             return
 
         return self._fetch_po_token(
@@ -3826,7 +3818,6 @@ class YoutubeIE(YoutubeBaseInfoExtractor):
 
     def _get_requested_clients(self, url, smuggled_data):
         requested_clients = []
-        broken_clients = []
         excluded_clients = []
         allowed_clients = sorted(
             (client for client in INNERTUBE_CLIENTS if client[:1] != '_'),
@@ -3840,12 +3831,8 @@ class YoutubeIE(YoutubeBaseInfoExtractor):
                 excluded_clients.append(client[1:])
             elif client not in allowed_clients:
                 self.report_warning(f'Skipping unsupported client "{client}"')
-            elif client in self._BROKEN_CLIENTS:
-                broken_clients.append(client)
             else:
                 requested_clients.append(client)
-        # Force deprioritization of _BROKEN_CLIENTS for format de-duplication
-        requested_clients.extend(broken_clients)
         if not requested_clients:
             requested_clients.extend(self._DEFAULT_CLIENTS)
         for excluded_client in excluded_clients:
@@ -3929,10 +3916,10 @@ class YoutubeIE(YoutubeBaseInfoExtractor):
             require_po_token = self._get_default_ytcfg(client).get('REQUIRE_PO_TOKEN')
             if not po_token and require_po_token:
                 self.report_warning(
-                    f'No PO Token provided for {client} client. '
-                    f'A PO Token is required by this client for working formats. '
+                    f'No PO Token provided for {client} client, '
+                    f'which is required for working {client} formats. '
                     f'You can manually pass a PO Token for this client with '
-                    f'--extractor-args youtube:po_token={client}+XXX',
+                    f'--extractor-args "youtube:po_token={client}+XXX"',
                     only_once=True)
                 deprioritize_pr = True
 
@@ -3946,8 +3933,7 @@ class YoutubeIE(YoutubeBaseInfoExtractor):
                     initial_pr=initial_pr,
                     visitor_data=visitor_data,
                     data_sync_id=data_sync_id,
-                    po_token=po_token,
-                )
+                    po_token=po_token)
             except ExtractorError as e:
                 self.report_warning(e)
                 continue
@@ -4133,16 +4119,12 @@ class YoutubeIE(YoutubeBaseInfoExtractor):
             if po_token:
                 fmt_url = update_url_query(fmt_url, {'pot': po_token})
 
-            # Clients that require poToken return videoplayback URLs that expire after 30 seconds if not supplied.
-            # Ref: https://github.com/yt-dlp/yt-dlp/issues/9554
-            is_broken = (
-                client_name in self._BROKEN_CLIENTS
-                or (not po_token and self._get_default_ytcfg(client_name).get('REQUIRE_PO_TOKEN'))
-            )
+            # Clients that require PO Token return videoplayback URLs that may return 403
+            is_broken = (not po_token and self._get_default_ytcfg(client_name).get('REQUIRE_PO_TOKEN'))
             if is_broken:
                 self.report_warning(
-                    f'{video_id}: {client_name} client formats are broken '
-                    'and may yield HTTP Error 403. They will be deprioritized', only_once=True)
+                    f'{video_id}: {client_name} client formats require a PO Token which was not provided. '
+                    'They will be deprioritized as they may yield HTTP Error 403', only_once=True)
 
             name = fmt.get('qualityLabel') or quality.replace('audio_quality_', '') or ''
             fps = int_or_none(fmt.get('fps')) or 0
@@ -4224,19 +4206,17 @@ class YoutubeIE(YoutubeBaseInfoExtractor):
                 return False
             itags[itag].add(key)
 
-            # Clients that require poToken return videoplayback URLs that expire after 30 seconds if not supplied.
-            # Ref: https://github.com/yt-dlp/yt-dlp/issues/9554
-            is_broken = (
-                client_name in self._BROKEN_CLIENTS
-                # hls proto does not appear to require PO Token currently
-                or (not po_token and self._get_default_ytcfg(client_name).get('REQUIRE_PO_TOKEN') and proto != 'hls')
-            )
+            if f.get('source_preference') is None:
+                f['source_preference'] = -1
 
-            if is_broken:
+            # Clients that require PO Token return videoplayback URLs that may return 403
+            # hls does not currently require PO Token
+            if (not po_token and self._get_default_ytcfg(client_name).get('REQUIRE_PO_TOKEN')) and proto != 'hls':
                 self.report_warning(
-                    f'{video_id}: {client_name} client {proto} formats are broken '
-                    'and may yield HTTP Error 403. They will be deprioritized', only_once=True)
+                    f'{video_id}: {client_name} client {proto} formats require a PO Token which was not provided. '
+                    'They will be deprioritized as they may yield HTTP Error 403', only_once=True)
                 f['format_note'] = join_nonempty(f.get('format_note'), 'BROKEN', delim=' ')
+                f['source_preference'] -= 20
 
             if itag and all_formats:
                 f['format_id'] = f'{itag}-{proto}'
@@ -4248,9 +4228,6 @@ class YoutubeIE(YoutubeBaseInfoExtractor):
             if original_language and f.get('language') == original_language:
                 f['format_note'] = join_nonempty(f.get('format_note'), '(default)', delim=' ')
                 f['language_preference'] = PREFERRED_LANG_VALUE
-
-            if f.get('source_preference') is None:
-                f['source_preference'] = -1
 
             if itag in ('616', '235'):
                 f['format_note'] = join_nonempty(f.get('format_note'), 'Premium', delim=' ')

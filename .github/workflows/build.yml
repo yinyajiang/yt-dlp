@@ -339,6 +339,14 @@ jobs:
    
           (cd ./dist/yt-dlp && zip -r ../yt-dlp_macos.zip .)
           python3 -m bundle.pyinstaller --target-architecture universal2 --codesign-identity "${{ secrets.APPLE_CERTIFICATE_NAME }}"
+
+      - name: Remove Certificate
+        env:
+          APPLE_CERTIFICATE: ${{ secrets.APPLE_CERTIFICATE }}
+        if: env.APPLE_CERTIFICATE != ''
+        run: |
+          security delete-keychain build.keychain
+
       - name: Build
         env:
           APPLE_CERTIFICATE_NAME: ${{ secrets.APPLE_CERTIFICATE_NAME }}

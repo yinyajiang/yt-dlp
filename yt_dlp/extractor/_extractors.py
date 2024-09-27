@@ -743,6 +743,7 @@ from .genius import (
     GeniusIE,
     GeniusLyricsIE,
 )
+from .germanupa import GermanupaIE
 from .getcourseru import (
     GetCourseRuIE,
     GetCourseRuPlayerIE,
@@ -1186,6 +1187,7 @@ from .mlb import (
 )
 from .mlssoccer import MLSSoccerIE
 from .mocha import MochaVideoIE
+from .mojevideo import MojevideoIE
 from .mojvideo import MojvideoIE
 from .monstercat import MonstercatIE
 from .motherless import (
@@ -1906,6 +1908,7 @@ from .slideshare import SlideshareIE
 from .slideslive import SlidesLiveIE
 from .slutload import SlutloadIE
 from .smotrim import SmotrimIE
+from .snapchat import SnapchatSpotlightIE
 from .snotr import SnotrIE
 from .sohu import (
     SohuIE,

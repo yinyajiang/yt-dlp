@@ -247,7 +247,7 @@ class HotStarIE(HotStarBaseIE):
         headers = {'Referer': f'{self._BASE_URL}/in'}
 
         # change to v2 in the future
-        playback_sets = self._call_api_v2('play/v1/playback', video_id, st=st, cookies=cookies)['playBackSets']
+        playback_sets = self._call_api_v2('play/v2/playback', video_id, st=st, cookies=cookies)['playBackSets']
         for playback_set in playback_sets:
             if not isinstance(playback_set, dict):
                 continue

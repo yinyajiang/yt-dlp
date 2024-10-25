@@ -333,8 +333,8 @@ jobs:
           repository: ${{ github.repository }}
           branch: ${{ github.ref }}
         run: |
-          gh extension install actions/gh-actions-cache
-          gh actions-cache delete "${cache_key}" -R "${repository}" -B "${branch}" --confirm
+          # gh extension install actions/gh-actions-cache
+          # gh actions-cache delete "${cache_key}" -R "${repository}" -B "${branch}" --confirm
 
       - name: Cache requirements
         uses: actions/cache/save@v4

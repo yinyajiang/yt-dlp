@@ -13,7 +13,7 @@ on:
         default: true
         type: boolean
       linux_static:
-        default: true
+        default: false
         type: boolean
       linux_arm:
         default: true

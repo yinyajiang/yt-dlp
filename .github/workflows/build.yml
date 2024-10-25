@@ -10,19 +10,19 @@ on:
         default: stable
         type: string
       unix:
-        default: true
+        default: false
         type: boolean
       linux_static:
         default: false
         type: boolean
       linux_arm:
-        default: true
+        default: false
         type: boolean
       macos:
         default: true
         type: boolean
       macos_legacy:
-        default: true
+        default: false
         type: boolean
       windows:
         default: true

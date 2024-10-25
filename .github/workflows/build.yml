@@ -247,7 +247,7 @@ jobs:
       # NB: Building universal2 does not work with python from actions/setup-python
 
       - name: Restore cached requirements
-        id: restore-cache
+        id: false
         uses: actions/cache/restore@v4
         env:
           SEGMENT_DOWNLOAD_TIMEOUT_MINS: 1
@@ -326,17 +326,18 @@ jobs:
           compression-level: 0
 
       - name: Cleanup cache
-        if: steps.restore-cache.outputs.cache-hit == 'true'
+        if: false
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           cache_key: cache-reqs-${{ github.job }}
           repository: ${{ github.repository }}
           branch: ${{ github.ref }}
         run: |
-          # gh extension install actions/gh-actions-cache
-          # gh actions-cache delete "${cache_key}" -R "${repository}" -B "${branch}" --confirm
+          gh extension install actions/gh-actions-cache
+          gh actions-cache delete "${cache_key}" -R "${repository}" -B "${branch}" --confirm
 
       - name: Cache requirements
+        if: false
         uses: actions/cache/save@v4
         with:
           path: |

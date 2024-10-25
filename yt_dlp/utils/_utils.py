@@ -5655,3 +5655,107 @@ class _YDLLogger:
     def stderr(self, message):
         if self._ydl:
             self._ydl.to_stderr(message)
+
+
+def find_json_possible_str(string, key):
+    if not isinstance(string, str):
+        string = json.dumps(string)
+    start_match = re.search(f'"{key}"' + r'\s*:\s*(?P<bracket>[{\[])', string)
+    if not start_match:
+        return None
+    bracketPair = ('[', ']') if start_match.group('bracket') == '[' else ('{', '}')
+    start_index = start_match.end() - 1
+
+    bracket_count = 1
+    end_index = start_index
+    for i in range(start_index + 1, len(string)):
+        if string[i] == bracketPair[0]:
+            bracket_count += 1
+        elif string[i] == bracketPair[1]:
+            bracket_count -= 1
+            if bracket_count == 0:
+                end_index = i
+                break
+
+    if bracket_count != 0:
+        return None
+
+    return (string[start_index:end_index + 1], end_index if end_index < len(string) - 1 else -1)
+
+
+def find_json(string, key, fatal=False):
+    end_index = 0
+    while end_index != -1:
+        jsonStr, end_index = find_json_possible_str(string, key)
+        if not jsonStr:
+            if fatal:
+                raise ExtractorError(f'Unable to find JSON object with key {key}')
+            return None
+
+        try:
+            return json.loads(jsonStr)
+        except Exception:
+            pass
+        string = string[end_index + 1:]
+
+    if fatal:
+        raise ExtractorError(f'Unable to parse JSON object with key {key}')
+
+
+def find_json_all(string, key, fatal=False):
+    end_index = 0
+    jsonList = []
+    while end_index != -1:
+        jsonStr, end_index = find_json_possible_str(string, key)
+        if not jsonStr:
+            break
+        with contextlib.suppress(Exception):
+            jsonList.append(json.loads(jsonStr))
+        string = string[end_index + 1:]
+
+    if not jsonList and fatal:
+        raise ExtractorError(f'Unable to find JSON object with key {key}')
+    return jsonList
+
+
+def find_json_all_by(string, key, filter, fatal=False):
+    jsonListAll = find_json_all(string, key, fatal=fatal)
+    jsonList = []
+    for js in jsonListAll:
+        if try_call(filter, args=[js]):
+            jsonList.append(js)
+
+    if not jsonList and fatal:
+        raise ExtractorError(f'Unable to find JSON object with key {key}')
+    return jsonList
+
+
+def find_json_by(string, key, filter, fatal=False):
+    jsonby = None
+
+    def sink(js):
+        nonlocal jsonby
+        if try_call(filter, args=[js]):
+            jsonby = js
+            return False
+        return True
+    walk_json(string, key, sink, fatal=fatal)
+    return jsonby
+
+
+def walk_json(string, key, sink, fatal=False):
+    has = False
+    end_index = 0
+    while end_index != -1:
+        jsonStr, end_index = find_json_possible_str(string, key)
+        if not jsonStr:
+            break
+        with contextlib.suppress(Exception):
+            js = json.loads(jsonStr)
+            has = True
+            if not try_call(sink, args=[js]):
+                return
+        string = string[end_index + 1:]
+
+    if not has and fatal:
+        raise ExtractorError(f'Unable to find JSON object with key {key}')

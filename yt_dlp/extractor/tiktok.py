@@ -1206,6 +1206,34 @@ class TikTokCollectionIE(TikTokBaseIE):
             self._entries(collection_id), collection_id, '-'.join((user_name, title)))
 
 
+class TikTokPlaylistIE(TikTokCollectionIE):
+    IE_NAME = 'tiktok:playlist'
+    _VALID_URL = r'https?://www\.tiktok\.com/@(?P<user_id>[\w.-]+)/playlist/(?P<title>[^/?#]+)-(?P<id>\d+)/?(?:[?#]|$)'
+    _TESTS = [{
+        # playlist should have exactly 9 videos
+        'url': 'https://www.tiktok.com/@skanteryt/playlist/Wifey%F0%9F%92%95-7372469466678053678',
+        'info_dict': {
+            'id': '7372469466678053678',
+            'title': 'Wifey💕',
+        },
+        'playlist_count': 6,
+    }]
+    _API_BASE_URL = 'https://www.tiktok.com/api/mix/item_list/'
+
+    def _build_web_query(self, playlist_id, cursor):
+        return {
+            'aid': '1988',
+            'mixId': playlist_id,
+            'count': self._PAGE_COUNT,
+            'cursor': cursor,
+        }
+
+    def _real_extract(self, url):
+        playlist_id, title, user_name = self._match_valid_url(url).group('id', 'title', 'user_id')
+        return self.playlist_result(
+            self._entries(playlist_id), playlist_id, '-'.join((user_name, title)))
+
+
 class DouyinIE(TikTokBaseIE):
     _VALID_URL = r'https?://(?:www\.)?douyin\.com/video/(?P<id>[0-9]+)'
     _TESTS = [{

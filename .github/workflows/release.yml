@@ -18,6 +18,16 @@ on:
         required: false
         default: ''
         type: string
+    secrets:
+      APPLE_CERTIFICATE:
+        required: false
+      APPLE_CERTIFICATE_DECODE_KEY:
+        required: false
+      APPLE_CERTIFICATE_IMPORT_KEY:
+        required: false
+      APPLE_CERTIFICATE_NAME:
+        required: false
+
   workflow_dispatch:
     inputs:
       source:
@@ -232,6 +242,10 @@ jobs:
       actions: write  # For cleaning up cache
     secrets:
       GPG_SIGNING_KEY: ${{ secrets.GPG_SIGNING_KEY }}
+      APPLE_CERTIFICATE: ${{ secrets.APPLE_CERTIFICATE }}
+      APPLE_CERTIFICATE_DECODE_KEY: ${{ secrets.APPLE_CERTIFICATE_DECODE_KEY }}
+      APPLE_CERTIFICATE_IMPORT_KEY: ${{ secrets.APPLE_CERTIFICATE_IMPORT_KEY }}
+      APPLE_CERTIFICATE_NAME: ${{ secrets.APPLE_CERTIFICATE_NAME }}
 
   publish_pypi:
     needs: [prepare, build]
@@ -371,7 +385,7 @@ jobs:
           target_tag: ${{ needs.prepare.outputs.target_tag }}
           head_sha: ${{ needs.prepare.outputs.head_sha }}
         if: |
-          env.target_repo == github.repository
+          env.target_repo == github.repository && env.head_sha != ''
         run: |
           title="${{ github.repository == 'yt-dlp/yt-dlp' && 'yt-dlp ' || '' }}"
           title+="${{ env.target_tag != env.version && format('{0} ', env.target_tag) || '' }}"
@@ -381,4 +395,17 @@ jobs:
             --title "${title}${{ env.version }}" \
             ${{ inputs.prerelease && '--prerelease' || '' }} \
             ${{ env.target_tag }} \
+            artifact/*
+      - name: Publish release default
+        env:
+          GH_TOKEN: ${{ github.token }}
+          target_repo: ${{ needs.prepare.outputs.target_repo }}
+          head_sha: ${{ needs.prepare.outputs.head_sha }}
+        if: |
+          env.target_repo == github.repository && env.head_sha == ''
+        run: |
+          gh release create \
+            --notes-file ${{ inputs.prerelease && 'PRERELEASE_NOTES' || 'RELEASE_NOTES' }} \
+            --title "yt-dlp" \
+            ${{ github.run_id }} \
             artifact/*

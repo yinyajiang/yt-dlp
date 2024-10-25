@@ -34,7 +34,6 @@ classifiers = [
     "Programming Language :: Python :: 3.10",
     "Programming Language :: Python :: 3.11",
     "Programming Language :: Python :: 3.12",
-    "Programming Language :: Python :: 3.13",
     "Programming Language :: Python :: Implementation",
     "Programming Language :: Python :: Implementation :: CPython",
     "Programming Language :: Python :: Implementation :: PyPy",
@@ -85,6 +84,9 @@ test = [
 ]
 pyinstaller = [
     "pyinstaller>=6.10.0",  # Windows temp cleanup fixed in 6.10.0
+]
+py2exe = [
+    "py2exe>=0.12",
 ]
 
 [project.urls]
@@ -170,11 +172,13 @@ run-cov = "echo Code coverage not implemented && exit 1"
 
 [[tool.hatch.envs.hatch-test.matrix]]
 python = [
+    "3.8",
     "3.9",
     "3.10",
     "3.11",
     "3.12",
-    "3.13",
+    "pypy3.8",
+    "pypy3.9",
     "pypy3.10",
 ]
 

@@ -6,7 +6,6 @@ from ..utils import (
     ExtractorError,
     int_or_none,
     js_to_json,
-    strip_or_none,
     traverse_obj,
     url_or_none,
     urlencode_postdata,
@@ -133,12 +132,12 @@ class TubiTvIE(InfoExtractor):
 
         return {
             'id': video_id,
-            'title': strip_or_none(title),
+            'title': title,
             'formats': formats,
             'subtitles': subtitles,
             'season_number': int_or_none(season_number),
             'episode_number': int_or_none(episode_number),
-            'episode': strip_or_none(episode_title),
+            'episode': episode_title,
             **traverse_obj(video_data, {
                 'description': ('description', {str}),
                 'duration': ('duration', {int_or_none}),

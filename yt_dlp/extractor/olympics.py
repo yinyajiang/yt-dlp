@@ -1,7 +1,10 @@
+import re
+
 from .common import InfoExtractor
 from ..networking.exceptions import HTTPError
 from ..utils import (
     ExtractorError,
+    find_json_by,
     int_or_none,
     parse_iso8601,
     parse_qs,
@@ -13,7 +16,7 @@ from ..utils.traversal import traverse_obj
 
 
 class OlympicsReplayIE(InfoExtractor):
-    _VALID_URL = r'https?://(?:www\.)?olympics\.com/[a-z]{2}/(?:paris-2024/)?(?:replay|videos?|original-series/episode)/(?P<id>[\w-]+)'
+    _VALID_URL = r'https?://(?:www\.)?olympics\.com/.+'
     _TESTS = [{
         'url': 'https://olympics.com/fr/video/men-s-109kg-group-a-weightlifting-tokyo-2020-replays',
         'info_dict': {
@@ -60,17 +63,21 @@ class OlympicsReplayIE(InfoExtractor):
     }]
     _GEO_BYPASS = False
 
-    def _extract_from_nextjs_data(self, webpage, video_id):
-        data = traverse_obj(self._search_nextjs_data(webpage, video_id, default={}), (
+    def _extract_from_nextjs_data(self, webpage, url_id):
+        nexjsData = self._search_nextjs_data(webpage, url_id, default={})
+        data = traverse_obj(nexjsData, (
             'props', 'pageProps', 'page', 'items',
             lambda _, v: v['name'] == 'videoPlaylist', 'data', 'currentVideo', {dict}, any))
         if not data:
-            return None
+            data = find_json_by(nexjsData, 'currentVideo', lambda c: c.get('videoUrl'))
+            if not data:
+                return None
 
         geo_countries = traverse_obj(data, ('countries', ..., {str}))
         if traverse_obj(data, ('geoRestrictedVideo', {bool})):
             self.raise_geo_restricted(countries=geo_countries)
 
+        video_id = traverse_obj(data, ('videoID', {str})) or url_id
         is_live = traverse_obj(data, ('streamingStatus', {str})) == 'LIVE'
         m3u8_url = traverse_obj(data, ('videoUrl', {url_or_none})) or data['streamUrl']
         tokenized_url = self._tokenize_url(m3u8_url, data['jwtToken'], is_live, video_id)
@@ -110,9 +117,10 @@ class OlympicsReplayIE(InfoExtractor):
             'Downloading legacy tokenized m3u8 url', query={'url': url})
 
     def _real_extract(self, url):
-        video_id = self._match_id(url)
-        webpage = self._download_webpage(url, video_id)
+        match = re.search(r'https?://(?:www\.)?olympics\.com/[a-z]{2}/(?:paris-2024/)?(?:replay|videos?|original-series/episode)/(?P<id>[\w-]+)', url)
+        video_id = (match and match.group('id')) or 'olympics'
 
+        webpage = self._download_webpage(url, video_id)
         if info := self._extract_from_nextjs_data(webpage, video_id):
             return info
 

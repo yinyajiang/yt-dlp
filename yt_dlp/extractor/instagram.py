@@ -18,6 +18,7 @@ from ..utils import (
     lowercase_escape,
     str_or_none,
     str_to_int,
+    strftime_or_none,
     traverse_obj,
     url_or_none,
     urlencode_postdata,
@@ -49,6 +50,9 @@ class InstagramBaseIE(InfoExtractor):
         'Origin': 'https://www.instagram.com',
         'Accept': '*/*',
     }
+
+    def _has_session_id(self):
+        return self._get_cookies('https://www.instagram.com/').get('sessionid')
 
     def _perform_login(self, username, password):
         if self._IS_LOGGED_IN:
@@ -104,7 +108,7 @@ class InstagramBaseIE(InfoExtractor):
 
             video_id = node.get('shortcode')
 
-            if is_direct:
+            if is_direct and node.get('video_url'):
                 info = {
                     'id': video_id or node['id'],
                     'url': node.get('video_url'),
@@ -123,12 +127,11 @@ class InstagramBaseIE(InfoExtractor):
                     'id': video_id,
                     'url': f'https://instagram.com/p/{video_id}',
                 }
-
+            desc = traverse_obj(node, ('edge_media_to_caption', 'edges', 0, 'node', 'text'), expected_type=str)
             yield {
                 **info,
-                'title': node.get('title') or (f'Video {idx}' if is_direct else None),
-                'description': traverse_obj(
-                    node, ('edge_media_to_caption', 'edges', 0, 'node', 'text'), expected_type=str),
+                'title': node.get('title') or desc or (f'Video {idx}' if is_direct else None),
+                'description': desc,
                 'thumbnail': traverse_obj(
                     node, 'display_url', 'thumbnail_src', 'display_src', expected_type=url_or_none),
                 'duration': float_or_none(node.get('video_duration')),
@@ -139,11 +142,19 @@ class InstagramBaseIE(InfoExtractor):
             }
 
     def _extract_product_media(self, product_media):
+        media_type = product_media.get('media_type', 0)
+        if media_type == 8:
+            return {
+                '_media_type': 'CAROUSEL',
+                **self._extract_product(product_media),
+            }
+
         media_id = product_media.get('code') or _pk_to_id(product_media.get('pk'))
         vcodec = product_media.get('video_codec')
         dash_manifest_raw = product_media.get('video_dash_manifest')
         videos_list = product_media.get('video_versions')
-        if not (dash_manifest_raw or videos_list):
+        images_list = traverse_obj(product_media, ('image_versions2', 'candidates'))
+        if not (dash_manifest_raw or videos_list or images_list):
             return {}
 
         formats = [{
@@ -156,26 +167,41 @@ class InstagramBaseIE(InfoExtractor):
         if dash_manifest_raw:
             formats.extend(self._parse_mpd_formats(self._parse_xml(dash_manifest_raw, media_id), mpd_id='dash'))
 
+        if media_type == 1:
+            media_type = 'PHOTO'
+            formats.extend([{
+                'format_id': 'photo-' + str(item.get('width', '')) + '-' + str(item.get('height', '')),
+                'url': item.get('url'),
+                'width': item.get('width'),
+                'height': item.get('height'),
+                '_media_type': media_type,
+            } for item in images_list or []])
+        elif media_type == 2:
+            media_type = 'VIDEO'
+        else:
+            self.report_warning(f'Unknown media type {media_type}')
+            return {}
         thumbnails = [{
             'url': thumbnail.get('url'),
             'width': thumbnail.get('width'),
             'height': thumbnail.get('height'),
-        } for thumbnail in traverse_obj(product_media, ('image_versions2', 'candidates')) or []]
+        } for thumbnail in images_list or []]
+
         return {
             'id': media_id,
             'duration': float_or_none(product_media.get('video_duration')),
             'formats': formats,
             'thumbnails': thumbnails,
+            '_media_type': media_type,
         }
 
-    def _extract_product(self, product_info):
+    def _extract_product(self, product_info, webpage_is_post=False):
         if isinstance(product_info, list):
             product_info = product_info[0]
 
         user_info = product_info.get('user') or {}
         info_dict = {
             'id': _pk_to_id(traverse_obj(product_info, 'pk', 'id', expected_type=str_or_none)[:19]),
-            'title': product_info.get('title') or f'Video by {user_info.get("username")}',
             'description': traverse_obj(product_info, ('caption', 'text'), expected_type=str_or_none),
             'timestamp': int_or_none(product_info.get('taken_at')),
             'channel': user_info.get('username'),
@@ -189,20 +215,26 @@ class InstagramBaseIE(InfoExtractor):
                 'Referer': 'https://www.instagram.com/',
             },
         }
+
+        if webpage_is_post and product_info.get('code'):
+            info_dict['webpage_url'] = f"https://www.instagram.com/p/{product_info.get('code')}/"
+
+        timestr = strftime_or_none(info_dict.get('timestamp'), '%Y-%m-%d')
+        title = product_info.get('title') or (f'Post by {user_info.get("username")} {timestr}' if timestr else f'Post by {user_info.get("username")}')
+        info_dict['title'] = title
+
         carousel_media = product_info.get('carousel_media')
         if carousel_media:
-            return {
-                '_type': 'playlist',
-                **info_dict,
-                'title': f'Post by {user_info.get("username")}',
-                'entries': [{
-                    **info_dict,
-                    **self._extract_product_media(product_media),
-                } for product_media in carousel_media],
-            }
+            entries = [{**info_dict, **self._extract_product_media(product_media)} for product_media in carousel_media]
+            result = self.playlist_result(entries, info_dict['id'], **info_dict)
+            result['_playlist_media_type'] = 'CAROUSEL'
+            result['extractor'] = self.IE_NAME
+            result['extractor_key'] = self.ie_key()
+            return result
 
         return {
             **info_dict,
+            **self._extract_product_media(product_info),
             **self._extract_product_media(product_info),
         }
 
@@ -482,11 +514,21 @@ class InstagramIE(InstagramBaseIE):
         if not video_url:
             nodes = traverse_obj(media, ('edge_sidecar_to_children', 'edges', ..., 'node'), expected_type=dict) or []
             if nodes:
-                return self.playlist_result(
-                    self._extract_nodes(nodes, True), video_id,
-                    format_field(username, None, 'Post by %s'), description)
+                entries = []
+                for entry in self._extract_nodes(nodes, True):
+                    entries.append(entry)
+                if not entries and not self._has_session_id():
+                    self.raise_login_required()
 
-            video_url = self._og_search_video_url(webpage, secure=False)
+                return self.playlist_result(entries, video_id,
+                                            format_field(username, None, 'Post by %s'), description)
+            try:
+                video_url = self._og_search_video_url(webpage, secure=False)
+            except ExtractorError as e:
+                if not self._has_session_id():
+                    self.raise_login_required()
+                else:
+                    raise e
 
         formats = [{
             'url': video_url,
@@ -542,10 +584,16 @@ class InstagramPlaylistBaseIE(InstagramBaseIE):
 
     def _parse_graphql(self, webpage, item_id):
         # Reads a webpage and returns its GraphQL data.
-        return self._parse_json(
-            self._search_regex(
-                r'sharedData\s*=\s*({.+?})\s*;\s*[<\n]', webpage, 'data'),
-            item_id)
+        try:
+            return self._parse_json(
+                self._search_regex(
+                    r'sharedData\s*=\s*({.+?})\s*;\s*[<\n]', webpage, 'data'),
+                item_id)
+        except ExtractorError as e:
+            if not self._has_session_id():
+                self.raise_login_required()
+            else:
+                raise e
 
     def _extract_graphql(self, data, url):
         # Parses GraphQL queries containing videos and generates a playlist.
@@ -619,7 +667,7 @@ class InstagramPlaylistBaseIE(InstagramBaseIE):
 
 
 class InstagramUserIE(InstagramPlaylistBaseIE):
-    _WORKING = False
+    _WORKING = True
     _VALID_URL = r'https?://(?:www\.)?instagram\.com/(?P<id>[^/]{2,})/?(?:$|[?#])'
     IE_DESC = 'Instagram user profile'
     IE_NAME = 'instagram:user'
@@ -651,6 +699,62 @@ class InstagramUserIE(InstagramPlaylistBaseIE):
         return {
             'id': data['entry_data']['ProfilePage'][0]['graphql']['user']['id'],
         }
+
+    def _download_usedata(self, username):
+        return self._download_json(
+            f'{self._API_BASE_URL}/users/web_profile_info/?username={username}&count=100',
+            username, errnote=False, fatal=False, headers=self._API_HEADERS)
+
+    def _real_extract(self, url):
+        username = self._match_id(url)
+        action = self._configuration_arg(
+            'custom_action', default=[''], ie_key=InstagramUserIE)[0]
+        userdata = self._download_usedata(username)
+        if not userdata:
+            self.report_warning('userdata extraction failed', username)
+            userdata = self._download_usedata(username)
+            if not userdata:
+                self.raise_login_required()
+
+        userdata = userdata['data']
+        if action == 'get_post_count':
+            return {
+                '_type': 'custom_action',
+                'id': username,
+                'title': userdata.get('user', {}).get('full_name', username),
+                'action_info': {
+                    'action': action,
+                    'count': traverse_obj(userdata, ('user', 'edge_owner_to_timeline_media', 'count'), expected_type=int),
+                },
+            }
+
+        items = []
+        cursor = ''
+        while True:
+            feed_json = self._download_json(
+                f'{self._API_BASE_URL}/feed/user/{username}/username/?count=100&max_id={cursor}',
+                username, errnote=False, fatal=False, headers=self._API_HEADERS)
+            if not feed_json:
+                break
+            items += traverse_obj(feed_json, 'items', expected_type=list) or []
+            has_next_page = traverse_obj(feed_json, 'more_available')
+            cursor = traverse_obj(feed_json, 'next_max_id', expected_type=str)
+            if not has_next_page or not cursor:
+                break
+
+        info_data = []
+        for item in items:
+            entry = self._extract_product(item, webpage_is_post=True)
+            info_data.append({
+                **entry,
+                'uploader': userdata.get('user', {}).get('full_name', username),
+                'uploader_id': userdata.get('user', {}).get('id', username),
+            })
+
+        if not info_data and not self._has_session_id():
+            self.raise_login_required()
+
+        return self.playlist_result(info_data, playlist_id=username, playlist_title=format_field(username, None, 'Posts by %s'))
 
 
 class InstagramTagIE(InstagramPlaylistBaseIE):

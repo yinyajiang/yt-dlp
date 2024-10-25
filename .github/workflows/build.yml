@@ -37,31 +37,40 @@ on:
     secrets:
       GPG_SIGNING_KEY:
         required: false
-
+      APPLE_CERTIFICATE:
+        required: false
+      APPLE_CERTIFICATE_DECODE_KEY:
+        required: false
+      APPLE_CERTIFICATE_IMPORT_KEY:
+        required: false
+      APPLE_CERTIFICATE_NAME:
+        required: false
+      
   workflow_dispatch:
     inputs:
       version:
         description: |
           VERSION: yyyy.mm.dd[.rev] or rev
-        required: true
+        required: false
+        default: '2024.01.01'
         type: string
       channel:
         description: |
           SOURCE of this build's updates: stable/nightly/master/<repo>
-        required: true
+        required: false
         default: stable
         type: string
       unix:
         description: yt-dlp, yt-dlp.tar.gz
-        default: true
+        default: false
         type: boolean
       linux_static:
         description: yt-dlp_linux
-        default: true
+        default: false
         type: boolean
       linux_arm:
         description: yt-dlp_linux_aarch64, yt-dlp_linux_armv7l
-        default: true
+        default: false
         type: boolean
       macos:
         description: yt-dlp_macos, yt-dlp_macos.zip
@@ -69,14 +78,14 @@ on:
         type: boolean
       macos_legacy:
         description: yt-dlp_macos_legacy
-        default: true
+        default: false
         type: boolean
       windows:
-        description: yt-dlp.exe, yt-dlp_min.exe, yt-dlp_win.zip
+        description: yt-dlp.exe, yt-dlp_win.zip
         default: true
         type: boolean
       windows32:
-        description: yt-dlp_x86.exe
+        description: yt-dlp_x86.exe, yt-dlp_win_x86.zip
         default: true
         type: boolean
       origin:
@@ -263,6 +272,8 @@ jobs:
           source ~/yt-dlp-build-venv/bin/activate
           python3 devscripts/install_deps.py -o --include build
           python3 devscripts/install_deps.py --print --include pyinstaller > requirements.txt
+          # replace pyinstaller>=6.7.0 with pyinstaller>=6.8.0
+          # sed -i '' 's/pyinstaller>=6\.7\.0/pyinstaller>=6\.8\.0/' requirements.txt
           # We need to ignore wheels otherwise we break universal2 builds
           python3 -m pip install -U --no-binary :all: -r requirements.txt
           # We need to fuse our own universal2 wheels for curl_cffi
@@ -294,24 +305,64 @@ jobs:
             mv -n -- "${wheel}" "${wheel/x86_64/universal2}"
           done
           python3 -m pip install --force-reinstall -U curl_cffi_universal2/*cffi*.whl
+      
+      - name: Install Certificate
+        env:
+          APPLE_CERTIFICATE: ${{ secrets.APPLE_CERTIFICATE }}
+        if: env.APPLE_CERTIFICATE != ''
+        run: |
+          echo "Import apple develop apple_certificate: start"
+          echo "${{ secrets.APPLE_CERTIFICATE }}" > apple_certificate.p12.enc
+          openssl aes-256-cbc -k "${{ secrets.APPLE_CERTIFICATE_DECODE_KEY }}" -in apple_certificate.p12.enc -out apple_certificate.p12 -d -a
+          security create-keychain -p actions build.keychain
+          security default-keychain -s build.keychain
+          security unlock-keychain -p actions build.keychain
+          security import apple_certificate.p12 -k build.keychain -P "${{ secrets.APPLE_CERTIFICATE_IMPORT_KEY }}" -A 
+          security set-keychain-settings build.keychain
+          security set-key-partition-list -S apple-tool:,apple: -s -k actions build.keychain
+          echo "Import apple develop apple_certificate: success"
 
       - name: Prepare
         run: |
           python3 devscripts/update-version.py -c "${{ inputs.channel }}" -r "${{ needs.process.outputs.origin }}" "${{ inputs.version }}"
           python3 devscripts/make_lazy_extractors.py
-      - name: Build
+
+      - name: Build With Certificate
+        env:
+          APPLE_CERTIFICATE_NAME: ${{ secrets.APPLE_CERTIFICATE_NAME }}
+        if: env.APPLE_CERTIFICATE_NAME != ''
         run: |
           source ~/yt-dlp-build-venv/bin/activate
-          python3 -m bundle.pyinstaller --target-architecture universal2 --onedir
-          (cd ./dist/yt-dlp_macos && zip -r ../yt-dlp_macos.zip .)
+          python3 -m bundle.pyinstaller --target-architecture universal2 --onedir -n yt-dlp --codesign-identity "${{ secrets.APPLE_CERTIFICATE_NAME }}"
+          # codesign -f -s "${{ secrets.APPLE_CERTIFICATE_NAME }}" "./dist/yt-dlp/_internal/librtmp.1.dylib"
+          # codesign -f -s "${{ secrets.APPLE_CERTIFICATE_NAME }}" "./dist/yt-dlp/_internal/libzstd.1.5.5.dylib"
+   
+          (cd ./dist/yt-dlp && zip -r ../yt-dlp_macos.zip .)
+          python3 -m bundle.pyinstaller --target-architecture universal2 --codesign-identity "${{ secrets.APPLE_CERTIFICATE_NAME }}"
+
+      - name: Remove Certificate
+        env:
+          APPLE_CERTIFICATE: ${{ secrets.APPLE_CERTIFICATE }}
+        if: env.APPLE_CERTIFICATE != ''
+        run: |
+          security delete-keychain build.keychain
+
+      - name: Build
+        env:
+          APPLE_CERTIFICATE_NAME: ${{ secrets.APPLE_CERTIFICATE_NAME }}
+        if: env.APPLE_CERTIFICATE_NAME == ''
+        run: |
+          source ~/yt-dlp-build-venv/bin/activate
+          python3 -m bundle.pyinstaller --target-architecture universal2 --onedir -n yt-dlp
+          (cd ./dist/yt-dlp && zip -r ../yt-dlp_macos.zip .)
           python3 -m bundle.pyinstaller --target-architecture universal2
 
       - name: Verify --update-to
         if: vars.UPDATE_TO_VERIFICATION
         run: |
-          chmod +x ./dist/yt-dlp_macos
-          cp ./dist/yt-dlp_macos ./dist/yt-dlp_macos_downgraded
-          version="$(./dist/yt-dlp_macos --version)"
+          chmod +x ./dist/yt-dlp
+          cp ./dist/yt-dlp ./dist/yt-dlp_macos_downgraded
+          version="$(./dist/yt-dlp --version)"
           ./dist/yt-dlp_macos_downgraded -v --update-to yt-dlp/yt-dlp@2023.03.04
           downgraded_version="$(./dist/yt-dlp_macos_downgraded --version)"
           [[ "$version" != "$downgraded_version" ]]
@@ -420,11 +471,17 @@ jobs:
         run: |
           python -m bundle.pyinstaller
           python -m bundle.pyinstaller --onedir
+          # Move-Item ./dist/yt-dlp.exe ./dist/yt-dlp_real.exe
           Compress-Archive -Path ./dist/yt-dlp/* -DestinationPath ./dist/yt-dlp_win.zip
 
-      - name: Add migration executable for py2exe
-        run: |
-          Copy-Item ./dist/yt-dlp.exe ./dist/yt-dlp_min.exe
+      #- name: Install Requirements (py2exe)
+      #  run: |
+      #    python devscripts/install_deps.py --include py2exe
+      #- name: Build (py2exe)
+      #  run: |
+      #    python -m bundle.py2exe
+      #    Move-Item ./dist/yt-dlp.exe ./dist/yt-dlp_min.exe
+      #    Move-Item ./dist/yt-dlp_real.exe ./dist/yt-dlp.exe
 
       - name: Verify --update-to
         if: vars.UPDATE_TO_VERIFICATION
@@ -445,7 +502,6 @@ jobs:
           name: build-bin-${{ github.job }}
           path: |
             dist/yt-dlp.exe
-            dist/yt-dlp_min.exe
             dist/yt-dlp_win.zip
           compression-level: 0
 
@@ -473,6 +529,8 @@ jobs:
       - name: Build
         run: |
           python -m bundle.pyinstaller
+          python -m bundle.pyinstaller --onedir -n yt-dlp
+          Compress-Archive -Path ./dist/yt-dlp/* -DestinationPath ./dist/yt-dlp_win_x86.zip
 
       - name: Verify --update-to
         if: vars.UPDATE_TO_VERIFICATION
@@ -493,6 +551,7 @@ jobs:
           name: build-bin-${{ github.job }}
           path: |
             dist/yt-dlp_x86.exe
+            dist/yt-dlp_win_x86.zip
           compression-level: 0
 
   meta_files:

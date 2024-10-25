@@ -154,6 +154,7 @@ from .utils import (
     try_get,
     url_basename,
     variadic,
+    version_tuple,
     windows_enable_vt_mode,
     write_json_file,
     write_string,
@@ -250,7 +251,7 @@ class YoutubeDL:
     format_sort_force: Force the given format_sort. see "Sorting Formats"
                        for more details.
     prefer_free_formats: Whether to prefer video formats with free containers
-                       over non-free ones of the same quality.
+                       over non-free ones of same quality.
     allow_multiple_video_streams:   Allow multiple video streams to be merged
                        into a single file
     allow_multiple_audio_streams:   Allow multiple audio streams to be merged
@@ -284,7 +285,7 @@ class YoutubeDL:
     rejecttitle:       Reject downloads for matching titles.
     logger:            Log messages to a logging.Logger instance.
     logtostderr:       Print everything to stderr instead of stdout.
-    consoletitle:      Display progress in the console window's titlebar.
+    consoletitle:      Display progress in console window's titlebar.
     writedescription:  Write the video description to a .description file
     writeinfojson:     Write the video description to a .info.json file
     clean_infojson:    Remove internal metadata from the infojson
@@ -512,7 +513,7 @@ class YoutubeDL:
     The following options are used by the extractors:
     extractor_retries: Number of times to retry for known errors (default: 3)
     dynamic_mpd:       Whether to process dynamic DASH manifests (default: True)
-    hls_split_discontinuity: Split HLS playlists into different formats at
+    hls_split_discontinuity: Split HLS playlists to different formats at
                        discontinuities such as ad breaks (default: False)
     extractor_args:    A dictionary of arguments to be passed to the extractors.
                        See "EXTRACTOR ARGUMENTS" for details.
@@ -552,7 +553,7 @@ class YoutubeDL:
     include_ads:       - Doesn't work
                        Download ads as well
     call_home:         - Not implemented
-                       Boolean, true if we are allowed to contact the
+                       Boolean, true iff we are allowed to contact the
                        yt-dlp servers for debugging.
     post_hooks:        - Register a custom postprocessor
                        A list of functions that get called as the final step
@@ -1812,6 +1813,10 @@ class YoutubeDL:
             extra_info = {}
         result_type = ie_result.get('_type', 'video')
 
+        if self.params.get('plain_entries', False):
+            self._plain_ie_result(ie_result)
+            result_type = ie_result.get('_type', 'video')
+
         if result_type in ('url', 'url_transparent'):
             ie_result['url'] = sanitize_url(
                 ie_result['url'], scheme='http' if self.params.get('prefer_insecure') else 'https')
@@ -1931,6 +1936,8 @@ class YoutubeDL:
                 for r in ie_result['entries']
             ]
             return ie_result
+        elif result_type == 'custom_action':
+            return ie_result
         else:
             raise Exception(f'Invalid result type: {result_type}')
 
@@ -1962,8 +1969,8 @@ class YoutubeDL:
             **info,
             'playlist_index': 0,
             '__last_playlist_index': max(ie_result.get('requested_entries') or (0, 0)),
-            'extractor': ie_result['extractor'],
-            'extractor_key': ie_result['extractor_key'],
+            'extractor': ie_result.get('extractor') or '',
+            'extractor_key': ie_result.get('extractor_key') or '',
         }
 
     def __process_playlist(self, ie_result, download):
@@ -2054,10 +2061,13 @@ class YoutubeDL:
                 f'[download] Downloading item {self._format_screen(i + 1, self.Styles.ID)} '
                 f'of {self._format_screen(n_entries, self.Styles.EMPHASIS)}')
 
-            entry_result = self.__process_iterable_entry(entry, download, collections.ChainMap({
-                'playlist_index': playlist_index,
-                'playlist_autonumber': i + 1,
-            }, extra))
+            if entry.get('_playlist_media_type', '') != 'CAROUSEL':
+                entry_result = self.__process_iterable_entry(entry, download, collections.ChainMap({
+                    'playlist_index': playlist_index,
+                    'playlist_autonumber': i + 1,
+                }, extra))
+            else:
+                entry_result = entry
             if not entry_result:
                 failures += 1
             if failures >= max_failures:
@@ -3034,6 +3044,10 @@ class YoutubeDL:
 
         # We update the info dict with the selected best quality format (backwards compatibility)
         info_dict.update(best_format)
+
+        if 'formats' not in info_dict and best_format:
+            info_dict['formats'] = copy.deepcopy(best_format)
+
         return info_dict
 
     def process_subtitles(self, video_id, normal_subtitles, automatic_captions):
@@ -3353,7 +3367,9 @@ class YoutubeDL:
         new_info, files_to_move = self.pre_process(info_dict, 'before_dl', files_to_move)
         replace_info_dict(new_info)
 
-        if self.params.get('skip_download'):
+        skip_media_type = self.params.get('skip_download_media_type') or []
+        media_type = info_dict.get('_media_type', '-')
+        if self.params.get('skip_download') or media_type in skip_media_type:
             info_dict['filepath'] = temp_filename
             info_dict['__finaldir'] = os.path.dirname(os.path.abspath(encodeFilename(full_filename)))
             info_dict['__files_to_move'] = files_to_move
@@ -3704,8 +3720,8 @@ class YoutubeDL:
             files_to_delete, infodict = pp.run(infodict)
         except PostProcessingError as e:
             # Must be True and not 'only_download'
-            if self.params.get('ignoreerrors') is True:
-                self.report_error(e)
+            if self.params.get('ignoreerrors') is True or self.params.get('ignore_postproc_errors') is True:
+                self.report_warning(f'Postprocessing: {e!s}')
                 return infodict
             raise
 
@@ -4088,6 +4104,17 @@ class YoutubeDL:
         if plugin_dirs:
             write_debug(f'Plugin directories: {plugin_dirs}')
 
+        # Not implemented
+        if False and self.params.get('call_home'):
+            ipaddr = self.urlopen('https://yt-dl.org/ip').read().decode()
+            write_debug(f'Public IP address: {ipaddr}')
+            latest_version = self.urlopen(
+                'https://yt-dl.org/latest/version').read().decode()
+            if version_tuple(latest_version) > version_tuple(__version__):
+                self.report_warning(
+                    f'You are using an outdated version (newest version: {latest_version})! '
+                    'See https://yt-dl.org/update if you need help updating.')
+
     @functools.cached_property
     def proxies(self):
         """Global proxy configuration"""
@@ -4413,3 +4440,20 @@ class YoutubeDL:
             if ret and not write_all:
                 break
         return ret
+
+    def _plain_ie_result(self, ie_result):
+        if ie_result.get('entries', []):
+            ie_result['entries'] = self._plain_entries(ie_result['entries'])
+            if ie_result.get('_playlist_media_type', '') == 'CAROUSEL':
+                del ie_result['_playlist_media_type']
+            if ie_result.get('_type', '') == 'video':
+                ie_result['_type'] = 'playlist'
+
+    def _plain_entries(self, entries):
+        returns = []
+        for entry in entries:
+            if entry.get('entries', None):
+                returns.extend(self._plain_entries(entry['entries']))
+            else:
+                returns.append(entry)
+        return returns

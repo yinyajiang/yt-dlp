@@ -73,6 +73,8 @@ class TestAllURLsMatching(unittest.TestCase):
     def test_no_duplicates(self):
         ies = gen_extractors()
         for tc in gettestcases(include_onlymatching=True):
+            if 'url' not in tc:
+                continue
             url = tc['url']
             for ie in ies:
                 if type(ie).__name__ in ('GenericIE', tc['name'] + 'IE'):

@@ -23,8 +23,11 @@ def main():
     onedir = '--onedir' in opts or '-D' in opts
     if not onedir and '-F' not in opts and '--onefile' not in opts:
         opts.append('--onefile')
+    n = ''
+    if '-n' in opts:
+        n = opts[opts.index('-n') + 1]
 
-    name, final_file = exe(onedir)
+    name, final_file = exe(onedir, n)
     print(f'Building yt-dlp v{version} for {OS_NAME} {platform.machine()} with options {opts}')
     print('Remember to update the version using  "devscripts/update-version.py"')
     if not os.path.isfile('yt_dlp/extractor/lazy_extractors.py'):
@@ -57,13 +60,15 @@ def parse_options():
     return opts
 
 
-def exe(onedir):
+def exe(onedir, n):
     """@returns (name, path)"""
     name = '_'.join(filter(None, (
         'yt-dlp',
         {'win32': '', 'darwin': 'macos'}.get(OS_NAME, OS_NAME),
         MACHINE,
     )))
+    if n:
+        name = n
     return name, ''.join(filter(None, (
         'dist/',
         onedir and f'{name}/',

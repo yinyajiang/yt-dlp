@@ -8,14 +8,16 @@ if defined ProgramFiles(x86) (
 	if not exist "%PYTHON_PATH%" (
 		set "PYTHON_PATH=%APPDATA%\Python\Python310"
 	)
+	set "PATH=%PYTHON_PATH%;%PYTHON_PATH%\Scripts;%PATH%"
 ) else (
     echo 32 bit system
 	set "PYTHON_PATH=%LOCALAPPDATA%\Programs\Python\Python310-32"
 	if not exist "%PYTHON_PATH%" (
 		set "PYTHON_PATH=%APPDATA%\Python\Python310-32"
 	)
+	set "Path=%PYTHON_PATH%;%PYTHON_PATH%\Scripts;%PATH%"
 )
-set "PATH=%PYTHON_PATH%;%PYTHON_PATH%\Scripts;%PATH%"
+
 python -V
 for /f "delims=" %%i in ('python -V 2^>^&1') do set "PYTHON_VERSION=%%i"
 if "%PYTHON_VERSION%" neq "Python 3.10.11" (

@@ -29,7 +29,7 @@ if "%CUR_PYTHON_VERSION%" neq "%PYTHON_VERSION%" (
 )
 echo "python version is good!!"
 
-
+git pull
 
 if %isx86% neq 1 (
     echo This is x64 architecture

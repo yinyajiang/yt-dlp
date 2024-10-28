@@ -45,7 +45,7 @@ if %isx86% neq 1 (
 		  
 	REM Prepare
 	python -m bundle.pyinstaller --onedir -n yt-dlp
-	powershell -Command "Compress-Archive -Path ./dist/yt-dlp/* -DestinationPath ./dist/yt-dlp_win7.zip"
+	powershell -Command "Compress-Archive -Force -Path ./dist/yt-dlp/* -DestinationPath ./dist/yt-dlp_win7.zip"
 
 ) else (
     echo This is x32 architecture
@@ -62,7 +62,7 @@ if %isx86% neq 1 (
 	REM Build
 	python -m bundle.pyinstaller
 	python -m bundle.pyinstaller --onedir -n yt-dlp
-	powershell -Command "Compress-Archive -Path ./dist/yt-dlp/* -DestinationPath ./dist/yt-dlp_win_x86.zip"
+	powershell -Command "Compress-Archive -Force -Path ./dist/yt-dlp/* -DestinationPath ./dist/yt-dlp_win_x86.zip"
 )
 pause
 

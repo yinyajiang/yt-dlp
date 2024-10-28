@@ -22,7 +22,7 @@ echo %PATH%
 python -V
 for /f "tokens=2" %%i in ('python -V 2^>^&1') do set CUR_PYTHON_VERSION=%%i
 if "%CUR_PYTHON_VERSION%" neq "%PYTHON_VERSION%" (
-    echo Python version is not 3.10.11, exiting...
+    echo Python version is not %PYTHON_VERSION%, exiting...
     exit /b 1
 )
 echo "python version is good!!"

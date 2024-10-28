@@ -2,25 +2,20 @@ REM windows7 python https://github.com/adang1345/PythonWin7/blob/master/3.10.11
 
 @echo off
 
+set "PYTHON_VERSION=3.10.11"
 if defined ProgramFiles(x86) (
     echo 64 bit system
-	set "PYTHON_PATH=%LOCALAPPDATA%\Programs\Python\Python310"
-	if not exist "%PYTHON_PATH%" (
-		set "PYTHON_PATH=%APPDATA%\Python\Python310"
-	)
-	set "PATH=%PYTHON_PATH%;%PYTHON_PATH%\Scripts;%PATH%"
+	set "PYTHON_DIR=Python310"
 ) else (
     echo 32 bit system
-	set "PYTHON_PATH=%LOCALAPPDATA%\Programs\Python\Python310-32"
-	if not exist "%PYTHON_PATH%" (
-		set "PYTHON_PATH=%APPDATA%\Python\Python310-32"
-	)
-	set "Path=%PYTHON_PATH%;%PYTHON_PATH%\Scripts;%PATH%"
+	set "PYTHON_DIR=Python310-32"
 )
 
+set "PATH=%PYTHON_DIR%;%PYTHON_DIR%\Scripts;%PATH%"
+
 python -V
-for /f "delims=" %%i in ('python -V 2^>^&1') do set "PYTHON_VERSION=%%i"
-if "%PYTHON_VERSION%" neq "Python 3.10.11" (
+for /f "delims=" %%i in ('python -V 2^>^&1') do set "CUR_PYTHON_VERSION=%%i"
+if "%CUR_PYTHON_VERSION%" neq "%PYTHON_VERSION%" (
     echo Python version is not 3.10.11, exiting...
     exit /b 1
 )

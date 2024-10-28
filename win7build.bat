@@ -48,7 +48,7 @@ if %isx86% neq 1 (
 	powershell -Command "Compress-Archive -Path ./dist/yt-dlp/* -DestinationPath ./dist/yt-dlp_win7.zip"
 
 ) else (
-    echo This is not x32 architecture
+    echo This is x32 architecture
 	
 	REM Install Requirements
 	python devscripts/install_deps.py -o --include build

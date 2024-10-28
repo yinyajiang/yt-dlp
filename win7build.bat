@@ -38,5 +38,5 @@ python devscripts/update-version.py "2024.01.01"
 python devscripts/make_lazy_extractors.py
       
 REM Prepare
-python -m bundle.pyinstaller --onedir
+python -m bundle.pyinstaller --onedir -n yt-dlp
 powershell -Command "Compress-Archive -Path ./dist/yt-dlp/* -DestinationPath ./dist/yt-dlp_win7.zip"

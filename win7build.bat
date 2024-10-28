@@ -5,13 +5,17 @@ REM windows7 python https://github.com/adang1345/PythonWin7/blob/master/3.10.11
 set "PYTHON_VERSION=3.10.11"
 if defined ProgramFiles(x86) (
     echo 64 bit system
-	set "PYTHON_DIR=Python310"
+	set "PYTHON_DIR_NAME=Python310"
 ) else (
     echo 32 bit system
-	set "PYTHON_DIR=Python310-32"
+	set "PYTHON_DIR_NAME=Python310-32"
 )
 
-set "PATH=%PYTHON_DIR%;%PYTHON_DIR%\Scripts;%PATH%"
+set "PYTHON_PATH=%LOCALAPPDATA%\Programs\Python\%PYTHON_DIR_NAME%"
+if not exist "%PYTHON_PATH%" (
+	set "PYTHON_PATH=%APPDATA%\Python\%PYTHON_DIR_NAME%"
+)
+set "PATH=%PYTHON_PATH%;%PYTHON_PATH%\Scripts;%PATH%"
 
 python -V
 for /f "delims=" %%i in ('python -V 2^>^&1') do set "CUR_PYTHON_VERSION=%%i"

@@ -56,7 +56,7 @@ if %isx86% neq 1 (
 	python -m pip install -U "https://yt-dlp.github.io/Pyinstaller-Builds/i686/pyinstaller-6.10.0-py3-none-any.whl"
 
 	REM Prepare
-	python devscripts/update-version.py -c "${{ inputs.channel }}" -r "${{ needs.process.outputs.origin }}" "${{ inputs.version }}"
+	python devscripts/update-version.py "2024.01.01"
 	python devscripts/make_lazy_extractors.py
 
 	REM Build

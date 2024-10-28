@@ -18,7 +18,7 @@ set "PATH=%PYTHON_PATH%;%PYTHON_PATH%\Scripts;%PATH%"
 
 echo %PATH%
 
-python -V
+%PYTHON_PATH%\python -V
 for /f "delims=" %%i in ('python -V 2^>^&1') do set "CUR_PYTHON_VERSION=%%i"
 if "%CUR_PYTHON_VERSION%" neq "%PYTHON_VERSION%" (
     echo Python version is not 3.10.11, exiting...
@@ -27,15 +27,15 @@ if "%CUR_PYTHON_VERSION%" neq "%PYTHON_VERSION%" (
 echo "python version is good!!"
 
 REM Install Requirements
-python devscripts/install_deps.py -o --include build
-python devscripts/install_deps.py --include curl-cffi
-python -m pip install -U "https://yt-dlp.github.io/Pyinstaller-Builds/x86_64/pyinstaller-6.10.0-py3-none-any.whl"
+%PYTHON_PATH%\python devscripts/install_deps.py -o --include build
+%PYTHON_PATH%\python devscripts/install_deps.py --include curl-cffi
+%PYTHON_PATH%\python -m pip install -U "https://yt-dlp.github.io/Pyinstaller-Builds/x86_64/pyinstaller-6.10.0-py3-none-any.whl"
 
 
 REM Prepare
-python devscripts/update-version.py "2024.01.01"
-python devscripts/make_lazy_extractors.py
+%PYTHON_PATH%\python devscripts/update-version.py "2024.01.01"
+%PYTHON_PATH%\python devscripts/make_lazy_extractors.py
       
 REM Prepare
-python -m bundle.pyinstaller --onedir
-powershell -Command "Compress-Archive -Path ./dist/yt-dlp/* -DestinationPath ./dist/yt-dlp_win7.zip"
+%PYTHON_PATH%\python -m bundle.pyinstaller --onedir
+%PYTHON_PATH%\powershell -Command "Compress-Archive -Path ./dist/yt-dlp/* -DestinationPath ./dist/yt-dlp_win7.zip"

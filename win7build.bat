@@ -3,12 +3,11 @@ REM windows7 python https://github.com/adang1345/PythonWin7/blob/master/3.10.11
 @echo off
 
 set "PYTHON_VERSION=3.10.11"
-if defined ProgramFiles(x86) (
-    echo 64 bit system
-	set "PYTHON_DIR_NAME=Python310"
-) else (
+set "PYTHON_DIR_NAME=Python310"
+
+if not defined ProgramFiles(x86) (
     echo 32 bit system
-	set "PYTHON_DIR_NAME=Python310-32"
+	set "PYTHON_DIR_NAME=%PYTHON_DIR_NAME%-32"
 )
 
 set "PYTHON_PATH=%LOCALAPPDATA%\Programs\Python\%PYTHON_DIR_NAME%"

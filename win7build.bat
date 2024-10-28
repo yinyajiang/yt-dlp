@@ -60,7 +60,6 @@ if %isx86% neq 1 (
 	python devscripts/make_lazy_extractors.py
 
 	REM Build
-	python -m bundle.pyinstaller
 	python -m bundle.pyinstaller --onedir -n yt-dlp
 	powershell -Command "Compress-Archive -Force -Path ./dist/yt-dlp/* -DestinationPath ./dist/yt-dlp_win_x86.zip"
 )

@@ -16,6 +16,8 @@ if not exist "%PYTHON_PATH%" (
 )
 set "PATH=%PYTHON_PATH%;%PYTHON_PATH%\Scripts;%PATH%"
 
+echo %PATH%
+
 python -V
 for /f "delims=" %%i in ('python -V 2^>^&1') do set "CUR_PYTHON_VERSION=%%i"
 if "%CUR_PYTHON_VERSION%" neq "%PYTHON_VERSION%" (

@@ -14,6 +14,7 @@
  - **6play**
  - **7plus**
  - **8tracks**
+ - **91porn**
  - **9c9media**
  - **9gag**: 9GAG
  - **9News**
@@ -70,10 +71,12 @@
  - **AmericasTestKitchen**
  - **AmericasTestKitchenSeason**
  - **AmHistoryChannel**
+ - **AMVNews**
  - **AnchorFMEpisode**
  - **anderetijden**: npo.nl, ntr.nl, omroepwnl.nl, zapp.nl and npo3.nl
  - **Angel**
  - **AnimalPlanet**
+ - **Anime1**
  - **ant1newsgr:article**: ant1news.gr articles
  - **ant1newsgr:embed**: ant1news.gr embedded videos
  - **antenna:watch**: antenna.gr and ant1news.gr videos
@@ -136,6 +139,7 @@
  - **bbc.co.uk:​iplayer:episodes**
  - **bbc.co.uk:​iplayer:group**
  - **bbc.co.uk:playlist**
+ - **BBCMaestroCom**
  - **BBVTV**: [*bbvtv*](## "netrc machine")
  - **BBVTVLive**: [*bbvtv*](## "netrc machine")
  - **BBVTVRecordings**: [*bbvtv*](## "netrc machine")
@@ -173,6 +177,8 @@
  - **BiliBiliPlayer**
  - **BilibiliPlaylist**
  - **BiliBiliSearch**: Bilibili video search; "bilisearch:" prefix
+ - **BiliBiliSearchAll**: Bilibili all search; "biliallsearch:" prefix
+ - **BiliBiliSearchPage**: Bilibili Search Page URL Extractor
  - **BilibiliSeriesList**
  - **BilibiliSpaceAudio**
  - **BilibiliSpaceVideo**
@@ -218,6 +224,7 @@
  - **BusinessInsider**
  - **BuzzFeed**
  - **BYUtv**: (**Currently broken**)
+ - **CableAV**
  - **CaffeineTV**
  - **Callin**
  - **Caltrans**
@@ -328,6 +335,7 @@
  - **dailymotion:user**: [*dailymotion*](## "netrc machine")
  - **DailyWire**
  - **DailyWirePodcast**
+ - **DailyWireShow**
  - **damtomo:record**
  - **damtomo:video**
  - **dangalplay**: [*dangalplay*](## "netrc machine")
@@ -350,6 +358,7 @@
  - **DigitalConcertHall**: [*digitalconcerthall*](## "netrc machine") DigitalConcertHall extractor
  - **DigitallySpeaking**
  - **Digiteka**
+ - **digiview**: [*youtube*](## "netrc machine") Digiview
  - **DiscogsReleasePlaylist**
  - **DiscoveryLife**
  - **DiscoveryNetworksDe**
@@ -363,6 +372,7 @@
  - **dlf:corpus**: DLF Multi-feed Archives
  - **dlive:stream**
  - **dlive:vod**
+ - **DoodStream**
  - **Douyin**
  - **DouyuShow**
  - **DouyuTV**: 斗鱼直播
@@ -393,6 +403,7 @@
  - **EinsUndEinsTV**: [*1und1tv*](## "netrc machine")
  - **EinsUndEinsTVLive**: [*1und1tv*](## "netrc machine")
  - **EinsUndEinsTVRecordings**: [*1und1tv*](## "netrc machine")
+ - **Einthusan**
  - **eitb.tv**
  - **ElementorEmbed**
  - **Elonet**
@@ -430,6 +441,7 @@
  - **facebook**: [*facebook*](## "netrc machine")
  - **facebook:ads**
  - **facebook:reel**
+ - **facebook:short**
  - **FacebookPluginsVideo**
  - **fancode:live**: [*fancode*](## "netrc machine") (**Currently broken**)
  - **fancode:vod**: [*fancode*](## "netrc machine") (**Currently broken**)
@@ -440,6 +452,7 @@
  - **fc2:live**
  - **Fczenit**
  - **Fifa**
+ - **FileMoon**
  - **filmon**
  - **filmon:channel**
  - **Filmweb**
@@ -481,6 +494,7 @@
  - **Funker530**
  - **Fux**
  - **FuyinTV**
+ - **FYPTT**
  - **Gab**
  - **GabTV**
  - **Gaia**: [*gaia*](## "netrc machine")
@@ -548,6 +562,7 @@
  - **HearThisAt**
  - **Heise**
  - **HellPorno**
+ - **HentaiStigma**
  - **hetklokhuis**
  - **hgtv.com:show**
  - **HGTVDe**
@@ -566,6 +581,7 @@
  - **hotstar:playlist**
  - **hotstar:season**
  - **hotstar:series**
+ - **Hqporner**
  - **hrfernsehen**
  - **HRTi**: [*hrti*](## "netrc machine")
  - **HRTiPlaylist**: [*hrti*](## "netrc machine")
@@ -604,7 +620,7 @@
  - **Instagram**: [*instagram*](## "netrc machine")
  - **instagram:story**: [*instagram*](## "netrc machine")
  - **instagram:tag**: [*instagram*](## "netrc machine") Instagram hashtag search URLs
- - **instagram:user**: [*instagram*](## "netrc machine") Instagram user profile (**Currently broken**)
+ - **instagram:user**: [*instagram*](## "netrc machine") Instagram user profile
  - **InstagramIOS**: IOS instagram:// URL
  - **Internazionale**
  - **InternetVideoArchive**
@@ -630,6 +646,8 @@
  - **iwara:user**: [*iwara*](## "netrc machine")
  - **Ixigua**
  - **Izlesene**
+ - **Jable**
+ - **JablePlaylist**
  - **Jamendo**
  - **JamendoAlbum**
  - **JeuxVideo**: (**Currently broken**)
@@ -775,6 +793,7 @@
  - **megatvcom:embed**: megatv.com embedded videos
  - **Meipai**: 美拍
  - **MelonVOD**
+ - **MercadoLibre**
  - **Metacritic**
  - **mewatch**
  - **MicrosoftBuild**
@@ -819,6 +838,7 @@
  - **MotherlessGroup**
  - **MotherlessUploader**
  - **Motorsport**: motorsport.com (**Currently broken**)
+ - **Mover**
  - **MovieFap**
  - **Moviepilot**
  - **MoviewPlay**
@@ -1084,6 +1104,8 @@
  - **pluralsight**: [*pluralsight*](## "netrc machine")
  - **pluralsight:course**
  - **PlutoTV**: (**Currently broken**)
+ - **PMVHaven**
+ - **PMVHavenProfile**
  - **PodbayFM**
  - **PodbayFMChannel**
  - **Podchaser**
@@ -1100,6 +1122,7 @@
  - **polskieradio:player**
  - **polskieradio:podcast**
  - **polskieradio:​podcast:list**
+ - **PomfTVLive**
  - **Popcorntimes**
  - **PopcornTV**
  - **Pornbox**
@@ -1339,6 +1362,8 @@
  - **soop:catchstory**: [*afreecatv*](## "netrc machine") sooplive.co.kr catch story
  - **soop:live**: [*afreecatv*](## "netrc machine") sooplive.co.kr livestreams
  - **soop:user**: [*afreecatv*](## "netrc machine")
+ - **soopglobal:live**
+ - **soopglobal:vod**
  - **soundcloud**: [*soundcloud*](## "netrc machine")
  - **soundcloud:playlist**: [*soundcloud*](## "netrc machine")
  - **soundcloud:related**: [*soundcloud*](## "netrc machine")
@@ -1391,6 +1416,7 @@
  - **StoryFireUser**
  - **Streamable**
  - **StreamCZ**
+ - **Streamsb**
  - **StreetVoice**
  - **StretchInternet**
  - **Stripchat**
@@ -1438,7 +1464,7 @@
  - **Telegraaf**
  - **telegram:embed**
  - **TeleMB**: (**Currently broken**)
- - **Telemundo**: (**Currently broken**)
+ - **Telemundo**
  - **TeleQuebec**
  - **TeleQuebecEmission**
  - **TeleQuebecLive**
@@ -1463,17 +1489,23 @@
  - **TheStar**
  - **TheSun**
  - **TheWeatherChannel**
+ - **ThirtyDaySinger**
+ - **ThirtyDaySingerPlaylist**
  - **ThisAmericanLife**
+ - **ThisAV**
  - **ThisOldHouse**: [*thisoldhouse*](## "netrc machine")
  - **ThisVid**
  - **ThisVidMember**
  - **ThisVidPlaylist**
+ - **Threads**
+ - **ThreadsIOS**: IOS barcelona:// URL
  - **ThreeSpeak**
  - **ThreeSpeakUser**
  - **TikTok**
  - **tiktok:collection**
  - **tiktok:effect**: (**Currently broken**)
  - **tiktok:live**
+ - **tiktok:playlist**
  - **tiktok:sound**: (**Currently broken**)
  - **tiktok:tag**: (**Currently broken**)
  - **tiktok:user**
@@ -1678,6 +1710,7 @@
  - **VuClip**
  - **VVVVID**
  - **VVVVIDShow**
+ - **Vyneer**
  - **Walla**
  - **WalyTV**: [*walytv*](## "netrc machine")
  - **WalyTVLive**: [*walytv*](## "netrc machine")
@@ -1738,6 +1771,7 @@
  - **wykop:​post:comment**
  - **Xanimu**
  - **XboxClips**
+ - **XFileShare**: XFileShare based sites: Aparat, ClipWatching, GoUnlimited, GoVid, HolaVid, Streamty, TheVideoBee, Uqload, VidBom, vidlo, VidLocker, VidShare, VUp, WolfStream, XVideoSharing
  - **XHamster**
  - **XHamsterEmbed**
  - **XHamsterUser**

@@ -2,6 +2,10 @@ name: Release
 on:
   workflow_call:
     inputs:
+      prerelease:
+        required: false
+        default: true
+        type: boolean
       source:
         required: false
         default: ''
@@ -14,11 +18,7 @@ on:
         required: false
         default: ''
         type: string
-      prerelease:
-        required: false
-        default: true
-        type: boolean
-        
+
     secrets:
       APPLE_CERTIFICATE:
         required: false

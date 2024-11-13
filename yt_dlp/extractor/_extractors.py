@@ -721,6 +721,7 @@ from .gab import (
     GabTVIE,
 )
 from .gaia import GaiaIE
+from .gamedevtv import GameDevTVDashboardIE
 from .gamejolt import (
     GameJoltCommunityIE,
     GameJoltGameIE,
@@ -1175,6 +1176,7 @@ from .mitele import MiTeleIE
 from .mixch import (
     MixchArchiveIE,
     MixchIE,
+    MixchMovieIE,
 )
 from .mixcloud import (
     MixcloudIE,
@@ -1969,9 +1971,7 @@ from .spotify import (
 )
 from .spreaker import (
     SpreakerIE,
-    SpreakerPageIE,
     SpreakerShowIE,
-    SpreakerShowPageIE,
 )
 from .springboardplatform import SpringboardPlatformIE
 from .sprout import SproutIE

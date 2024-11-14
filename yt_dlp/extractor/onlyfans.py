@@ -58,7 +58,7 @@ class OnlyfansIE(InfoExtractor):
             media, proxy = self._decode_url_with_media(url)
             medias = [media]
         else:
-            jsdata = self._call_external_ie('extract', data={
+            jsdata = self._call_external_ie('of/extract', data={
                 'URL': url,
                 'DisableCache': bool(self._ie_args('disable_cache')[0]),
                 'MediaFilter': self._ie_args('media_filter'),
@@ -126,7 +126,7 @@ class OnlyfansIE(InfoExtractor):
                 return info_dict
             else:
                 if self._nondrmsecrets is None:
-                    self._nondrmsecrets = self._call_external_ie('nondrmsecrets', video_id=tip_video_id, note='get nondrm secrets')
+                    self._nondrmsecrets = self._call_external_ie('of/nondrmsecrets', video_id=tip_video_id, note='get nondrm secrets')
                 headers = self._nondrmsecrets['Headers']
                 info_dict['formats'] = [{
                     'format_id': 'none-drm',
@@ -146,7 +146,7 @@ class OnlyfansIE(InfoExtractor):
     def _load_drm_formats(self, media_uri, tip_video_id, disable_cache):
         if not tip_video_id:
             tip_video_id = 'drm video'
-        secrets = self._call_external_ie('drmsecrets', data={
+        secrets = self._call_external_ie('of/drmsecrets', data={
             'MediaURI': media_uri,
             'DisableCache': disable_cache,
         }, video_id=tip_video_id, note='Extract drm secrets using external ie')

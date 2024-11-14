@@ -1719,6 +1719,10 @@ def create_parser():
         dest='ffmpeg_location',
         help='Location of the ffmpeg binary; either the path to the binary or its containing directory')
     postproc.add_option(
+        '--mp4decrypt-location', metavar='PATH',
+        dest='mp4decrypt_location',
+        help='Location of the mp4decrypt binary')
+    postproc.add_option(
         '--exec',
         metavar='[WHEN:]CMD', dest='exec_cmd', **when_prefix('after_move'),
         help=(

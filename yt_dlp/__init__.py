@@ -31,6 +31,7 @@ from .postprocessor import (
     FFmpegVideoRemuxerPP,
     MetadataFromFieldPP,
     MetadataParserPP,
+    MP4DecryptPP,
 )
 from .update import Updater
 from .utils import (
@@ -456,6 +457,9 @@ def validate_options(opts):
 
     if opts.ffmpeg_location is not None:
         opts.ffmpeg_location = expand_path(opts.ffmpeg_location)
+
+    if opts.mp4decrypt_location is not None:
+        opts.mp4decrypt_location = expand_path(opts.mp4decrypt_location)
 
     if opts.user_agent is not None:
         opts.headers.setdefault('User-Agent', opts.user_agent)
@@ -953,6 +957,7 @@ def parse_options(argv=None):
         'match_filter': opts.match_filter,
         'color': opts.color,
         'ffmpeg_location': opts.ffmpeg_location,
+        'mp4decrypt_location': opts.mp4decrypt_location,
         'hls_prefer_native': opts.hls_prefer_native,
         'hls_use_mpegts': opts.hls_use_mpegts,
         'hls_split_discontinuity': opts.hls_split_discontinuity,
@@ -992,6 +997,9 @@ def _real_main(argv=None):
     # See https://github.com/yt-dlp/yt-dlp/issues/2191
     if opts.ffmpeg_location:
         FFmpegPostProcessor._ffmpeg_location.set(opts.ffmpeg_location)
+
+    if opts.mp4decrypt_location:
+        MP4DecryptPP._mp4decrypt_location.set(opts.mp4decrypt_location)
 
     with YoutubeDL(ydl_opts) as ydl:
         pre_process = opts.update_self or opts.rm_cachedir

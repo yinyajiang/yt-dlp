@@ -58,6 +58,7 @@ from .postprocessor import (
     FFmpegPostProcessor,
     FFmpegVideoConvertorPP,
     MoveFilesAfterDownloadPP,
+    MP4DecryptPP,
     get_postprocessor,
 )
 from .postprocessor.ffmpeg import resolve_mapping as resolve_recode_mapping
@@ -683,7 +684,7 @@ class YoutubeDL:
         if system_deprecation:
             self.deprecated_feature(system_deprecation.replace('\n', '\n                    '))
 
-        if self.params.get('allow_unplayable_formats'):
+        if False and self.params.get('allow_unplayable_formats'):
             self.report_warning(
                 f'You have asked for {self._format_err("UNPLAYABLE", self.Styles.EMPHASIS)} formats to be listed/downloaded. '
                 'This is a developer option intended for debugging. \n'
@@ -712,7 +713,7 @@ class YoutubeDL:
 
         self.params['compat_opts'] = set(self.params.get('compat_opts', ()))
         self.params['http_headers'] = HTTPHeaderDict(std_headers, self.params.get('http_headers'))
-        self._load_cookies(self.params['http_headers'].get('Cookie'))  # compat
+        self._load_cookies(self.params['http_headers'].get('Cookie'), autoscope=False)  # compat
         self.params['http_headers'].pop('Cookie', None)
 
         if auto_init and auto_init != 'no_verbose_header':
@@ -1728,14 +1729,15 @@ class YoutubeDL:
                     'Please consider loading cookies from a file or browser instead.')
                 self.__header_cookies.append(prepared_cookie)
             elif autoscope:
-                self.report_warning(
-                    'The extractor result contains an unscoped cookie as an HTTP header. '
-                    f'If you are using yt-dlp with an input URL{bug_reports_message(before=",")}',
-                    only_once=True)
+                # self.report_warning(
+                #     'The extractor result contains an unscoped cookie as an HTTP header. '
+                #     f'If you are using yt-dlp with an input URL{bug_reports_message(before=",")}',
+                #     only_once=True)
                 self._apply_header_cookies(autoscope, [prepared_cookie])
             else:
-                self.report_error('Unscoped cookies are not allowed; please specify some sort of scoping',
-                                  tb=False, is_error=False)
+                # self.report_error('Unscoped cookies are not allowed; please specify some sort of scoping',
+                #                   tb=False, is_error=False)
+                self.__header_cookies.append(prepared_cookie)
 
     def _apply_header_cookies(self, url, cookies=None):
         """Applies stray header cookies to the provided url
@@ -3261,6 +3263,9 @@ class YoutubeDL:
             if self._num_downloads >= float(self.params.get('max_downloads') or 'inf'):
                 raise MaxDownloadsReached
 
+        # update params
+        self.params.update(info_dict.get('_params', {}))
+
         if self.params.get('simulate'):
             info_dict['__write_download_archive'] = self.params.get('force_write_download_archive')
             check_max_downloads()
@@ -3395,6 +3400,11 @@ class YoutubeDL:
                         self.report_error(f'{msg}. Aborting')
                         return
 
+                decrypter = MP4DecryptPP(self)
+                if decrypter.available and decrypter.can_decrypt(info_dict):
+                    info_dict['__postprocessors'].append(decrypter)
+                    info_dict['__will_decrypt'] = True
+                # multiple files
                 if info_dict.get('requested_formats') is not None:
                     old_ext = info_dict['ext']
                     if self.params.get('merge_output_format') is None:
@@ -3441,7 +3451,7 @@ class YoutubeDL:
                         success, real_download = self.dl(temp_filename, info_dict)
                         info_dict['__real_download'] = real_download
                     else:
-                        if self.params.get('allow_unplayable_formats'):
+                        if False and self.params.get('allow_unplayable_formats'):
                             self.report_warning(
                                 'You have requested merging of multiple formats '
                                 'while also allowing unplayable formats to be downloaded. '
@@ -3477,7 +3487,7 @@ class YoutubeDL:
                             info_dict['__real_download'] = info_dict['__real_download'] or real_download
                             success = success and partial_success
 
-                    if downloaded and merger.available and not self.params.get('allow_unplayable_formats'):
+                    if downloaded and merger.available and (not self.params.get('allow_unplayable_formats') or info_dict.get('__will_decrypt')):
                         info_dict['__postprocessors'].append(merger)
                         info_dict['__files_to_merge'] = downloaded
                         # Even if there were no downloads, it is being merged only now

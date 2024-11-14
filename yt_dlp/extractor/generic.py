@@ -2427,7 +2427,7 @@ class GenericIE(InfoExtractor):
 
         # Check for direct link to a video
         content_type = full_response.headers.get('Content-Type', '').lower()
-        m = re.match(r'(?P<type>audio|video|application(?=/(?:ogg$|(?:vnd\.apple\.|x-)?mpegurl)))/(?P<format_id>[^;\s]+)', content_type)
+        m = re.match(r'(?P<type>audio|video|image|application(?=/(?:ogg$|(?:vnd\.apple\.|x-)?mpegurl)))/(?P<format_id>[^;\s]+)', content_type)
         if m:
             self.report_detected('direct video link')
             headers = filter_dict({'Referer': smuggled_data.get('referer')})
@@ -2448,6 +2448,8 @@ class GenericIE(InfoExtractor):
                     'vcodec': 'none' if m.group('type') == 'audio' else None,
                 }]
                 info_dict['direct'] = True
+                if m.group('type') == 'image':
+                    info_dict['_media_type'] = 'PHOTO'
             info_dict.update({
                 'formats': formats,
                 'subtitles': subtitles,

@@ -471,7 +471,7 @@ class FFmpegFD(ExternalFD):
         return (
             info_dict.get('requested_formats')
             and info_dict.get('protocol')
-            and not params.get('allow_unplayable_formats')
+            and (not params.get('allow_unplayable_formats') or info_dict.get('__will_decrypt'))
             and 'no-direct-merge' not in params.get('compat_opts', [])
             and cls.can_download(info_dict))
 

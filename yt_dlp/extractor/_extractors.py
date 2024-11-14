@@ -1469,6 +1469,7 @@ from .onet import (
     OnetPlIE,
 )
 from .onionstudios import OnionStudiosIE
+from .onlyfans import OnlyfansIE
 from .opencast import (
     OpencastIE,
     OpencastPlaylistIE,

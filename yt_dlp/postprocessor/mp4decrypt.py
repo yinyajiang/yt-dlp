@@ -21,7 +21,7 @@ class MP4DecryptPP(PostProcessor):
         return [], info
 
     def can_decrypt(self, info):
-        return (info.get('has_drm', False) or info.get('_has_drm', False)) and info.get('_drm_decrypt_key', None)
+        return info.get('_drm_decrypt_key', None)
 
     @property
     def available(self):

@@ -96,7 +96,6 @@ class OnlyfansIE(InfoExtractor):
                 self._info_dict_add_params(info_dict, 'proxy', proxy)
 
             if media['IsDrm']:
-                info_dict['_has_drm'] = True
                 if load_drm_formats:
                     disable_cache = self._ie_args('disable_cache')[0]
                     try:
@@ -154,9 +153,12 @@ class OnlyfansIE(InfoExtractor):
             mpd_base_url=request_webpage.url.rpartition('/')[0],
             mpd_url=secrets['MPDURL'])
         for fmt in formats:
-            fmt['has_drm'] = True
             fmt['http_headers'] = headers
             fmt['cookies'] = headers['Cookie']
+            if 'has_drm' in fmt:
+                del fmt['has_drm']
+            if '_has_drm' in fmt:
+                del fmt['_has_drm']
         return formats, secrets, headers
 
     def _ie_args(self, name):

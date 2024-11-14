@@ -1,5 +1,6 @@
 import json
 import urllib
+import urllib.parse
 import xml
 
 from .common import InfoExtractor
@@ -14,7 +15,7 @@ class OnlyfansIE(InfoExtractor):
     _nondrmsecrets = None
 
     def _call_external_ie(self, endpoint, note='Request External IE', large_timeout=False, **kwargs):
-        addr = self._ie_arg('external_ie')
+        addr = self._ie_args('external_ie')[0]
         if not addr:
             raise ExtractorError('external_ie not found')
         if not addr.endswith('/'):
@@ -42,25 +43,27 @@ class OnlyfansIE(InfoExtractor):
         return jsdata
 
     def _real_extract(self, url):
-        url = self._decode_media_uri(url)
-        jsdata = self._call_external_ie('extract', data={
-            'URL': url,
-            'DisableCache': bool(self._ie_arg('disable_cache')),
-        }, video_id=url, note='Extract media info using external ie', large_timeout=True)
-        if jsdata['ExtractResult']['IsFromCache']:
-            self.to_screen('Media info is from cache')
-        medias = jsdata['ExtractResult']['Medias']
-        proxy = jsdata['Proxy']
+        if self._is_url_with_media(url):
+            self.to_screen('Decoding encoded media url')
+            media, proxy = self._decode_url_with_media(url)
+            medias = [media]
+        else:
+            jsdata = self._call_external_ie('extract', data={
+                'URL': url,
+                'DisableCache': bool(self._ie_args('disable_cache')[0]),
+                'MediaFilter': self._ie_args('media_filter'),
+            }, video_id=url, note='Extract media info using external ie', large_timeout=True)
+            if jsdata['ExtractResult']['IsFromCache']:
+                self.to_screen('Media info is from cache')
+            medias = jsdata['ExtractResult']['Medias']
+            proxy = jsdata['Proxy']
 
         if len(medias) == 1:
-            entry = self._extract_media_info(tip_video_id=url,
-                                             media=medias[0],
-                                             proxy=proxy,
-                                             load_drm_formats=True,
-                                             panic=True)
-            entry['webpage_url'] = url
-            entry['original_url'] = url
-            return entry
+            return self._extract_media_info(tip_video_id=url,
+                                            media=medias[0],
+                                            proxy=proxy,
+                                            load_drm_formats=True,
+                                            panic=True)
 
         entries = []
         for i, media in enumerate(medias):
@@ -95,7 +98,7 @@ class OnlyfansIE(InfoExtractor):
             if media['IsDrm']:
                 info_dict['_has_drm'] = True
                 if load_drm_formats:
-                    disable_cache = self._ie_arg('disable_cache')
+                    disable_cache = self._ie_args('disable_cache')[0]
                     try:
                         info_dict['formats'], secrets, headers = self._load_drm_formats(media['MediaURI'],
                                                                                         tip_video_id=tip_video_id,
@@ -109,7 +112,7 @@ class OnlyfansIE(InfoExtractor):
                     info_dict['_drm_decrypt_key'] = secrets['DecryptKey']
                     self._info_dict_add_params(info_dict, 'http_headers', headers)
                 else:
-                    info_dict['url'] = self._encode_media_uri(media['MediaURI'])
+                    info_dict['url'] = self._encode_media_to_url(media, proxy)
                     info_dict['_type'] = 'url'
                 return info_dict
             else:
@@ -156,23 +159,44 @@ class OnlyfansIE(InfoExtractor):
             fmt['cookies'] = headers['Cookie']
         return formats, secrets, headers
 
-    def _ie_arg(self, name):
+    def _ie_args(self, name):
         args = self._configuration_arg(name, [], ie_key=OnlyfansIE, casesense=True)
         if not args:
-            return None
-        return args[0]
+            return [None]
+        if not isinstance(args, list):
+            return [args]
+        return args
 
     def _info_dict_add_params(self, info_dict, k, v):
         if '_params' not in info_dict:
             info_dict['_params'] = {}
         info_dict['_params'][k] = v
 
-    def _encode_media_uri(self, media_uri):
-        p = urllib.parse.quote(media_uri)
-        return 'https://onlyfans.com?__media__uri=' + p
+    def _encode_media_to_url(self, media, proxy):
+        params = urllib.parse.urlencode({
+            'MediaURI': media['MediaURI'],
+            'Type': media['Type'],
+            'PostID': media['PostID'],
+            'MediaID': media['MediaID'],
+            'Title': media['Title'],
+            'IsDrm': media['IsDrm'],
+            'proxy': proxy,
+        })
+        return f'https://onlyfans.com?__media_info_=true&{params}'
 
-    def _decode_media_uri(self, media_uri):
-        if '__media__uri=' not in media_uri:
-            return media_uri
-        p = media_uri.split('__media__uri=')[1]
-        return urllib.parse.unquote(p)
+    def _is_url_with_media(self, url):
+        return '__media_info_=true' in url
+
+    def _decode_url_with_media(self, url):
+        if not self._is_url_with_media(url):
+            raise ExtractorError('Not an encoded media url')
+        parsed = urllib.parse.urlparse(url)
+        query_params = urllib.parse.parse_qs(parsed.query)
+        media = {}
+        media['MediaURI'] = query_params.get('MediaURI', [None])[0]
+        media['Type'] = query_params.get('Type', [None])[0]
+        media['PostID'] = query_params.get('PostID', [None])[0]
+        media['MediaID'] = query_params.get('MediaID', [None])[0]
+        media['Title'] = query_params.get('Title', [None])[0]
+        media['IsDrm'] = query_params.get('IsDrm', [None])[0]
+        return media, query_params.get('proxy', [None])[0]

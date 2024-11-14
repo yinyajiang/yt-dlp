@@ -14,10 +14,20 @@ class OnlyfansIE(InfoExtractor):
     IE_NAME = 'onlyfans'
     _nondrmsecrets = None
 
-    def _call_external_ie(self, endpoint, note='Request External IE', large_timeout=False, **kwargs):
+    def _get_external_ie_addr(self):
         addr = self._ie_args('external_ie')[0]
         if not addr:
             raise ExtractorError('external_ie not found')
+        try:
+            port = int(addr)
+            if port == 0:
+                raise ExtractorError('external_ie port is 0')
+            return f'http://localhost:{port}'
+        except Exception:
+            return addr
+
+    def _call_external_ie(self, endpoint, note='Request External IE', large_timeout=False, **kwargs):
+        addr = self._get_external_ie_addr()
         if not addr.endswith('/'):
             addr += '/'
         if 'data' in kwargs:

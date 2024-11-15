@@ -22,7 +22,7 @@ class OnlyfansIE(InfoExtractor):
             port = int(addr)
             if port == 0:
                 raise ExtractorError('external_ie port is 0')
-            return f'http://localhost:{port}'
+            return f'http://127.0.0.1:{port}'
         except Exception:
             return addr
 

@@ -1,7 +1,6 @@
 import contextvars
 import os
 import subprocess
-from ..utils import encodeFilename
 from .common import PostProcessor
 
 
@@ -15,7 +14,7 @@ class MP4DecryptPP(PostProcessor):
     def run(self, info):
         files = self._get_files_from_info(info)
         for f in files:
-            dl_path, _ = os.path.split(encodeFilename(info['filepath']))
+            dl_path, _ = os.path.split(info['filepath'])
             inputpath = os.path.join(info.get('__finaldir', dl_path), f)
             self._decrypt(info['_drm_decrypt_key'], inputpath)
         return [], info

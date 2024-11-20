@@ -1,7 +1,7 @@
+import functools
 import uuid
 
 from yt_dlp import int_or_none, traverse_obj
-from yt_dlp.compat import functools
 from yt_dlp.extractor.common import InfoExtractor
 from yt_dlp.utils import UserNotLive, bool_or_none, parse_iso8601
 

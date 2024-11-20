@@ -69,11 +69,13 @@ class OnlyfansIE(InfoExtractor):
             proxy = jsdata['Proxy']
 
         if len(medias) == 1:
-            return self._extract_media_info(tip_video_id=url,
-                                            media=medias[0],
-                                            proxy=proxy,
-                                            load_drm_formats=True,
-                                            panic=True)
+            info_dict = self._extract_media_info(tip_video_id=url,
+                                                 media=medias[0],
+                                                 proxy=proxy,
+                                                 load_drm_formats=True,
+                                                 panic=False)
+            if info_dict:
+                return info_dict
 
         entries = []
         for i, media in enumerate(medias):

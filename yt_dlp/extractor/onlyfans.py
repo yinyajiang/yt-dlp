@@ -39,7 +39,7 @@ class OnlyfansIE(InfoExtractor):
             if large_timeout:
                 old_timeout = self._downloader.params.get('socket_timeout', None)
                 self._downloader.params['socket_timeout'] = 9999
-            jsdata = self._download_json(addr + endpoint, note=note, **kwargs)
+            jsdata = self._get_json(addr + endpoint, note=note, **kwargs)
         finally:
             if large_timeout:
                 if old_timeout is None:

@@ -35,17 +35,12 @@ class OnlyfansIE(InfoExtractor):
                 kwargs['data'] = json.dumps(kwargs['data']).encode()
             elif isinstance(kwargs['data'], str):
                 kwargs['data'] = kwargs['data'].encode()
-        try:
-            if large_timeout:
-                old_timeout = self._downloader.params.get('socket_timeout', None)
-                self._downloader.params['socket_timeout'] = 9999
-            jsdata = self._no_proxy_get_json(addr + endpoint, note=note, **kwargs)
-        finally:
-            if large_timeout:
-                if old_timeout is None:
-                    self._downloader.params.pop('socket_timeout', None)
-                else:
-                    self._downloader.params['socket_timeout'] = old_timeout
+
+        if large_timeout:
+            jsdata = self._no_proxy_download_large_timeout(addr + endpoint, note=note, **kwargs)
+        else:
+            jsdata = self._no_proxy_download_json(addr + endpoint, note=note, **kwargs)
+
         if not jsdata:
             raise ExtractorError('No data returned from external IE')
         if 'error' in jsdata:
@@ -217,13 +212,3 @@ class OnlyfansIE(InfoExtractor):
 
     def _set_disable_proxy(self):
         self._downloader.params['proxy'] = ''
-
-    def _no_proxy_get_json(self, url, **kwargs):
-        old_proxy = self._downloader.params.get('proxy', None)
-        if old_proxy:
-            self._downloader.params['proxy'] = ''
-            js = self._download_json(url, **kwargs)
-            self._downloader.params['proxy'] = old_proxy
-            return js
-        else:
-            return self._download_json(url, **kwargs)

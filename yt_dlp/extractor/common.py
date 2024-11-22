@@ -3959,6 +3959,29 @@ class InfoExtractor:
 
         return super().__init_subclass__(**kwargs)
 
+    def _no_proxy_download_large_timeout(self, url, large_timeout=True, **kwargs):
+        try:
+            if large_timeout:
+                old_timeout = self._downloader.params.get('socket_timeout', None)
+                self._downloader.params['socket_timeout'] = 9999
+            return self._no_proxy_download_json(url, **kwargs)
+        finally:
+            if large_timeout:
+                if old_timeout is None:
+                    self._downloader.params.pop('socket_timeout', None)
+                else:
+                    self._downloader.params['socket_timeout'] = old_timeout
+
+    def _no_proxy_download_json(self, url, **kwargs):
+        old_proxy = self._downloader.params.get('proxy', None)
+        if old_proxy:
+            self._downloader.params['proxy'] = ''
+            js = self._download_json(url, **kwargs)
+            self._downloader.params['proxy'] = old_proxy
+            return js
+        else:
+            return self._download_json(url, **kwargs)
+
 
 class SearchInfoExtractor(InfoExtractor):
     """

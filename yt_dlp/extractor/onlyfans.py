@@ -103,7 +103,7 @@ class OnlyfansIE(InfoExtractor):
             if not proxy:
                 self._info_dict_add_params(info_dict, 'proxy', '__noproxy__')
                 # disable proxy
-                self._downloader.params['proxy'] = ''
+                self._set_disable_proxy()
             else:
                 self._info_dict_add_params(info_dict, 'proxy', proxy)
 
@@ -214,3 +214,13 @@ class OnlyfansIE(InfoExtractor):
         media['Title'] = query_params.get('Title', [None])[0]
         media['IsDrm'] = query_params.get('IsDrm', [None])[0]
         return media, query_params.get('proxy', [None])[0]
+
+    def _set_disable_proxy(self):
+        self._downloader.params['proxy'] = ''
+
+    def _get_json(self, url, **kwargs):
+        try:
+            return self._download_json(url, **kwargs)
+        except Exception:
+            self._set_disable_proxy()
+            return self._download_json(url, **kwargs)

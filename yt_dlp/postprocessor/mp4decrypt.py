@@ -12,7 +12,7 @@ class MP4DecryptPP(PostProcessor):
         self._path = self.get_param('mp4decrypt_location', self._mp4decrypt_location.get())
 
     def run(self, info):
-        files = self._get_files_from_info(info)
+        files = self._get_files_name_from_info(info)
         for f in files:
             dl_path, _ = os.path.split(info['filepath'])
             inputpath = os.path.join(info.get('__finaldir', dl_path), f)
@@ -41,11 +41,14 @@ class MP4DecryptPP(PostProcessor):
         except Exception as e:
             self.report_warning(f'Decrypt failed: {e}')
 
-    def _get_files_from_info(self, info_dict):
+    def _get_files_name_from_info(self, info_dict):
         files_to_move = info_dict.get('__files_to_move', {})
         files_to_merge = info_dict.get('__files_to_merge', [])
         if isinstance(files_to_move, dict):
             files_to_move = files_to_move.keys()
         if isinstance(files_to_merge, dict):
             files_to_merge = files_to_merge.keys()
-        return set(files_to_move) | set(files_to_merge)
+        if files_to_move or files_to_merge:
+            return set(files_to_move) | set(files_to_merge)
+        _, name = os.path.split(info_dict['filepath'])
+        return [name]

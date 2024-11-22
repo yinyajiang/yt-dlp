@@ -39,7 +39,7 @@ class OnlyfansIE(InfoExtractor):
             if large_timeout:
                 old_timeout = self._downloader.params.get('socket_timeout', None)
                 self._downloader.params['socket_timeout'] = 9999
-            jsdata = self._get_json(addr + endpoint, note=note, **kwargs)
+            jsdata = self._no_proxy_get_json(addr + endpoint, note=note, **kwargs)
         finally:
             if large_timeout:
                 if old_timeout is None:
@@ -218,9 +218,12 @@ class OnlyfansIE(InfoExtractor):
     def _set_disable_proxy(self):
         self._downloader.params['proxy'] = ''
 
-    def _get_json(self, url, **kwargs):
-        try:
-            return self._download_json(url, **kwargs)
-        except Exception:
-            self._set_disable_proxy()
+    def _no_proxy_get_json(self, url, **kwargs):
+        old_proxy = self._downloader.params.get('proxy', None)
+        if old_proxy:
+            self._downloader.params['proxy'] = ''
+            js = self._download_json(url, **kwargs)
+            self._downloader.params['proxy'] = old_proxy
+            return js
+        else:
             return self._download_json(url, **kwargs)

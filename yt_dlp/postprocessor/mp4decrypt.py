@@ -2,6 +2,7 @@ import contextvars
 import os
 import subprocess
 from .common import PostProcessor
+from ..utils import try_rename
 
 
 class MP4DecryptPP(PostProcessor):
@@ -37,7 +38,7 @@ class MP4DecryptPP(PostProcessor):
         try:
             subprocess.run([self._path, '--key', decrypt_key, inputpath, temp_outputpath]).check_returncode()
             os.remove(inputpath)
-            os.rename(temp_outputpath, inputpath)
+            try_rename(temp_outputpath, inputpath)
         except Exception as e:
             self.report_warning(f'Decrypt failed: {e}')
 

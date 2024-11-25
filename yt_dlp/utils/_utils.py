@@ -5771,3 +5771,11 @@ def try_rename(old, new, try_count=3):
             if i == try_count - 1:
                 raise
             time.sleep(0.5)
+
+
+def to_bool(value):
+    if isinstance(value, bool):
+        return value
+    if isinstance(value, str):
+        return value.lower() in ['true', '1']
+    return bool(value)

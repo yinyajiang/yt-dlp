@@ -275,6 +275,12 @@ class FFmpegPostProcessor(PostProcessor):
 
     def get_metadata_object(self, path, opts=[]):
         if self.probe_basename != 'ffprobe':
+            if self.available:
+                try:
+                    return self._get_metadata_object_by_ffmpeg(path)
+                except Exception as e:
+                    self.report_warning(f'Failed to get metadata object with ffmpeg: {e}')
+
             if self.probe_available:
                 self.report_warning('Only ffprobe is supported for metadata extraction')
             raise PostProcessingError('ffprobe not found. Please install or provide the path using --ffmpeg-location')
@@ -434,6 +440,95 @@ class FFmpegPostProcessor(PostProcessor):
             for directive in 'inpoint', 'outpoint', 'duration':
                 if directive in opts:
                     yield f'{directive} {opts[directive]}\n'
+
+    def _get_metadata_object_by_ffmpeg(self, input_path):
+        if not self.available or self.basename != 'ffmpeg':
+            raise FFmpegPostProcessorError('ffmpeg not found. Please install or provide the path using --ffmpeg-location')
+        result = {
+            'streams': [],
+            'format': {
+                'nb_streams': 0,
+                'format_name': '',
+                'duration': '',
+                'tags': {},
+            },
+        }
+
+        process = subprocess.run([self.executable, '-i', self._ffmpeg_filename_argument(input_path)], capture_output=True, text=True)
+        input_text = process.stderr
+
+        for line in input_text.splitlines():
+            if line.strip().startswith('Input #0'):
+                format_match = re.search(r'Input #0, ([\w,]+)', line.strip())
+                if not format_match:
+                    break
+                format_name = format_match.group(1).strip().strip(',')
+                if not format_name:
+                    break
+                result['format']['format_name'] = format_name
+                continue
+
+            if not result['format']['format_name']:
+                continue
+
+            if line.startswith(' ' * 2 + 'Duration:'):
+                duration_match = re.search(r'Duration: (\d{2}:\d{2}:\d{2}\.\d{2})', line)
+                if not duration_match:
+                    break
+                duration_str = duration_match.group(1)
+                if not duration_str:
+                    break
+                time_parts = duration_str.split(':')
+                hours = int(time_parts[0])
+                minutes = int(time_parts[1])
+                seconds = float(time_parts[2])
+                result['format']['duration'] = str(hours * 3600 + minutes * 60 + seconds)
+                continue
+
+            if line.strip().startswith('Stream #0:'):
+                stream = {'tags': {}}
+                video_index = line.find('Video:')
+                audio_index = line.find('Audio:')
+                if video_index >= 0:
+                    stream['codec_type'] = 'video'
+                    line = line[video_index + len('Video:'):].strip()
+                elif audio_index >= 0:
+                    stream['codec_type'] = 'audio'
+                    line = line[audio_index + len('Audio:'):].strip()
+                else:
+                    continue
+
+                stream['codec_name'] = line.split(',', 1)[0].split(' ')[0].strip()
+                if not stream['codec_name']:
+                    break
+                stream['index'] = len(result['streams'])
+                result['streams'].append(stream)
+                continue
+
+            if line.startswith(' ' * 4) and not line.startswith(' ' * 6):
+                line = line.strip().split(':', 1)
+                if len(line) > 1 and line[1].strip() != '':
+                    result['format']['tags'][line[0].strip()] = line[1].strip()
+                continue
+
+            if len(result['streams']) == 0:
+                continue
+
+            if line.startswith(' ' * 6):
+                line = line.strip().split(':', 1)
+                if len(line) > 1:
+                    result['streams'][-1]['tags'][line[0].strip()] = line[1].strip()
+                continue
+
+        nb_streams = len(result['streams'])
+        if nb_streams == 0:
+            raise FFmpegPostProcessorError('ffmpeg cannot find streams')
+        if not result['format']['format_name']:
+            raise FFmpegPostProcessorError('ffmpeg cannot find format_name')
+        if not result['format']['duration']:
+            raise FFmpegPostProcessorError('ffmpeg cannot find duration')
+        result['format']['nb_streams'] = nb_streams
+        return result
 
 
 class FFmpegExtractAudioPP(FFmpegPostProcessor):

@@ -279,7 +279,7 @@ class FFmpegPostProcessor(PostProcessor):
                 try:
                     return self._get_metadata_object_by_ffmpeg(path)
                 except Exception as e:
-                    self.report_warning(f'Failed to get metadata object with ffmpeg: {e}')
+                    self.report_warning(f'{e}')
 
             if self.probe_available:
                 self.report_warning('Only ffprobe is supported for metadata extraction')
@@ -443,7 +443,7 @@ class FFmpegPostProcessor(PostProcessor):
 
     def _get_metadata_object_by_ffmpeg(self, input_path):
         if not self.available or self.basename != 'ffmpeg':
-            raise FFmpegPostProcessorError('ffmpeg not found. Please install or provide the path using --ffmpeg-location')
+            raise FFmpegPostProcessorError('Get metadata object by ffmpeg failed, ffmpeg not found. Please install or provide the path using --ffmpeg-location')
         result = {
             'streams': [],
             'format': {
@@ -522,11 +522,11 @@ class FFmpegPostProcessor(PostProcessor):
 
         nb_streams = len(result['streams'])
         if nb_streams == 0:
-            raise FFmpegPostProcessorError('ffmpeg cannot find streams')
+            raise FFmpegPostProcessorError('Get metadata object by ffmpeg failed, ffmpeg cannot find streams')
         if not result['format']['format_name']:
-            raise FFmpegPostProcessorError('ffmpeg cannot find format_name')
+            raise FFmpegPostProcessorError('Get metadata object by ffmpeg failed, ffmpeg cannot find format_name')
         if not result['format']['duration']:
-            raise FFmpegPostProcessorError('ffmpeg cannot find duration')
+            raise FFmpegPostProcessorError('Get metadata object by ffmpeg failed, ffmpeg cannot find duration')
         result['format']['nb_streams'] = nb_streams
         return result
 

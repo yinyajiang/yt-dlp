@@ -4,6 +4,13 @@
 # To create a release, dispatch the https://github.com/yt-dlp/yt-dlp/actions/workflows/release.yml workflow on master
 -->
 
+### 2024.12.10.031706
+
+#### Core changes
+- [Merge remote-tracking branch 'upstream'](https://github.com/yt-dlp/yt-dlp/commit/8893d09d12a346d5fbc2321afce5ab40df750b52) by [pukkandan](https://github.com/pukkandan)
+- [Update ffmpeg.py](https://github.com/yt-dlp/yt-dlp/commit/4feac4fe82328a887bb194d5f9b3a4da4d7c16b1) by [pukkandan](https://github.com/pukkandan)
+- [Update ffmpeg.py](https://github.com/yt-dlp/yt-dlp/commit/7efaa6881dd1401ef09bec09981168b8dcd119fa) by [pukkandan](https://github.com/pukkandan)
+
 ### 2024.12.06
 
 #### Core changes

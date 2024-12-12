@@ -76,11 +76,10 @@ class OnlyfansIE(InfoExtractor):
         has_drm = any(bool(media['IsDrm']) for media in medias)
         entries = []
         for i, media in enumerate(medias):
-            url = self._url_add_params(url, 'index', str(i))
-            entry = self._extract_media_info(url=url,
+            entry = self._extract_media_info(url=self._url_add_params(url, 'index', str(i)),
                                              media=media,
                                              proxy=proxy,
-                                             load_formats=not has_drm,
+                                             load_formats=(not has_drm) and (not self._downloader.params.get('extract_flat', False)),
                                              panic=(i == len(medias) - 1 and len(entries) == 0))
             if not entry:
                 continue

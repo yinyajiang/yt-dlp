@@ -3663,9 +3663,9 @@ class YoutubeDL:
         info_dict.setdefault('_type', 'video')
         info_dict.setdefault('_version', {
             'version': __version__,
-            'current_git_head': current_git_head(),
-            'release_git_head': RELEASE_GIT_HEAD,
-            'repository': ORIGIN,
+            # 'current_git_head': current_git_head(),
+            # 'release_git_head': RELEASE_GIT_HEAD,
+            # 'repository': ORIGIN,
         })
 
         if remove_private_keys:

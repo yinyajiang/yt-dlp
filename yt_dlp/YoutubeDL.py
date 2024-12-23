@@ -1600,6 +1600,9 @@ class YoutubeDL:
             if not ie.suitable(url):
                 continue
 
+            if self._is_use_webview(url) and str(key) != 'Generic':
+                continue
+
             if not ie.working():
                 self.report_warning('The program functionality for this site has been marked as broken, '
                                     'and will probably not work.')
@@ -4454,3 +4457,17 @@ class YoutubeDL:
             else:
                 returns.append(entry)
         return returns
+
+    def _is_use_webview(self, url):
+        try:
+            parsed = urllib.parse.urlparse(url)
+            query_params = urllib.parse.parse_qs(parsed.query)
+            real_webview_url = query_params.get('__real_use_wevbiew__', None)
+            if real_webview_url and real_webview_url[0]:
+                return True
+            this_use_webview = query_params.get('__use_wevbiew__', None)
+            if this_use_webview and this_use_webview[0] == '1' or this_use_webview[0] == 'true':
+                return True
+            return False
+        except Exception:
+            return False

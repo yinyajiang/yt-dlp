@@ -66,6 +66,7 @@ from ..utils import (
     fix_xml_ampersands,
     float_or_none,
     format_field,
+    get_app_executable_path,
     int_or_none,
     join_nonempty,
     js_to_json,
@@ -3995,6 +3996,66 @@ class InfoExtractor:
             return js
         else:
             return self._download_json(url, **kwargs)
+
+    def _get_playable_info_by_webview(self, web_url, *args):
+        webview_location = self._downloader.params.get('webview_location')
+        if not webview_location:
+            self.report_warning('webview_location is not set')
+            return None
+        webview_location = get_app_executable_path(webview_location)
+        if not os.path.exists(webview_location):
+            webview_install = self._downloader.params.get('webview_install')
+            if webview_install:
+                process = subprocess.run(webview_install, shell=True)
+                if process.returncode != 0:
+                    self.report_warning(f'{webview_install} failed')
+                    return None
+            else:
+                self.report_warning(f'webview_location {webview_location} does not exist')
+                return None
+
+        webview_params = self._downloader.params.get('webview_params')
+        if webview_params:
+            for param in webview_params.split(';'):
+                key, value = param.split('=')
+                args.append(f'--{key}')
+                args.append(value)
+
+        process = subprocess.run([webview_location, web_url, *args],
+                                 stdout=subprocess.PIPE, stderr=subprocess.DEVNULL, text=True)
+        input_text = process.stdout
+        for line in input_text.splitlines():
+            line = line.strip()
+            if not line:
+                continue
+            try:
+                if line.startswith('{') and line.endswith('}'):
+                    js = json.loads(line)
+                    if js.get('url'):
+                        js['title'] = self._correct_title_by_webview(js.get('title', ''))
+                        return js
+                    elif js.get('error'):
+                        self.report_warning(f'[webview] {js.get("error")}')
+                        return None
+            except Exception:
+                pass
+            self.to_screen(f'[webview] {line}')
+        return None
+
+    def _correct_title_by_webview(self, title):
+        if not title:
+            return title
+        match = re.search(r'Watch (.*?)(?:in .* )?on .*', title, re.IGNORECASE)
+        if match:
+            return match.group(1).strip()
+
+        match = re.search(r'(.*?) Online Free .*', title, re.IGNORECASE)
+        if match:
+            title = match.group(1).strip()
+            if title.startswith('Stream'):
+                title = title[len('Stream'):].strip()
+            return title
+        return title
 
 
 class SearchInfoExtractor(InfoExtractor):

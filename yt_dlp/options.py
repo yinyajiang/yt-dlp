@@ -1488,6 +1488,18 @@ def create_parser():
         dest='cookiefile', metavar='FILE',
         help='Netscape formatted file to read cookies from and dump cookie jar in')
     filesystem.add_option(
+        '--webview-location',
+        dest='webview_location', metavar='FILE',
+        help='Location of the webview')
+    filesystem.add_option(
+        '--webview-install',
+        dest='webview_install',
+        help='Install the webview url')
+    filesystem.add_option(
+        '--webview-params',
+        dest='webview_params',
+        help='Params of the webview')
+    filesystem.add_option(
         '--no-cookies',
         action='store_const', const=None, dest='cookiefile', metavar='FILE',
         help='Do not read/dump cookies from/to file (default)')

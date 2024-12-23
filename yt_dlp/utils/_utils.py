@@ -5779,3 +5779,12 @@ def to_bool(value):
     if isinstance(value, str):
         return value.lower() in ['true', '1']
     return bool(value)
+
+
+def get_app_executable_path(path):
+    if sys.platform == 'win32':
+        return path
+    if path.endswith('.app'):
+        name = os.path.basename(path).replace('.app', '')
+        return os.path.join(path, 'Contents', 'MacOS', name)
+    return path

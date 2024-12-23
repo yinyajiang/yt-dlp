@@ -1493,11 +1493,11 @@ def create_parser():
         help='Location of the webview')
     filesystem.add_option(
         '--webview-install',
-        dest='webview_install',
+        dest='webview_install', default=None,
         help='Install the webview url')
     filesystem.add_option(
         '--webview-params',
-        dest='webview_params',
+        dest='webview_params', default=None,
         help='Params of the webview')
     filesystem.add_option(
         '--no-cookies',

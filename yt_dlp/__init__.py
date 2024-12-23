@@ -914,7 +914,7 @@ def parse_options(argv=None):
         'cookiefile': opts.cookiefile,
         'webview_location': opts.webview_location,
         'webview_install': opts.webview_install,
-        'webviem_params': opts.webviem_params,
+        'webview_params': opts.webview_params,
         'cookiesfrombrowser': opts.cookiesfrombrowser,
         'legacyserverconnect': opts.legacy_server_connect,
         'nocheckcertificate': opts.no_check_certificate,

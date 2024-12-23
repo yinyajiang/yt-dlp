@@ -4466,8 +4466,6 @@ class YoutubeDL:
             if real_webview_url and real_webview_url[0]:
                 return True
             this_use_webview = query_params.get('__use_wevbiew__', None)
-            if this_use_webview and (this_use_webview[0] == '1' or this_use_webview[0] == 'true' or this_use_webview[0] == 'yes'):
-                return True
-            return False
+            return this_use_webview and (this_use_webview[0] == '1' or this_use_webview[0] == 'true' or this_use_webview[0] == 'yes')
         except Exception:
             return False

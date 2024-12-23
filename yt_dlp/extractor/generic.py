@@ -2929,7 +2929,7 @@ class GenericIE(InfoExtractor):
                 return real_webview_url[0], True
 
             this_use_webview = query_params.get('__use_wevbiew__', None)
-            if this_use_webview and this_use_webview[0] == '1' or this_use_webview[0] == 'true' or this_use_webview[0] == 'yes':
+            if this_use_webview and (this_use_webview[0] == '1' or this_use_webview[0] == 'true' or this_use_webview[0] == 'yes'):
                 query_params.pop('__use_wevbiew__')
                 new_query = urllib.parse.urlencode(query_params, doseq=True)
                 parsed = parsed._replace(query=new_query)

@@ -3997,7 +3997,7 @@ class InfoExtractor:
         else:
             return self._download_json(url, **kwargs)
 
-    def _get_playable_info_by_webview(self, web_url, *args):
+    def _get_playable_info_by_webview(self, web_url):
         webview_location = self._downloader.params.get('webview_location')
         if not webview_location:
             self.report_warning('webview_location is not set')
@@ -4016,13 +4016,22 @@ class InfoExtractor:
                     return None
 
             webview_params = self._downloader.params.get('webview_params')
+            args = []
+            put_url = False
             if webview_params:
-                for param in webview_params.split(';'):
-                    key, value = param.split('=')
-                    args.append(f'--{key}')
-                    args.append(value)
+                for param in webview_params.split(' '):
+                    param = param.strip()
+                    if not param:
+                        continue
+                    if '{url}' in param:
+                        param = param.replace('{url}', web_url)
+                        put_url = True
+                    args.append(param)
 
-            process = subprocess.run([webview_location, web_url, *args],
+            if not put_url:
+                args.append(web_url)
+
+            process = subprocess.run([webview_location, *args],
                                      stdout=subprocess.PIPE, stderr=subprocess.DEVNULL, text=True)
             input_text = process.stdout
             for line in input_text.splitlines():

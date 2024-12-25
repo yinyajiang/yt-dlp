@@ -4044,7 +4044,7 @@ class InfoExtractor:
             return None
         else:
             try:
-                data = self._no_proxy_download_json(webview_location, data=json.dumps({'url': web_url}).encode())
+                data = self._no_proxy_download_large_timeout(webview_location, data=json.dumps({'url': web_url}).encode())
                 if data:
                     js = json.loads(data)
                     if js.get('url'):

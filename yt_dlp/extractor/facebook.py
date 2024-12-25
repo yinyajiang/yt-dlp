@@ -643,6 +643,7 @@ class FacebookIE(InfoExtractor):
                                 'quality': q(format_id) - 3,
                                 'url': playable_url,
                             })
+                            self._correct_format(formats[-1])
                     extract_dash_manifest(fmt_data, formats)
 
                     # New videoDeliveryResponse formats extraction
@@ -898,6 +899,19 @@ class FacebookIE(InfoExtractor):
 
         real_url = self._VIDEO_PAGE_TEMPLATE % video_id if url.startswith('facebook:') else url
         return self._extract_from_url(real_url, video_id)
+
+    @staticmethod
+    def _correct_format(f):
+        if not f:
+            return
+        if f.get('format_id', '') in ('sd', 'hd') and 'acodec' not in f and 'vcodec' not in f:
+            format_ext = determine_ext(f.get('url', ''))
+            if format_ext == 'mp4':
+                f['vcodec'] = 'mp4'
+                f['acodec'] = 'none'
+            elif format_ext == 'm4a':
+                f['vcodec'] = 'none'
+                f['acodec'] = 'm4a'
 
 
 class FacebookPluginsVideoIE(InfoExtractor):

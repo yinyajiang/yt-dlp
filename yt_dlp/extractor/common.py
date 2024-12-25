@@ -4002,45 +4002,59 @@ class InfoExtractor:
         if not webview_location:
             self.report_warning('webview_location is not set')
             return None
-        webview_location = get_app_executable_path(webview_location)
-        if not os.path.exists(webview_location):
-            webview_install = self._downloader.params.get('webview_install')
-            if webview_install:
-                process = subprocess.run(webview_install, shell=True)
-                if process.returncode != 0:
-                    self.report_warning(f'{webview_install} failed')
+        if not webview_location.startswith('http'):
+            webview_location = get_app_executable_path(webview_location)
+            if not os.path.exists(webview_location):
+                webview_install = self._downloader.params.get('webview_install')
+                if webview_install:
+                    process = subprocess.run(webview_install, shell=True)
+                    if process.returncode != 0:
+                        self.report_warning(f'{webview_install} failed')
+                        return None
+                else:
+                    self.report_warning(f'webview_location {webview_location} does not exist')
                     return None
-            else:
-                self.report_warning(f'webview_location {webview_location} does not exist')
-                return None
 
-        webview_params = self._downloader.params.get('webview_params')
-        if webview_params:
-            for param in webview_params.split(';'):
-                key, value = param.split('=')
-                args.append(f'--{key}')
-                args.append(value)
+            webview_params = self._downloader.params.get('webview_params')
+            if webview_params:
+                for param in webview_params.split(';'):
+                    key, value = param.split('=')
+                    args.append(f'--{key}')
+                    args.append(value)
 
-        process = subprocess.run([webview_location, web_url, *args],
-                                 stdout=subprocess.PIPE, stderr=subprocess.DEVNULL, text=True)
-        input_text = process.stdout
-        for line in input_text.splitlines():
-            line = line.strip()
-            if not line:
-                continue
+            process = subprocess.run([webview_location, web_url, *args],
+                                     stdout=subprocess.PIPE, stderr=subprocess.DEVNULL, text=True)
+            input_text = process.stdout
+            for line in input_text.splitlines():
+                line = line.strip()
+                if not line:
+                    continue
+                try:
+                    if line.startswith('{') and line.endswith('}'):
+                        js = json.loads(line)
+                        if js.get('url'):
+                            js['title'] = self._correct_title_by_webview(js.get('title', ''))
+                            return js
+                        elif js.get('error'):
+                            self.report_warning(f'[webview] {js.get("error")}')
+                            return None
+                except Exception:
+                    pass
+                self.to_screen(f'[webview] {line}')
+            return None
+        else:
             try:
-                if line.startswith('{') and line.endswith('}'):
-                    js = json.loads(line)
+                data = self._no_proxy_download_json(webview_location, data=json.dumps({'url': web_url}).encode())
+                if data:
+                    js = json.loads(data)
                     if js.get('url'):
                         js['title'] = self._correct_title_by_webview(js.get('title', ''))
                         return js
                     elif js.get('error'):
                         self.report_warning(f'[webview] {js.get("error")}')
-                        return None
-            except Exception:
-                pass
-            self.to_screen(f'[webview] {line}')
-        return None
+            except Exception as e:
+                self.report_warning(f'[webview] {e}')
+            return None
 
     def _correct_title_by_webview(self, title):
         if not title:

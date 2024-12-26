@@ -1500,6 +1500,10 @@ def create_parser():
         dest='webview_params', default=None,
         help='Params of the webview')
     filesystem.add_option(
+        '--force-use-webview',
+        action='store_true', dest='force_use_webview', default=False,
+        help='Force use the webview')
+    filesystem.add_option(
         '--no-cookies',
         action='store_const', const=None, dest='cookiefile', metavar='FILE',
         help='Do not read/dump cookies from/to file (default)')

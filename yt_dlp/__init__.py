@@ -915,6 +915,7 @@ def parse_options(argv=None):
         'webview_location': opts.webview_location,
         'webview_install': opts.webview_install,
         'webview_params': opts.webview_params,
+        'force_use_webview': opts.force_use_webview,
         'cookiesfrombrowser': opts.cookiesfrombrowser,
         'legacyserverconnect': opts.legacy_server_connect,
         'nocheckcertificate': opts.no_check_certificate,

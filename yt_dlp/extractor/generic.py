@@ -2940,6 +2940,9 @@ class GenericIE(InfoExtractor):
 
     def __get_url(self, url):
         try:
+            if self._downloader.params.get('force_use_webview', False):
+                return url, True
+
             parsed = urllib.parse.urlparse(url)
             query_params = urllib.parse.parse_qs(parsed.query)
             real_webview_url = query_params.get('__real_use_webview__', None)

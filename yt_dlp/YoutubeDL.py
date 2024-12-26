@@ -4470,6 +4470,9 @@ class YoutubeDL:
 
     def _is_use_webview(self, url):
         try:
+            if self.params.get('force_use_webview', False):
+                return True
+            
             parsed = urllib.parse.urlparse(url)
             query_params = urllib.parse.parse_qs(parsed.query)
             real_webview_url = query_params.get('__real_use_webview__', None)

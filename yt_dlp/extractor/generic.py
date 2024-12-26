@@ -2888,7 +2888,7 @@ class GenericIE(InfoExtractor):
                 if 'is not a valid url' in str(e).lower():
                     raise e
                 first_exception = e
-        playable_info = self._get_playable_info_by_webview(url)
+        used_webview, playable_info = self._get_playable_info_by_webview(url)
         if playable_info:
             result = super().extract(playable_info['url'])
             if result:
@@ -2902,23 +2902,41 @@ class GenericIE(InfoExtractor):
                     result['id'] = hashlib.md5(url.encode()).hexdigest()
                 return result
         elif force_use_webview:
-            raise ExtractorError('[webview] Failed to extract playable url by webview')
+            raise ExtractorError('[webview] Failed to extract playable url by webview. [webview]has triggered')
         if first_exception:
-            raise ExtractorError(f'{first_exception!s}. [webview]has triggered')
+            if used_webview:
+                raise ExtractorError(f'{first_exception!s}. [webview]has triggered')
+            raise first_exception
         return result
 
     def __check_result(self, result, input_url):
-        if not result:
-            self.report_warning(f'Generic extractor returned None for {input_url}')
-            return False
-        t = result.get('_type', 'video')
-        if t == 'url' and input_url.rstrip('/') == result.get('url', '').rstrip('/'):
-            self.report_warning(f'Generic extractor returned url same as input for {input_url}')
-            return False
-        if t == 'video' and not result.get('formats', None):
-            self.report_warning(f'Generic extractor returned video without formats for {input_url}')
-            return False
-        return True
+        try:
+            if not result:
+                self.report_warning(f'Generic extractor returned None for {input_url}')
+                return (False, result)
+            t = result.get('_type', 'video')
+            if t == 'url' and input_url.rstrip('/') == result.get('url', '').rstrip('/'):
+                self.report_warning(f'Generic extractor returned url same as input for {input_url}')
+                return (False, result)
+            if t == 'video' and not result.get('formats', None):
+                self.report_warning(f'Generic extractor returned video without formats for {input_url}')
+                return (False, result)
+            if t == 'url':
+                parsed_input = urllib.parse.urlparse(input_url)
+                parsed_result = urllib.parse.urlparse(result.get('url', ''))
+                if parsed_input.hostname == parsed_result.hostname:
+                    try:
+                        new_result = super().extract(result.get('url', ''))
+                        new_t = new_result.get('_type', 'video')
+                        if new_t == 'url':
+                            return (False, new_result)
+                        else:
+                            return (True, new_result)
+                    except Exception:
+                        return (False, result)
+            return (True, result)
+        except Exception:
+            return (True, result)
 
     def __get_url(self, url):
         try:

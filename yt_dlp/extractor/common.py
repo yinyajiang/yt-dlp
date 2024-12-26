@@ -4001,7 +4001,7 @@ class InfoExtractor:
         webview_location = self._downloader.params.get('webview_location')
         if not webview_location:
             self.report_warning('webview_location is not set')
-            return None
+            return (False, None)
         if not webview_location.startswith('http'):
             webview_location = get_app_executable_path(webview_location)
             if not os.path.exists(webview_location):
@@ -4010,10 +4010,10 @@ class InfoExtractor:
                     process = subprocess.run(webview_install, shell=True)
                     if process.returncode != 0:
                         self.report_warning(f'{webview_install} failed')
-                        return None
+                        return (False, None)
                 else:
                     self.report_warning(f'webview_location {webview_location} does not exist')
-                    return None
+                    return (False, None)
 
             webview_params = self._downloader.params.get('webview_params')
             args = []
@@ -4043,14 +4043,14 @@ class InfoExtractor:
                         js = json.loads(line)
                         if js.get('url'):
                             js['title'] = self._correct_title_by_webview(js.get('title', ''))
-                            return js
+                            return (True, js)
                         elif js.get('error'):
                             self.report_warning(f'[webview] {js.get("error")}')
-                            return None
+                            return (True, None)
                 except Exception:
                     pass
                 self.to_screen(f'[webview] {line}')
-            return None
+            return (True, None)
         else:
             try:
                 data = self._no_proxy_download_large_timeout(webview_location, data=json.dumps({'url': web_url}).encode())
@@ -4058,12 +4058,12 @@ class InfoExtractor:
                     js = json.loads(data)
                     if js.get('url'):
                         js['title'] = self._correct_title_by_webview(js.get('title', ''))
-                        return js
+                        return (True, js)
                     elif js.get('error'):
                         self.report_warning(f'[webview] {js.get("error")}')
             except Exception as e:
                 self.report_warning(f'[webview] {e}')
-            return None
+            return (True, None)
 
     def _correct_title_by_webview(self, title):
         if not title:

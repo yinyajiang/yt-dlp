@@ -4401,37 +4401,53 @@ class YoutubeIE(YoutubeBaseInfoExtractor):
 
         master_ytcfg = self.extract_ytcfg(video_id, webpage) or self._get_default_ytcfg()
 
+        clients = self._get_requested_clients(url, smuggled_data)
         player_responses, player_url = self._extract_player_responses(
-            self._get_requested_clients(url, smuggled_data),
+            clients,
             video_id, webpage, master_ytcfg, smuggled_data)
+
+        if 'android_vr' not in clients:
+            response_str = json.dumps(player_responses)
+            if '360\\u00b0 video playback is not supported on this' in response_str or '180\\u00b0 video playback is not supported on this' in response_str:
+                self.report_warning('this is a vr video, try to use android_vr client')
+                try:
+                    player_responses_vr, player_url_vr = self._extract_player_responses(['android_vr'], video_id, webpage, master_ytcfg, smuggled_data)
+                    if player_responses_vr:
+                        player_responses = player_responses_vr
+                        player_url = player_url_vr
+                except Exception as e:
+                    self.report_warning(f'Failed to extract player responses for android_vr: {e}')
 
         self._report_invalid_clients(player_responses)
 
         return webpage, master_ytcfg, player_responses, player_url
 
     def _report_invalid_clients(self, player_responses):
-        invalid_client = []
-        valid_client = []
-        if player_responses and isinstance(player_responses, list):
-            for resp in player_responses:
-                if not resp or 'playabilityStatus' not in resp:
-                    continue
-                status = resp['playabilityStatus']
-                if not status or not isinstance(status, dict):
-                    continue
-                if 'status' not in status:
-                    continue
-                client = resp.get(STREAMING_DATA_CLIENT_NAME, '')
-                if not client:
-                    continue
-                if status['status'] != 'OK':
-                    invalid_client.append(client)
-                else:
-                    valid_client.append(client)
-        if invalid_client:
-            self.report_warning(f'Invalid youtube clients: {", ".join(invalid_client)}')
-        if valid_client:
-            self.to_screen(f'Valid youtube clients: {", ".join(valid_client)}')
+        try:
+            invalid_client = []
+            valid_client = []
+            if player_responses and isinstance(player_responses, list):
+                for resp in player_responses:
+                    if not resp or 'playabilityStatus' not in resp:
+                        continue
+                    status = resp['playabilityStatus']
+                    if not status or not isinstance(status, dict):
+                        continue
+                    if 'status' not in status:
+                        continue
+                    client = resp.get(STREAMING_DATA_CLIENT_NAME, '')
+                    if not client:
+                        continue
+                    if status['status'] != 'OK':
+                        invalid_client.append(client)
+                    else:
+                        valid_client.append(client)
+            if invalid_client:
+                self.report_warning(f'Invalid youtube clients: {", ".join(invalid_client)}')
+            if valid_client:
+                self.to_screen(f'Valid youtube clients: {", ".join(valid_client)}')
+        except Exception:
+            pass
 
     def _list_formats(self, video_id, microformats, video_details, player_responses, player_url, duration=None):
         live_broadcast_details = traverse_obj(microformats, (..., 'liveBroadcastDetails'))

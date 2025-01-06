@@ -71,7 +71,9 @@ ydl = YoutubeDL({
 },
 )
 
-# ydl.download_with_info_file("info.json")
+# ydl.download_with_info_file(os.path.join(current_dir, "debug", "info.json"))
 info = ydl.extract_info('url', download=False)
 s = json.dumps(ydl.sanitize_info(info))
 print(s)
+with open(os.path.join(current_dir, 'debug', 'info.json'), 'w') as f:
+    f.write(s)

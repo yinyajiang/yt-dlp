@@ -4032,7 +4032,7 @@ class InfoExtractor:
                 args.append(web_url)
 
             process = subprocess.run([webview_location, *args],
-                                     stdout=subprocess.PIPE, stderr=subprocess.DEVNULL, text=True)
+                                     stdout=subprocess.PIPE, stderr=subprocess.DEVNULL, text=True, encoding='utf-8', errors='replace')
             input_text = process.stdout
             for line in input_text.splitlines():
                 line = line.strip()

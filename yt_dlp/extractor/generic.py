@@ -2880,7 +2880,7 @@ class GenericIE(InfoExtractor):
         first_exception = None
         if not force_use_webview:
             try:
-                result = super().extract(url)
+                result = self.__super_extract(url, fatal=True)
                 ok = self.__check_result(result, url)
                 if ok:
                     return result
@@ -2890,10 +2890,10 @@ class GenericIE(InfoExtractor):
                 first_exception = e
         used_webview, playable_info = self._get_playable_info_by_webview(url)
         if playable_info:
-            result = super().extract(playable_info['url'])
+            result = self.__super_extract(playable_info['url'], fatal=False)
             if result:
                 if result.get('_type', 'video') == 'url':
-                    new_result = super().extract(result.get('url'))
+                    new_result = self.__super_extract(result.get('url'), fatal=False)
                     if new_result:
                         url = result.get('url')
                         result = new_result
@@ -2908,6 +2908,14 @@ class GenericIE(InfoExtractor):
                 raise ExtractorError(f'{first_exception!s}. [webview]has triggered')
             raise first_exception
         return result
+
+    def __super_extract(self, url, fatal=True):
+        try:
+            return super().extract(url)
+        except Exception as e:
+            if fatal:
+                raise e
+            return None
 
     def __check_result(self, result, input_url):
         try:
@@ -2926,7 +2934,7 @@ class GenericIE(InfoExtractor):
                 parsed_result = urllib.parse.urlparse(result.get('url', ''))
                 if parsed_input.hostname == parsed_result.hostname:
                     try:
-                        new_result = super().extract(result.get('url', ''))
+                        new_result = self.__super_extract(result.get('url', ''), fatal=True)
                         new_t = new_result.get('_type', 'video')
                         if new_t == 'url':
                             return (False, new_result)

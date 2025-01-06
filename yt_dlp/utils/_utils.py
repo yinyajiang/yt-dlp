@@ -5788,3 +5788,12 @@ def get_app_executable_path(path):
         name = os.path.basename(path).replace('.app', '')
         return os.path.join(path, 'Contents', 'MacOS', name)
     return path
+
+
+def determine_is_know_media_ext(url):
+    ext = determine_ext(url)
+    if not ext:
+        return False
+    if ext[0] == '.':
+        ext = ext[1:]
+    return ext in KNOWN_EXTENSIONS

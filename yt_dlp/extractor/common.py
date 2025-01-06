@@ -59,6 +59,7 @@ from ..utils import (
     clean_html,
     deprecation_warning,
     determine_ext,
+    determine_is_know_media_ext,
     dict_get,
     encode_data_uri,
     extract_attributes,
@@ -3998,6 +3999,8 @@ class InfoExtractor:
             return self._download_json(url, **kwargs)
 
     def _get_playable_info_by_webview(self, web_url):
+        if determine_is_know_media_ext(web_url):
+            return (False, None)
         webview_location = self._downloader.params.get('webview_location')
         if not webview_location:
             self.report_warning('webview_location is not set')

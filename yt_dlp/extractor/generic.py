@@ -2890,6 +2890,8 @@ class GenericIE(InfoExtractor):
                 first_exception = e
         used_webview, playable_info = self._get_playable_info_by_webview(url)
         if playable_info:
+            # if 'headers' in playable_info:
+            #     self._downloader.params['http_headers'] = playable_info['headers']
             result = self.__super_extract(playable_info['url'], fatal=False)
             if result:
                 if result.get('_type', 'video') == 'url':

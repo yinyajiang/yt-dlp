@@ -3,7 +3,7 @@ import os
 
 
 current_dir = os.path.dirname(os.path.realpath(__file__))
-debug_dir = os.path.join(current_dir, "debug")
+debug_dir = os.path.join(current_dir, 'debug')
 os.makedirs(debug_dir, exist_ok=True)
 
 # import yt_dlp
@@ -35,7 +35,7 @@ ydl = YoutubeDL({
     #     'download':r'{"status": "%(progress.status)s","n_entries": %(info.n_entries)s, "playlist_index": %(info.playlist_index)s}',
     # },
     # 'load_info_filename':"",
-    'mp4decrypt_location': os.path.join(debug_dir, "mp4decrypt"),
+    'mp4decrypt_location': os.path.join(debug_dir, 'mp4decrypt'),
     'ffmpeg_location': debug_dir,
     # 'noplaylist':True,
     # 'outtmpl': "",

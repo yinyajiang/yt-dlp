@@ -1,21 +1,26 @@
 import json
 import os
 
+
 current_dir = os.path.dirname(os.path.realpath(__file__))
+debug_dir = os.path.join(current_dir, "debug")
+os.makedirs(debug_dir, exist_ok=True)
 
 # import yt_dlp
 # sys.argv = [
-#     os.path.join(current_dir, "yt-dlp"),
-#     "--legacy-server-connect",
-#     "--no-check-certificates",
-#     "--no-colors",
-#     "-J",
-#     "--skip-download",
-#     "--yes-playlist",
-#     "--flat-playlist",
-#     "--allow-unplayable-formats",
-#     "--extractor-args",
-#     "url"
+#   os.path.join(current_dir, "yt-dlp"),
+#    "--ffmpeg_location", debug_dir,
+#    "--mp4decrypt_location", os.path.join(debug_dir, "mp4decrypt"),
+#    "--legacy-server-connect",
+#    "--no-check-certificates",
+#    "--no-colors",
+#    "-J",
+#    "--skip-download",
+#    "--yes-playlist",
+#    "--flat-playlist",
+#    "--allow-unplayable-formats",
+#    "--extractor-args",
+#    "url"
 # ]
 # yt_dlp.main()
 
@@ -30,8 +35,8 @@ ydl = YoutubeDL({
     #     'download':r'{"status": "%(progress.status)s","n_entries": %(info.n_entries)s, "playlist_index": %(info.playlist_index)s}',
     # },
     # 'load_info_filename':"",
-    # 'mp4decrypt_location': "",
-    # 'ffmpeg_location': "",
+    'mp4decrypt_location': os.path.join(debug_dir, "mp4decrypt"),
+    'ffmpeg_location': debug_dir,
     # 'noplaylist':True,
     # 'outtmpl': "",
     'extract_flat': True,

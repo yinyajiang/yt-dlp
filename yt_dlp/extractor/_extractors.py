@@ -1600,6 +1600,10 @@ from .polskieradio import (
 from .pomftv import PomfTVLiveIE
 from .popcorntimes import PopcorntimesIE
 from .popcorntv import PopcornTVIE
+from .popcouk import (
+    PopCoUkIE,
+    PopCoUkShowIE,
+)
 from .porn91 import Porn91IE
 from .pornbox import PornboxIE
 from .pornflip import PornFlipIE

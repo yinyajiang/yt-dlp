@@ -27,7 +27,7 @@ os.makedirs(debug_dir, exist_ok=True)
 from yt_dlp import YoutubeDL
 
 ydl = YoutubeDL({
-    # "cookiefile":'',
+    # "cookiefile": '',
     # 'ignoreerrors': True,
     # 'plain_entries': True,
     # 'skip_download_media_type': "",
@@ -77,7 +77,7 @@ ydl = YoutubeDL({
 )
 
 # ydl.download_with_info_file(os.path.join(current_dir, "debug", "info.json"))
-info = ydl.extract_info('url', download=False)
+info = ydl.extract_info('https://www.youtube.com/watch?v=kyN623RzFe0', download=False)
 s = json.dumps(ydl.sanitize_info(info))
 print(s)
 with open(os.path.join(current_dir, 'debug', 'info.json'), 'w') as f:

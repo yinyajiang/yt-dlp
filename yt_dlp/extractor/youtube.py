@@ -726,8 +726,9 @@ class YoutubeBaseInfoExtractor(InfoExtractor):
         Extracts visitorData from an API response or ytcfg
         Appears to be used to track session state
         """
-        if visitor_data := self._configuration_arg('visitor_data', [None], ie_key=YoutubeIE, casesense=True)[0]:
-            return visitor_data
+        visitor_data_cfg = self._configuration_arg('visitor_data', [None], ie_key=YoutubeIE, casesense=True)
+        if visitor_data_cfg and len(visitor_data_cfg) > 0:
+            return visitor_data_cfg[0]
         return get_first(
             args, [('VISITOR_DATA', ('INNERTUBE_CONTEXT', 'client', 'visitorData'), ('responseContext', 'visitorData'))],
             expected_type=str)

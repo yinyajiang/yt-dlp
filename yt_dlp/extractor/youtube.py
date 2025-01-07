@@ -4467,12 +4467,6 @@ class YoutubeIE(YoutubeBaseInfoExtractor):
             ]
             if any(vr_warning in response_str for vr_warning in vr_warings_list):
                 return True
-            for resp in player_responses:
-                vr_config = traverse_obj(resp, ('playerConfig', 'vrConfig'))
-                if vr_config:
-                    if 'allowVr' in vr_config:
-                        return vr_config['allowVr']
-                    return True
             return False
         except Exception:
             return False

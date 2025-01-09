@@ -4465,9 +4465,7 @@ class YoutubeIE(YoutubeBaseInfoExtractor):
                 '180\\u00b0 video playback is not supported on this',
                 'To view this video in VR',
             ]
-            if any(vr_warning in response_str for vr_warning in vr_warings_list):
-                return True
-            return False
+            return any(vr_warning in response_str for vr_warning in vr_warings_list)
         except Exception:
             return False
 

@@ -2881,7 +2881,7 @@ class GenericIE(InfoExtractor):
         if not force_use_webview:
             try:
                 result = self.__super_extract(url, fatal=True)
-                ok = self.__check_result(result, url)
+                ok, result = self.__check_result(result, url)
                 if ok:
                     return result
             except Exception as e:
@@ -2951,13 +2951,13 @@ class GenericIE(InfoExtractor):
     def __get_url(self, url):
         try:
             if self._downloader.params.get('force_use_webview', False):
-                return url, True
+                return (url, True)
 
             parsed = urllib.parse.urlparse(url)
             query_params = urllib.parse.parse_qs(parsed.query)
             real_webview_url = query_params.get('__real_use_webview__', None)
             if real_webview_url and real_webview_url[0]:
-                return real_webview_url[0], True
+                return (real_webview_url[0], True)
 
             this_use_webview = query_params.get('__use_webview__', None)
             if this_use_webview and (this_use_webview[0] == '1' or this_use_webview[0] == 'true' or this_use_webview[0] == 'yes'):
@@ -2965,7 +2965,7 @@ class GenericIE(InfoExtractor):
                 new_query = urllib.parse.urlencode(query_params, doseq=True)
                 parsed = parsed._replace(query=new_query)
                 url = parsed.geturl()
-                return url, True
+                return (url, True)
         except Exception:
-            return url, False
-        return url, False
+            return (url, False)
+        return (url, False)

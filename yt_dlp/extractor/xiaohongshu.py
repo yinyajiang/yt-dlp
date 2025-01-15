@@ -68,27 +68,56 @@ class XiaoHongShuIE(InfoExtractor):
             formats.extend(traverse_obj(info, (('mediaUrl', ('backupUrls', ...)), {
                 lambda u: url_or_none(u) and {'url': u, **format_info}})))
 
+        photo_items = []
         thumbnails = []
         for image_info in traverse_obj(note_info, ('imageList', ...)):
             thumbnail_info = traverse_obj(image_info, {
                 'height': ('height', {int_or_none}),
                 'width': ('width', {int_or_none}),
             })
+
+            photo_format = None
             for thumb_url in traverse_obj(image_info, (('urlDefault', 'urlPre'), {url_or_none})):
                 thumbnails.append({
                     'url': thumb_url,
                     **thumbnail_info,
                 })
+                if not photo_format:
+                    photo_format = thumbnails[-1]
 
-        return {
-            'id': display_id,
-            'formats': formats,
-            'thumbnails': thumbnails,
-            'title': self._html_search_meta(['og:title'], webpage, default=None),
-            **traverse_obj(note_info, {
-                'title': ('title', {str}),
-                'description': ('desc', {str}),
-                'tags': ('tagList', ..., 'name', {str}),
-                'uploader_id': ('user', 'userId', {str}),
-            }),
-        }
+            photo_items.append(photo_format)
+
+        # has video
+        if formats or not photo_items:
+            return {
+                'id': display_id,
+                'formats': formats,
+                'thumbnails': thumbnails,
+                'title': self._html_search_meta(['og:title'], webpage, default=None),
+                **traverse_obj(note_info, {
+                    'title': ('title', {str}),
+                    'description': ('desc', {str}),
+                    'tags': ('tagList', ..., 'name', {str}),
+                    'uploader_id': ('user', 'userId', {str}),
+                }),
+            }
+        elif photo_items:  # only has photos
+            entries = []
+            title = self._html_search_meta(['og:title'], webpage, default=None) or str(display_id)
+            for i, item in enumerate(photo_items):
+                ext = next((e for e in ('jpg', 'jpeg', 'png', 'webp', 'gif', 'heic', 'heif') if e in item['url']), 'jpg')
+                entries.append({
+                    'id': f'{display_id}-{i}',
+                    'formats': [
+                        {
+                            **item,
+                            'vcodec': ext,
+                            'ext': ext,
+                            '_media_type': 'PHOTO',
+                        },
+                    ],
+                    'title': title + f'-{i}',
+                })
+            result = self.playlist_result(entries, playlist_id=display_id, playlist_title=title)
+            result['_playlist_media_type'] = 'CAROUSEL'
+            return result

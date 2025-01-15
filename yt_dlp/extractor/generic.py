@@ -2449,7 +2449,7 @@ class GenericIE(InfoExtractor):
                     'vcodec': 'none' if m.group('type') == 'audio' else None,
                 }]
                 info_dict['direct'] = True
-                if m.group('type') == 'image':
+                if str(m.group('type')).lower() == 'image':
                     info_dict['_media_type'] = 'PHOTO'
             info_dict.update({
                 'formats': formats,

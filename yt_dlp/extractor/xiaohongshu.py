@@ -105,7 +105,7 @@ class XiaoHongShuIE(InfoExtractor):
             entries = []
             title = self._html_search_meta(['og:title'], webpage, default=None) or str(display_id)
             for i, item in enumerate(photo_items):
-                ext = next((e for e in ('jpg', 'jpeg', 'png', 'webp', 'gif', 'heic', 'heif') if e in item['url']), 'jpg')
+                ext = next((e for e in ('_jpg_', '_jpeg_', '_png_', '_webp_', '_gif_', '_heic_', '_heif_', 'jpg', 'jpeg', 'png', 'webp', 'gif', 'heic', 'heif') if e in item['url']), 'jpg')
                 entries.append({
                     'id': f'{display_id}-{i}',
                     'formats': [

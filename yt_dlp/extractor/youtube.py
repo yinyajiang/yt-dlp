@@ -23,6 +23,7 @@ from .common import InfoExtractor, SearchInfoExtractor
 from .openload import PhantomJSwrapper
 from ..jsinterp import JSInterpreter
 from ..networking.exceptions import HTTPError, network_exceptions
+from ..potoken import gen_po_token_run_params
 from ..utils import (
     NO_DEFAULT,
     ExtractorError,
@@ -36,7 +37,6 @@ from ..utils import (
     filter_dict,
     float_or_none,
     format_field,
-    gen_po_token_run_params,
     get_first,
     int_or_none,
     is_html,

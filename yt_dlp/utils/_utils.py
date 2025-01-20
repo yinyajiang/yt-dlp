@@ -42,7 +42,6 @@ import urllib.error
 import urllib.parse
 import urllib.request
 import xml.etree.ElementTree
-from . import potoken
 from . import traversal
 
 
@@ -5798,10 +5797,6 @@ def determine_is_know_media_ext(url):
     if ext[0] == '.':
         ext = ext[1:]
     return ext in KNOWN_EXTENSIONS
-
-
-def gen_po_token_run_params():
-    return potoken.PoToken.gen_po_token_run_params()
 
 
 def join_appdata_path(*paths):

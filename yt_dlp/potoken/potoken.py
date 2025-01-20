@@ -3,9 +3,7 @@ import re
 import os
 import tempfile
 import zlib
-from ._utils import (
-    js_files,
-)
+from ._compressed_potoken_js_files import js_files
 
 
 def get_decompress_po_token_js(name):
@@ -89,3 +87,7 @@ class PoToken:
             }
         except Exception:
             return None
+
+
+def gen_po_token_run_params():
+    return PoToken.gen_po_token_run_params()

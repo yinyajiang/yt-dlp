@@ -11,7 +11,7 @@ def compress_file(filename):
 
 if __name__ == '__main__':
     cur_dir = os.path.join(os.path.dirname(__file__))
-    dest = os.path.abspath(os.path.join(cur_dir, '..', 'yt_dlp', 'utils', '_compressed_potoken_js_files.py'))
+    dest = os.path.abspath(os.path.join(cur_dir, '..', 'yt_dlp', 'potoken', '_compressed_potoken_js_files.py'))
 
     if len(sys.argv) > 1 and 'inner' in sys.argv[1].lower():
         base_js = compress_file(os.path.join(cur_dir, 'js_res', 'potoken', 'base.js'))

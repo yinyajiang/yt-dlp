@@ -4083,6 +4083,66 @@ class InfoExtractor:
             return title
         return title
 
+    def _smart_call_cmd(self, cmd_location, cmd_params, input_params, main_para_name, main_para=None, result_is_obj=True):
+        try:
+            if not cmd_location:
+                return (False, None)
+            if isinstance(cmd_location, list):
+                cmd_location = cmd_location[0]
+
+            if not cmd_location.startswith('http'):
+                if not os.path.exists(cmd_location):
+                    return (False, None)
+
+                if isinstance(cmd_params, list):
+                    cmd_params = cmd_params[0]
+
+                args = []
+                put_main_para = False
+                if cmd_params:
+                    for cparam in cmd_params.split(' '):
+                        cparam = cparam.strip()
+                        if not cparam:
+                            continue
+                        for key, value in input_params.items():
+                            if f'{{{key}}}' in cparam:
+                                cparam = cparam.replace(f'{{{key}}}', value)
+                                if key == main_para_name:
+                                    put_main_para = True
+                        args.append(cparam)
+
+                if main_para and not put_main_para:
+                    args.append(main_para)
+
+                process = subprocess.run([cmd_location, *args],
+                                         stdout=subprocess.PIPE, stderr=subprocess.DEVNULL, text=True, encoding='utf-8', errors='replace')
+                input_text = process.stdout
+                if not result_is_obj:
+                    return (True, input_text)
+
+                for line in input_text.splitlines():
+                    line = line.strip()
+                    if not line:
+                        continue
+                    try:
+                        if line.startswith('{') and line.endswith('}'):
+                            js = json.loads(line)
+                            return (True, js)
+                    except Exception:
+                        pass
+                return (False, None)
+            else:
+                data = self._no_proxy_download_large_timeout(cmd_location)
+                if data:
+                    if result_is_obj:
+                        js = json.loads(data)
+                        return (True, js)
+                    else:
+                        return (True, data)
+        except Exception:
+            pass
+        return (False, None)
+
 
 class SearchInfoExtractor(InfoExtractor):
     """

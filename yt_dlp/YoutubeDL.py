@@ -4485,3 +4485,14 @@ class YoutubeDL:
             return this_use_webview and (this_use_webview[0] == '1' or this_use_webview[0] == 'true' or this_use_webview[0] == 'yes')
         except Exception:
             return False
+
+    def _has_formats_to_download(self, info_dict):
+        try:
+            format_selector = self.format_selector
+            if format_selector is None:
+                req_format = self._default_format_spec(info_dict)
+                format_selector = self.build_format_selector(req_format)
+            formats_to_download = self._select_formats(info_dict['formats'], format_selector)
+            return len(formats_to_download) > 0
+        except Exception:
+            return False

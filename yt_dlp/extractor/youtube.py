@@ -36,9 +36,11 @@ from ..utils import (
     filter_dict,
     float_or_none,
     format_field,
+    gen_po_token_run_params,
     get_first,
     int_or_none,
     is_html,
+    join_appdata_path,
     join_nonempty,
     js_to_json,
     mimetype2ext,
@@ -4434,7 +4436,7 @@ class YoutubeIE(YoutubeBaseInfoExtractor):
                 } for j in range(math.ceil(fragment_count))],
             }
 
-    def _download_player_responses(self, url, smuggled_data, video_id, webpage_url):
+    def _download_player_responses(self, url, smuggled_data, video_id, webpage_url, out_additional_info=None):
         webpage = None
         if 'webpage' not in self._configuration_arg('player_skip'):
             query = {'bpctr': '9999999999', 'has_verified': '1'}
@@ -4457,32 +4459,35 @@ class YoutubeIE(YoutubeBaseInfoExtractor):
             try:
                 player_responses_vr, player_url_vr = self._extract_player_responses([vr_client], video_id, webpage, master_ytcfg, smuggled_data)
                 if player_responses_vr:
-                    player_responses = player_responses_vr
-                    player_url = player_url_vr
+                    _, is_invalid = self._maybe_is_invalid_client_response(player_responses_vr)
+                    if not is_invalid:
+                        player_responses = player_responses_vr
+                        player_url = player_url_vr
             except Exception as e:
                 self.report_warning(f'Failed to extract player responses for android_vr: {e}')
 
-        self._report_invalid_clients(player_responses)
+        self._report_invalid_clients(player_responses, out_additional_info)
 
         return webpage, master_ytcfg, player_responses, player_url
 
-    def _report_invalid_clients(self, player_responses):
+    def _report_invalid_clients(self, player_responses, out_additional_info=None):
         try:
+            if out_additional_info is None:
+                out_additional_info = {}
             invalid_client = []
             valid_client = []
             if player_responses and isinstance(player_responses, list):
                 for resp in player_responses:
-                    if not resp or 'playabilityStatus' not in resp:
-                        continue
-                    status = resp['playabilityStatus']
-                    if not status or not isinstance(status, dict):
-                        continue
-                    if 'status' not in status:
-                        continue
-                    client = resp.get(STREAMING_DATA_CLIENT_NAME, '')
+                    client, is_invalid = self._maybe_is_invalid_client_response(resp)
                     if not client:
                         continue
-                    if status['status'] != 'OK':
+                    if is_invalid:
+                        if client in INNERTUBE_CLIENTS and INNERTUBE_CLIENTS[client].get('REQUIRE_PO_TOKEN', False):
+                            client += '(require_potoken=True)'
+                            out_additional_info['has_invalid_potoken_client'] = True
+                        else:
+                            client += '(require_potoken=False)'
+                            out_additional_info['has_invalid_potoken_client'] = False
                         invalid_client.append(client)
                     else:
                         valid_client.append(client)
@@ -4492,6 +4497,22 @@ class YoutubeIE(YoutubeBaseInfoExtractor):
                 self.to_screen(f'Valid youtube clients: {", ".join(valid_client)}')
         except Exception:
             pass
+
+    def _maybe_is_invalid_client_response(self, resp):
+        try:
+            if not resp or 'playabilityStatus' not in resp:
+                return '', False
+            status = resp['playabilityStatus']
+            if not status or not isinstance(status, dict):
+                return '', False
+            if 'status' not in status:
+                return '', False
+            client = resp.get(STREAMING_DATA_CLIENT_NAME, '')
+            if not client:
+                return '', False
+            return client, str(status['status']).lower() != 'ok'
+        except Exception:
+            return '', False
 
     def _get_vr_client_name(self):
         if 'android_vr' in INNERTUBE_CLIENTS:
@@ -4536,14 +4557,14 @@ class YoutubeIE(YoutubeBaseInfoExtractor):
 
         return live_broadcast_details, live_status, streaming_data, formats, subtitles
 
-    def _real_extract(self, url):
+    def _real_extract_with_out_additional_info(self, url, out_additional_info=None):
         url, smuggled_data = unsmuggle_url(url, {})
         video_id = self._match_id(url)
 
         base_url = self.http_scheme() + '//www.youtube.com/'
         webpage_url = base_url + 'watch?v=' + video_id
 
-        webpage, master_ytcfg, player_responses, player_url = self._download_player_responses(url, smuggled_data, video_id, webpage_url)
+        webpage, master_ytcfg, player_responses, player_url = self._download_player_responses(url, smuggled_data, video_id, webpage_url, out_additional_info)
 
         playability_statuses = traverse_obj(
             player_responses, (..., 'playabilityStatus'), expected_type=dict)
@@ -5087,6 +5108,116 @@ class YoutubeIE(YoutubeBaseInfoExtractor):
         self.mark_watched(video_id, player_responses)
 
         return info
+
+    def _load_potoken_run_js_in_webview(self):
+        try:
+            js_run_webview = self._configuration_arg('js_run_webview', ie_key='youtube', casesense=True)
+            if not js_run_webview:
+                return False
+            js_run_params = self._configuration_arg('js_run_params', ie_key='youtube', casesense=True)
+
+            input_params = gen_po_token_run_params()
+            if not input_params:
+                return False
+            ok, result = self._smart_call_cmd(cmd_location=js_run_webview, cmd_params=js_run_params, input_params=input_params, main_para_name='js_file')
+            if not ok:
+                return False
+            potoken = result.get('poToken')
+            visitor_data = result.get('visitorData')
+            if not potoken or not visitor_data:
+                return False
+            return self._set_potoken_to_config(potoken, visitor_data)
+        except Exception:
+            return False
+
+    def _set_potoken_to_config(self, potoken, visitor_data):
+        try:
+            if not potoken or not visitor_data:
+                return False
+            addFlagIndex = potoken.find('+')
+            if addFlagIndex == -1 or addFlagIndex > 10:
+                potoken = 'all+' + potoken
+            params = self._downloader.params
+            extractor_args = params.setdefault('extractor_args', {})
+            youtube_args = extractor_args.setdefault('youtube', {})
+            youtube_args['po_token'] = [potoken]
+            youtube_args['visitor_data'] = [visitor_data]
+            return True
+        except Exception:
+            return False
+
+    def _real_extract(self, url):
+        out_additional_info = {}
+        first_execption = None
+        try:
+            result = self._real_extract_with_out_additional_info(url, out_additional_info)
+            result_type = result.get('_type', 'video')
+            if result_type == 'video' and not self._downloader._has_formats_to_download(result) and not self._has_config_potoken():
+                # try to use potoken
+                out_additional_info['has_invalid_potoken_client'] = True
+            else:
+                return result
+        except Exception as e:
+            first_execption = e
+
+        if out_additional_info.get('has_invalid_potoken_client', False):
+            load_potoken_ok, load_potoken_from_file = self._auto_load_potoken()
+            if load_potoken_ok:
+                try:
+                    new_result = self._real_extract_with_out_additional_info(url, out_additional_info)
+                    if not self._downloader._has_formats_to_download(new_result):
+                        self.report_warning('use inner potoken but not found formats to download')
+                    if not load_potoken_from_file:
+                        self._save_current_potoken_to_file()
+                    return new_result
+                except Exception:
+                    pass
+            else:
+                self.report_warning('if an error occurs, try using potoken')
+
+        if first_execption:
+            raise first_execption
+        return result
+
+    def _has_config_potoken(self):
+        try:
+            return self._configuration_arg('po_token', [], casesense=True) and self._configuration_arg('visitor_data', [], casesense=True)
+        except Exception:
+            return False
+
+    def _save_current_potoken_to_file(self):
+        try:
+            potoken = self._configuration_arg('po_token', [None], casesense=True)[0]
+            visitor_data = self._configuration_arg('visitor_data', [None], casesense=True)[0]
+            if potoken and visitor_data:
+                po_token_dir = join_appdata_path('potoken')
+                os.makedirs(po_token_dir, exist_ok=True)
+                po_token_path = os.path.join(po_token_dir, '.potoken')
+                with open(po_token_path, 'w') as f:
+                    f.write(json.dumps({'po_token': potoken, 'visitor_data': visitor_data, 'timestamp': time.time()}))
+                return True
+        except Exception:
+            return False
+
+    def _load_last_potoken_from_file(self):
+        try:
+            po_token_path = join_appdata_path('potoken', '.potoken')
+            if not os.path.exists(po_token_path):
+                return None
+            with open(po_token_path) as f:
+                data = json.loads(f.read())
+                if data.get('timestamp') and time.time() - data.get('timestamp') < 3600 * 24 * 4:
+                    return self._set_potoken_to_config(data.get('po_token'), data.get('visitor_data'))
+                return False
+        except Exception:
+            return False
+
+    def _auto_load_potoken(self):
+        if self._load_last_potoken_from_file():
+            return (True, True)  # (is_ok, is_from_file)
+        if self._load_potoken_run_js_in_webview():
+            return (True, False)  # (is_ok, is_from_file)
+        return (False, False)  # (is_ok, is_from_file)
 
 
 class YoutubeTabBaseInfoExtractor(YoutubeBaseInfoExtractor):

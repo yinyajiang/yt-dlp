@@ -45,6 +45,7 @@ import xml.etree.ElementTree
 from . import potoken
 from . import traversal
 
+
 from ..compat import (
     compat_etree_fromstring,
     compat_expanduser,

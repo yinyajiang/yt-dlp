@@ -3,19 +3,21 @@ import re
 import os
 import tempfile
 import zlib
-from . import _compressed_potoken_js_files
+from ._utils import (
+    js_files,
+)
 
 
 def get_decompress_po_token_js(name):
     try:
-        compressed = _compressed_potoken_js_files.js_files()[name]
+        compressed = js_files()[name]
         return zlib.decompress(compressed).decode('utf-8')
     except Exception:
         return None
 
 
 def has_compressed_potoken_js():
-    return bool(_compressed_potoken_js_files.js_files())
+    return bool(js_files())
 
 
 class PoToken:

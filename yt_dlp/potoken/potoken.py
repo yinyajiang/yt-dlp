@@ -1,4 +1,3 @@
-import requests
 import re
 import os
 import tempfile
@@ -28,19 +27,21 @@ class PoToken:
         'user-agent': USER_AGENT,
     }
 
-    @staticmethod
-    def _get_visitor_data():
-        response = requests.get(PoToken.PAGE_URL, headers=PoToken.HEADERS)
-        response.raise_for_status()
+    def __init__(self, download_webpage_func):
+        self._download_webpage_func = download_webpage_func
+
+    def _get_visitor_data(self):
+        if not self._download_webpage_func:
+            raise ValueError('Download function not provided')
+        response = self._download_webpage_func(PoToken.PAGE_URL, headers=PoToken.HEADERS)
 
         pattern = r'"visitorData"\s*:\s*"([^"]+)'
-        match = re.search(pattern, response.text)
+        match = re.search(pattern, response)
         if match:
             return match.group(1)
         raise ValueError('No visitor data found')
 
-    @staticmethod
-    def _gen_po_token_js(visitor_data):
+    def _gen_po_token_js(self, visitor_data):
         try:
             js_prefix = f'''
                 Object.defineProperty(window.navigator, 'userAgent', {{ value: '{PoToken.USER_AGENT}', writable: false }});
@@ -73,14 +74,13 @@ class PoToken:
             print(f'Error generating po token js: {e!s}')
             raise
 
-    @staticmethod
-    def gen_po_token_run_params():
+    def gen_po_token_run_params(self):
         try:
             if not has_compressed_potoken_js():
                 return None
-            visitor_data = PoToken._get_visitor_data()
+            visitor_data = self._get_visitor_data()
             return {
-                'js_file': PoToken._gen_po_token_js(visitor_data),
+                'js_file': self._gen_po_token_js(visitor_data),
                 'page_url': PoToken.PAGE_URL,
                 'user_agent': PoToken.USER_AGENT,
                 'headers': PoToken.HEADERS,
@@ -89,5 +89,5 @@ class PoToken:
             return None
 
 
-def gen_po_token_run_params():
-    return PoToken.gen_po_token_run_params()
+def gen_po_token_run_params(download_webpage_func):
+    return PoToken(download_webpage_func).gen_po_token_run_params()

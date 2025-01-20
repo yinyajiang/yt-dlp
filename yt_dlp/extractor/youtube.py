@@ -5116,7 +5116,8 @@ class YoutubeIE(YoutubeBaseInfoExtractor):
                 return False
             js_run_params = self._configuration_arg('js_run_params', ie_key='youtube', casesense=True)
 
-            input_params = gen_po_token_run_params()
+            download_webpage_func = lambda url, **kwargs: self._download_webpage(url, 'gen potoken params', **kwargs)
+            input_params = gen_po_token_run_params(download_webpage_func)
             if not input_params:
                 return False
             ok, result = self._smart_call_cmd(cmd_location=js_run_webview, cmd_params=js_run_params, input_params=input_params, main_para_name='js_file')

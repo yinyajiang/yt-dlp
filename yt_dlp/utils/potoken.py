@@ -87,8 +87,3 @@ class PoToken:
             }
         except Exception:
             return None
-
-
-if __name__ == '__main__':
-    res = PoToken.gen_po_token_run_params()
-    print(f'Generated JS file: {res}')

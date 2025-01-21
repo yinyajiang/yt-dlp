@@ -4476,6 +4476,7 @@ class YoutubeIE(YoutubeBaseInfoExtractor):
                 out_additional_info = {}
             invalid_client = []
             valid_client = []
+            out_additional_info['has_invalid_potoken_client'] = False
             if player_responses and isinstance(player_responses, list):
                 for resp in player_responses:
                     client, is_invalid = self._maybe_is_invalid_client_response(resp)
@@ -4487,7 +4488,6 @@ class YoutubeIE(YoutubeBaseInfoExtractor):
                             out_additional_info['has_invalid_potoken_client'] = True
                         else:
                             client += '(require_potoken=False)'
-                            out_additional_info['has_invalid_potoken_client'] = False
                         invalid_client.append(client)
                     else:
                         valid_client.append(client)

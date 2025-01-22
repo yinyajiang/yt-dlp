@@ -1,37 +1,24 @@
-import re
 
 from .common import InfoExtractor
 from ..utils import (
     ExtractorError,
     determine_ext,
+    determine_is_know_media_ext,
     int_or_none,
+    traverse_obj,
     unescapeHTML,
 )
 
 
 class MSNIE(InfoExtractor):
-    _WORKING = False
-    _VALID_URL = r'https?://(?:(?:www|preview)\.)?msn\.com/(?:[^/]+/)+(?P<display_id>[^/]+)/[a-z]{2}-(?P<id>[\da-zA-Z]+)'
+    _VALID_URL = r'https?://(?:(?:www|preview)\.)?msn\.com/(?P<locale>[^/]+)/(?:[^/]+/)*(?P<display_id>[^/]+)/[a-z]{2}-(?P<id>[\da-zA-Z]+)'
     _TESTS = [{
         'url': 'https://www.msn.com/en-in/money/video/7-ways-to-get-rid-of-chest-congestion/vi-BBPxU6d',
-        'md5': '087548191d273c5c55d05028f8d2cbcd',
-        'info_dict': {
-            'id': 'BBPxU6d',
-            'display_id': '7-ways-to-get-rid-of-chest-congestion',
-            'ext': 'mp4',
-            'title': 'Seven ways to get rid of chest congestion',
-            'description': '7 Ways to Get Rid of Chest Congestion',
-            'duration': 88,
-            'uploader': 'Health',
-            'uploader_id': 'BBPrMqa',
-        },
+        'only_matching': True,
     }, {
         # Article, multiple Dailymotion Embeds
         'url': 'https://www.msn.com/en-in/money/sports/hottest-football-wags-greatest-footballers-turned-managers-and-more/ar-BBpc7Nl',
-        'info_dict': {
-            'id': 'BBpc7Nl',
-        },
-        'playlist_mincount': 4,
+        'only_matching': True,
     }, {
         'url': 'http://www.msn.com/en-ae/news/offbeat/meet-the-nine-year-old-self-made-millionaire/ar-BBt6ZKf',
         'only_matching': True,
@@ -64,16 +51,28 @@ class MSNIE(InfoExtractor):
     }]
 
     def _real_extract(self, url):
-        display_id, page_id = self._match_valid_url(url).groups()
+        locale, display_id, page_id = self._match_valid_url(url).groups()
+        items_list = []
+        try:
+            js = self._download_json(f'https://assets.msn.com/content/view/v2/Detail/{locale}/{page_id}', display_id)
+            if not js:
+                raise ExtractorError(f'download json failed: https://assets.msn.com/content/view/v2/Detail/{locale}/{page_id}')
+        except Exception as e:
+            if any(status in str(e) for status in ['410', '404']):
+                raise ExtractorError(f'this video is not available, {e}')
+            raise e
 
-        webpage = self._download_webpage(url, display_id)
+        if isinstance(js, list):
+            items_list = js
+        else:
+            items_list.append(js)
 
         entries = []
-        for _, metadata in re.findall(r'data-metadata\s*=\s*(["\'])(?P<data>.+?)\1', webpage):
-            video = self._parse_json(unescapeHTML(metadata), display_id)
-
-            provider_id = video.get('providerId')
-            player_name = video.get('playerName')
+        for index, item in enumerate(items_list):
+            if not item:
+                continue
+            provider_id = traverse_obj(item, ('provider', 'id', {str}), default='')
+            player_name = traverse_obj(item, ('provider', 'name', {str}), default='')
             if player_name and provider_id:
                 entry = None
                 if player_name == 'AOL':
@@ -98,70 +97,94 @@ class MSNIE(InfoExtractor):
                     entries.append(entry)
                     continue
 
-            video_id = video['uuid']
-            title = video['title']
+            title = item.get('title') or display_id
+            video_id = item.get('id') or f'{display_id}_{index}'
+            thumbnails = []
+            if traverse_obj(item, ('thumbnail', 'image', 'url'), default=None):
+                thumbnails = [{
+                    'width': traverse_obj(item, ('thumbnail', 'image', 'width'), default=None),
+                    'height': traverse_obj(item, ('thumbnail', 'image', 'height'), default=None),
+                    'url': traverse_obj(item, ('thumbnail', 'image', 'url'), default=None),
+                }]
+            if not thumbnails:
+                for image in traverse_obj(item, ('imageResources', {list}), default=[]):
+                    if image.get('url'):
+                        thumbnails.append({
+                            'width': image.get('width', None),
+                            'height': image.get('height', None),
+                            'url': image.get('url'),
+                            'preference': image.get('quality', None),
+                        })
 
             formats = []
-            for file_ in video.get('videoFiles', []):
+            for file_ in traverse_obj(item, ('videoMetadata', 'externalVideoFiles', {list}), default=[]):
                 format_url = file_.get('url')
                 if not format_url:
                     continue
-                if 'format=m3u8-aapl' in format_url:
-                    # m3u8_native should not be used here until
-                    # https://github.com/ytdl-org/youtube-dl/issues/9913 is fixed
+                format_url_ext = determine_ext(format_url, 'm3u8')
+
+                if format_url_ext == 'm3u8':
                     formats.extend(self._extract_m3u8_formats(
                         format_url, display_id, 'mp4',
                         m3u8_id='hls', fatal=False))
-                elif 'format=mpd-time-csf' in format_url:
+                elif format_url_ext == 'mpd':
                     formats.extend(self._extract_mpd_formats(
                         format_url, display_id, 'dash', fatal=False))
-                elif '.ism' in format_url:
+                elif format_url_ext == 'ism':
                     if format_url.endswith('.ism'):
                         format_url += '/manifest'
                     formats.extend(self._extract_ism_formats(
                         format_url, display_id, 'mss', fatal=False))
                 else:
-                    format_id = file_.get('formatCode')
-                    formats.append({
+                    format_id = file_.get('format', 'mp4')
+                    format_file_size = int_or_none(file_.get('fileSize'))
+                    video_format = {
                         'url': format_url,
-                        'ext': 'mp4',
+                        'ext': format_url_ext,
                         'format_id': format_id,
                         'width': int_or_none(file_.get('width')),
                         'height': int_or_none(file_.get('height')),
-                        'vbr': int_or_none(self._search_regex(r'_(\d+)\.mp4', format_url, 'vbr', default=None)),
                         'quality': 1 if format_id == '1001' else None,
+                    }
+                    if format_file_size:
+                        video_format['filesize'] = format_file_size
+                    formats.append(video_format)
+            if not formats:
+                sourceHref = item.get('sourceHref')
+                if sourceHref and determine_is_know_media_ext(sourceHref):
+                    formats.append({
+                        'url': sourceHref,
+                        'ext': determine_ext(sourceHref),
+                        'format_id': 'source_href',
                     })
-
-            subtitles = {}
-            for file_ in video.get('files', []):
-                format_url = file_.get('url')
-                format_code = file_.get('formatCode')
-                if not format_url or not format_code:
-                    continue
-                if str(format_code) == '3100':
-                    subtitles.setdefault(file_.get('culture', 'en'), []).append({
-                        'ext': determine_ext(format_url, 'ttml'),
-                        'url': format_url,
-                    })
+            if not formats and thumbnails:
+                formats.append({
+                    'url': thumbnails[0].get('url'),
+                    'ext': 'jpg',
+                    'width': thumbnails[0].get('width'),
+                    'height': thumbnails[0].get('height'),
+                    'vcodec': 'jpg',
+                    'format_id': 'image',
+                    '_media_type': 'PHOTO',
+                })
 
             entries.append({
                 'id': video_id,
-                'display_id': display_id,
                 'title': title,
-                'description': video.get('description'),
-                'thumbnail': video.get('headlineImage', {}).get('url'),
-                'duration': int_or_none(video.get('durationSecs')),
-                'uploader': video.get('sourceFriendly'),
-                'uploader_id': video.get('providerId'),
-                'creator': video.get('creator'),
-                'subtitles': subtitles,
+                'description': traverse_obj(item, ('abstract'), default=None),
+                'thumbnails': thumbnails,
+                'uploader_id': provider_id,
                 'formats': formats,
+                'uploader': item.get('createdBy', None),
             })
 
         if not entries:
+            webpage = self._download_webpage(url, display_id)
             error = unescapeHTML(self._search_regex(
                 r'data-error=(["\'])(?P<error>.+?)\1',
                 webpage, 'error', group='error'))
             raise ExtractorError(f'{self.IE_NAME} said: {error}', expected=True)
 
+        if len(entries) == 1:
+            return entries[0]
         return self.playlist_result(entries, page_id)

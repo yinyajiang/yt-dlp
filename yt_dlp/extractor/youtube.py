@@ -5109,18 +5109,35 @@ class YoutubeIE(YoutubeBaseInfoExtractor):
 
         return info
 
-    def _load_potoken_run_js_in_webview(self):
+    def _load_potoken_from_run_js_in_webview(self):
         try:
-            js_run_webview = self._configuration_arg('js_run_webview', ie_key='youtube', casesense=True)
-            if not js_run_webview:
+            potoken_webview_location = self._configuration_arg('potoken_webview_location', ie_key='youtube', casesense=True)
+            if not potoken_webview_location:
                 return False
-            js_run_params = self._configuration_arg('js_run_params', ie_key='youtube', casesense=True)
+            potoken_webview_params = self._configuration_arg('potoken_webview_params', ie_key='youtube', casesense=True)
 
             download_webpage_func = lambda url, **kwargs: self._download_webpage(url, 'gen potoken params', **kwargs)
             input_params = gen_po_token_run_params(download_webpage_func)
             if not input_params:
                 return False
-            ok, result = self._smart_call_cmd(cmd_location=js_run_webview, cmd_params=js_run_params, input_params=input_params, main_para_name='js_file')
+            ok, result = self._smart_call_cmd(cmd_location=potoken_webview_location, cmd_params=potoken_webview_params, input_params=input_params, main_para_name='js_file')
+            if not ok:
+                return False
+            potoken = result.get('poToken')
+            visitor_data = result.get('visitorData')
+            if not potoken or not visitor_data:
+                return False
+            return self._set_potoken_to_config(potoken, visitor_data)
+        except Exception:
+            return False
+
+    def _load_potoen_from_cmd(self):
+        try:
+            potoken_cmd_location = self._configuration_arg('potoken_cmd_location', ie_key='youtube', casesense=True)
+            if not potoken_cmd_location:
+                return False
+            potoken_cmd_params = self._configuration_arg('potoken_cmd_params', ie_key='youtube', casesense=True)
+            ok, result = self._smart_call_cmd(cmd_location=potoken_cmd_location, cmd_params=potoken_cmd_params)
             if not ok:
                 return False
             potoken = result.get('poToken')
@@ -5161,8 +5178,11 @@ class YoutubeIE(YoutubeBaseInfoExtractor):
         except Exception as e:
             first_execption = e
 
+        if 'Sign in to confirm you’re not a bot.' in str(first_execption) and self._has_config_potoken():
+            raise first_execption
+
         if out_additional_info.get('has_invalid_potoken_client', False):
-            load_potoken_ok, load_potoken_from_file = self._auto_load_potoken()
+            load_potoken_ok, load_potoken_from_file = self._auto_load_potoken(disable_from_file=False)
             if load_potoken_ok:
                 try:
                     new_result = self._real_extract_with_out_additional_info(url, out_additional_info)
@@ -5213,10 +5233,12 @@ class YoutubeIE(YoutubeBaseInfoExtractor):
         except Exception:
             return False
 
-    def _auto_load_potoken(self):
-        if self._load_last_potoken_from_file():
+    def _auto_load_potoken(self, disable_from_file=False):
+        if not disable_from_file and self._load_last_potoken_from_file():
             return (True, True)  # (is_ok, is_from_file)
-        if self._load_potoken_run_js_in_webview():
+        if self._load_potoen_from_cmd():
+            return (True, False)  # (is_ok, is_from_file)
+        if self._load_potoken_from_run_js_in_webview():
             return (True, False)  # (is_ok, is_from_file)
         return (False, False)  # (is_ok, is_from_file)
 

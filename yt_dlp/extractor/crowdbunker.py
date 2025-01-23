@@ -45,15 +45,26 @@ class CrowdBunkerIE(InfoExtractor):
             })
 
         mpd_url = try_get(video_json, lambda x: x['dashManifest']['url'])
-        if mpd_url:
-            fmts, subs = self._extract_mpd_formats_and_subtitles(mpd_url, video_id)
-            formats.extend(fmts)
-            subtitles = self._merge_subtitles(subtitles, subs)
         m3u8_url = try_get(video_json, lambda x: x['hlsManifest']['url'])
         if m3u8_url:
-            fmts, subs = self._extract_m3u8_formats_and_subtitles(mpd_url, video_id)
-            formats.extend(fmts)
-            subtitles = self._merge_subtitles(subtitles, subs)
+            try:
+                fmts, subs = self._extract_m3u8_formats_and_subtitles(m3u8_url, video_id)
+                formats.extend(fmts)
+                subtitles = self._merge_subtitles(subtitles, subs)
+            except Exception as e:
+                if not mpd_url:
+                    raise e
+                else:
+                    self.report_warning(f'extract m3u8({m3u8_url}) failed: {e}')
+
+        if mpd_url:
+            try:
+                fmts, subs = self._extract_mpd_formats_and_subtitles(mpd_url, video_id)
+                formats.extend(fmts)
+                subtitles = self._merge_subtitles(subtitles, subs)
+            except Exception as e:
+                if len(formats) == 0:
+                    raise e
 
         thumbnails = [{
             'url': image['url'],

@@ -1079,6 +1079,18 @@ class YoutubeDL:
                 return
             self.to_stderr(f'{self._format_err("WARNING:", self.Styles.WARNING)} {message}', only_once)
 
+    def report_msg(self, message, only_once=False):
+        """
+        Print the message to stderr, it will be prefixed with 'MESSAGE:'
+        If stderr is a tty file the 'MESSAGE:' will be colored
+        """
+        if self.params.get('logger') is not None:
+            self.params['logger'].info(message)
+        else:
+            if self.params.get('no_messages'):
+                return
+            self.to_stderr(f'{self._format_err("MESSAGE:", self.Styles.WARNING)} {message}', only_once)
+
     def deprecation_warning(self, message, *, stacklevel=0):
         deprecation_warning(
             message, stacklevel=stacklevel + 1, printer=self.report_error, is_error=False)

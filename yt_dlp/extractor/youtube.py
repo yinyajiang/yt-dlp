@@ -5177,10 +5177,8 @@ class YoutubeIE(YoutubeBaseInfoExtractor):
                 return result
         except Exception as e:
             first_execption = e
-
         if 'Sign in to confirm you’re not a bot.' in str(first_execption) and self._has_config_potoken():
             raise first_execption
-
         if out_additional_info.get('has_invalid_potoken_client', False):
             load_potoken_ok, load_potoken_from_file = self._auto_load_potoken(disable_from_file=False)
             if load_potoken_ok:
@@ -5235,11 +5233,15 @@ class YoutubeIE(YoutubeBaseInfoExtractor):
 
     def _auto_load_potoken(self, disable_from_file=False):
         if not disable_from_file and self._load_last_potoken_from_file():
+            self.report_msg('load potoken from file')
             return (True, True)  # (is_ok, is_from_file)
         if self._load_potoen_from_cmd():
+            self.report_msg('load potoken from cmd')
             return (True, False)  # (is_ok, is_from_file)
         if self._load_potoken_from_run_js_in_webview():
+            self.report_msg('load potoken from run js in webview')
             return (True, False)  # (is_ok, is_from_file)
+        self.report_msg('auto load potoken failed')
         return (False, False)  # (is_ok, is_from_file)
 
 

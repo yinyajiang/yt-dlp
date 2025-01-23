@@ -1220,6 +1220,15 @@ class InfoExtractor:
         """Print msg to screen, prefixing it with '[ie_name]'"""
         self._downloader.to_screen(f'[{self.IE_NAME}] {msg}', *args, **kwargs)
 
+    def report_msg(self, msg, video_id=None, *args, only_once=False, **kwargs):
+        idstr = format_field(video_id, None, '%s: ')
+        msg = f'[{self.IE_NAME}] {idstr}{msg}'
+        if only_once:
+            if f'MESSAGE: {msg}' in self._printed_messages:
+                return
+            self._printed_messages.add(f'MESSAGE: {msg}')
+        self._downloader.report_msg(msg, *args, **kwargs)
+
     def write_debug(self, msg, *args, **kwargs):
         self._downloader.write_debug(f'[{self.IE_NAME}] {msg}', *args, **kwargs)
 

@@ -3005,6 +3005,43 @@ def mimetype2ext(mt, default=NO_DEFAULT):
     return subtype.replace('+', '.')
 
 
+def mimetype2codecs(mimetype, assign_only_one_codec='vcodec', vcodec_default=None, acodec_default=None):
+    if not mimetype:
+        return {}
+    info = {}
+    if vcodec_default is not None:
+        info['vcodec'] = vcodec_default
+    if acodec_default is not None:
+        info['acodec'] = acodec_default
+
+    codecs = re.findall(r'codecs="([^"]+)"', mimetype)
+    if not codecs:
+        ext = mimetype2ext(mimetype, default=None).strip()
+        if ext:
+            if assign_only_one_codec == 'vcodec':
+                info['vcodec'] = ext
+            elif assign_only_one_codec == 'acodec':
+                info['acodec'] = ext
+            else:
+                info['acodec'] = ext
+                info['vcodec'] = ext
+        return info
+
+    codecs = codecs[0].split(',')
+    if len(codecs) == 1:
+        if assign_only_one_codec == 'vcodec':
+            info['vcodec'] = codecs[0].strip()
+        elif assign_only_one_codec == 'acodec':
+            info['acodec'] = codecs[0].strip()
+        else:
+            info['acodec'] = codecs[0].strip()
+            info['vcodec'] = codecs[0].strip()
+    else:
+        info['vcodec'] = codecs[0].strip()
+        info['acodec'] = codecs[1].strip()
+    return info
+
+
 def ext2mimetype(ext_or_url):
     if not ext_or_url:
         return None

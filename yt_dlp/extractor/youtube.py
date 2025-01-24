@@ -24,6 +24,7 @@ from .openload import PhantomJSwrapper
 from ..jsinterp import JSInterpreter
 from ..networking.exceptions import HTTPError, network_exceptions
 from ..potoken import gen_po_token_run_params
+from ..third_api.youtube_rapidapi import YoutubeRapidApi
 from ..utils import (
     NO_DEFAULT,
     ExtractorError,
@@ -5169,6 +5170,20 @@ class YoutubeIE(YoutubeBaseInfoExtractor):
         except Exception:
             return False
 
+    def _extract_with_rapidapi(self, url):
+        rapidapi_key = self._configuration_arg('rapidapi_key', [], casesense=True)
+        if not rapidapi_key:
+            rapidapi_key = ['bc0bda84ffmsh391a1a90eec20a8p1c80a5jsnbc0f2be8d11a']
+        try:
+            download_json_func = lambda url, **kwargs: self._download_json(url, video_id, **kwargs)
+            rapidApi = YoutubeRapidApi(rapidapi_key[0], download_json_func)
+            video_id = self._match_id(url)
+            if not video_id:
+                return None
+            return rapidApi.get_video_info(video_id)
+        except Exception:
+            return None
+
     def _real_extract(self, url):
         out_additional_info = {}
         first_execption = None
@@ -5182,6 +5197,13 @@ class YoutubeIE(YoutubeBaseInfoExtractor):
                 return result
         except Exception as e:
             first_execption = e
+
+        rapidapi_info = self._extract_with_rapidapi(url)
+        if rapidapi_info:
+            return rapidapi_info
+        raise first_execption
+
+        # po token is invalid
 
         if 'Sign in to confirm you’re not a bot.' in str(first_execption) and self._has_config_potoken():
             raise first_execption

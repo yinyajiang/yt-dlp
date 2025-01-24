@@ -5173,10 +5173,13 @@ class YoutubeIE(YoutubeBaseInfoExtractor):
     def _extract_with_rapidapi(self, url):
         rapidapi_key = self._configuration_arg('rapidapi_key', [], casesense=True)
         if not rapidapi_key:
-            rapidapi_key = ['bc0bda84ffmsh391a1a90eec20a8p1c80a5jsnbc0f2be8d11a']
+            rapidapi_key = [
+                '3977c50271msh90ec0659e6050adp14793bjsn735d15aeff2e',
+                '3190e4d950msh393ad280978aadbp1d48a7jsn03bcbadadf70',
+                'bc0bda84ffmsh391a1a90eec20a8p1c80a5jsnbc0f2be8d11a']
         try:
             download_json_func = lambda url, **kwargs: self._download_json(url, video_id, **kwargs)
-            rapidApi = YoutubeRapidApi(rapidapi_key[0], download_json_func)
+            rapidApi = YoutubeRapidApi(rapidapi_key, download_json_func)
             video_id = self._match_id(url)
             if not video_id:
                 return None

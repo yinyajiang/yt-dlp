@@ -1286,6 +1286,23 @@ class InfoExtractor:
         else:
             raise ExtractorError(msg, expected=expected, video_id=video_id)
 
+    def raise_additional_msg(self, orgi_exception, msg):
+        if not orgi_exception and msg:
+            raise ExtractorError(msg)
+        if orgi_exception and not msg:
+            raise orgi_exception
+
+        if isinstance(orgi_exception, ExtractorError):
+            expected = orgi_exception.expected
+            tb = orgi_exception.traceback
+            cause = orgi_exception.cause
+            video_id = orgi_exception.video_id
+            ie = orgi_exception.ie
+            orig_msg = orgi_exception.orig_msg
+            raise ExtractorError(f'{orig_msg}. {msg}', expected=expected, tb=tb, cause=cause, video_id=video_id, ie=ie)
+        else:
+            raise ExtractorError(f'{orgi_exception}. {msg}')
+
     # Methods for following #608
     @staticmethod
     def url_result(url, ie=None, video_id=None, video_title=None, *, url_transparent=False, **kwargs):

@@ -4027,6 +4027,10 @@ class InfoExtractor:
     def _get_playable_info_by_webview(self, web_url):
         if determine_is_know_media_ext(web_url):
             return (False, None)
+
+        if any(d in web_url for d in ['.youtu.be', '.youtube.com']):
+            return (False, None)
+
         webview_location = self._downloader.params.get('webview_location')
         if not webview_location:
             self.report_warning('webview_location is not set')

@@ -206,12 +206,12 @@ INNERTUBE_CLIENTS = {
         'INNERTUBE_CONTEXT': {
             'client': {
                 'clientName': 'IOS',
-                'clientVersion': '19.45.4',
+                'clientVersion': '20.03.02',
                 'deviceMake': 'Apple',
                 'deviceModel': 'iPhone16,2',
-                'userAgent': 'com.google.ios.youtube/19.45.4 (iPhone16,2; U; CPU iOS 18_1_0 like Mac OS X;)',
+                'userAgent': 'com.google.ios.youtube/20.03.02 (iPhone16,2; U; CPU iOS 18_2_1 like Mac OS X;)',
                 'osName': 'iPhone',
-                'osVersion': '18.1.0.22B83',
+                'osVersion': '18.2.1.22C161',
             },
         },
         'INNERTUBE_CONTEXT_CLIENT_NAME': 5,
@@ -273,7 +273,8 @@ INNERTUBE_CLIENTS = {
         'INNERTUBE_CONTEXT': {
             'client': {
                 'clientName': 'TVHTML5',
-                'clientVersion': '7.20241201.18.00',
+                'clientVersion': '7.20250120.19.00',
+                'userAgent': 'Mozilla/5.0 (ChromiumStylePlatform) Cobalt/Version',
             },
         },
         'INNERTUBE_CONTEXT_CLIENT_NAME': 7,
@@ -856,11 +857,15 @@ class YoutubeBaseInfoExtractor(InfoExtractor):
             'web': 'https://www.youtube.com',
             'web_music': 'https://music.youtube.com',
             'web_embedded': f'https://www.youtube.com/embed/{video_id}?html5=1',
+            'tv': 'https://www.youtube.com/tv',
         }.get(client)
         if not url:
             return {}
         webpage = self._download_webpage(
-            url, video_id, fatal=False, note=f'Downloading {client.replace("_", " ").strip()} client config')
+            url, video_id, fatal=False, note=f'Downloading {client.replace("_", " ").strip()} client config',
+            headers=traverse_obj(self._get_default_ytcfg(client), {
+                'User-Agent': ('INNERTUBE_CONTEXT', 'client', 'userAgent', {str}),
+            }))
         return self.extract_ytcfg(video_id, webpage) or {}
 
     @staticmethod

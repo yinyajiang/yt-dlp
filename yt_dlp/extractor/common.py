@@ -86,6 +86,7 @@ from ..utils import (
     str_or_none,
     str_to_int,
     strip_or_none,
+    to_bool,
     traverse_obj,
     truncate_string,
     try_call,
@@ -4175,6 +4176,16 @@ class InfoExtractor:
         except Exception:
             pass
         return (False, None)
+
+    def _has_ie_config(self, name, is_bool=True):
+        value = self._configuration_arg(name, [], casesense=True)
+        if not value:
+            return False
+        if is_bool:
+            if isinstance(value, list):
+                value = value[0]
+            return to_bool(value)
+        return True
 
 
 class SearchInfoExtractor(InfoExtractor):

@@ -95,7 +95,7 @@ class YoutubeRapidApi:
         return ytb_info
 
     def _get_video_info(self, video_id):
-        for _ in range(5):
+        for _ in range(50):
             try:
                 return self.__get_video_info(video_id)
             except Exception as e:

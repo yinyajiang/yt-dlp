@@ -5307,7 +5307,9 @@ class YoutubeIE(YoutubeBaseInfoExtractor):
             video_id = self._match_id(url)
             if not video_id:
                 return None
-            return rapidApi.get_video_info(video_id)
+            info = rapidApi.get_video_info(video_id)
+            self.report_msg('use rapidapi')
+            return info
         except Exception:
             return None
 
@@ -5351,6 +5353,11 @@ class YoutubeIE(YoutubeBaseInfoExtractor):
         return None
 
     def _real_extract(self, url):
+        if self._has_ie_config('prefer_rapidapi'):
+            rapidapi_info = self._extract_by_rapidapi(url)
+            if rapidapi_info:
+                return rapidapi_info
+
         out_additional_info = {}
         first_execption = None
         try:

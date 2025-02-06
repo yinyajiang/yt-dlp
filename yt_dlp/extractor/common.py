@@ -842,7 +842,7 @@ class InfoExtractor:
         return url_or_request
 
     def _request_webpage(self, url_or_request, video_id, note=None, errnote=None, fatal=True, data=None,
-                         headers=None, query=None, expected_status=None, impersonate=None, require_impersonation=False):
+                         headers=None, query=None, expected_status=None, impersonate=None, require_impersonation=False, extensions=None):
         """
         Return the response handle.
 
@@ -873,7 +873,8 @@ class InfoExtractor:
             headers = (headers or {}).copy()
             headers.setdefault('X-Forwarded-For', self._x_forwarded_for_ip)
 
-        extensions = {}
+        if not extensions:
+            extensions = {}
 
         if impersonate in (True, ''):
             impersonate = ImpersonateTarget()
@@ -917,7 +918,7 @@ class InfoExtractor:
 
     def _download_webpage_handle(self, url_or_request, video_id, note=None, errnote=None, fatal=True,
                                  encoding=None, data=None, headers={}, query={}, expected_status=None,
-                                 impersonate=None, require_impersonation=False):
+                                 impersonate=None, require_impersonation=False, extensions=None):
         """
         Return a tuple (page content as string, URL handle).
 
@@ -963,7 +964,7 @@ class InfoExtractor:
 
         urlh = self._request_webpage(url_or_request, video_id, note, errnote, fatal, data=data,
                                      headers=headers, query=query, expected_status=expected_status,
-                                     impersonate=impersonate, require_impersonation=require_impersonation)
+                                     impersonate=impersonate, require_impersonation=require_impersonation, extensions=extensions)
         if urlh is False:
             assert not fatal
             return False
@@ -1110,11 +1111,11 @@ class InfoExtractor:
 
         def download_handle(self, url_or_request, video_id, note=note, errnote=errnote, transform_source=None,
                             fatal=True, encoding=None, data=None, headers={}, query={}, expected_status=None,
-                            impersonate=None, require_impersonation=False):
+                            impersonate=None, require_impersonation=False, extensions=None):
             res = self._download_webpage_handle(
                 url_or_request, video_id, note=note, errnote=errnote, fatal=fatal, encoding=encoding,
                 data=data, headers=headers, query=query, expected_status=expected_status,
-                impersonate=impersonate, require_impersonation=require_impersonation)
+                impersonate=impersonate, require_impersonation=require_impersonation, extensions=extensions)
             if res is False:
                 return res
             content, urlh = res
@@ -1122,9 +1123,9 @@ class InfoExtractor:
 
         def download_content(self, url_or_request, video_id, note=note, errnote=errnote, transform_source=None,
                              fatal=True, encoding=None, data=None, headers={}, query={}, expected_status=None,
-                             impersonate=None, require_impersonation=False):
+                             impersonate=None, require_impersonation=False, extensions=None):
             if self.get_param('load_pages'):
-                url_or_request = self._create_request(url_or_request, data, headers, query)
+                url_or_request = self._create_request(url_or_request, data, headers, query, extensions=extensions)
                 filename = self._request_dump_filename(url_or_request.url, video_id, url_or_request.data)
                 self.to_screen(f'Loading request from {filename}')
                 try:
@@ -1147,6 +1148,7 @@ class InfoExtractor:
                 'expected_status': expected_status,
                 'impersonate': impersonate,
                 'require_impersonation': require_impersonation,
+                'extensions': extensions,
             }
             if parser is None:
                 kwargs.pop('transform_source')

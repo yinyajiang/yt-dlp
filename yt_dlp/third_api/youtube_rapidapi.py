@@ -4,6 +4,7 @@ from ..utils import (
     int_or_none,
     mimetype2codecs,
 )
+from ..cookies import YoutubeDLCookieJar
 
 
 def _date_convert(date_str):
@@ -17,11 +18,12 @@ class YoutubeRapidApi:
     API_ENDPOINT = 'https://youtube-media-downloader.p.rapidapi.com/v2/video/details'
     API_HOST = 'youtube-media-downloader.p.rapidapi.com'
 
-    def __init__(self, api_keys, download_json_func, api_host=API_HOST, api_endpoint=API_ENDPOINT):
+    def __init__(self, api_keys, download_json_func, print_msg_func=None, api_host=API_HOST, api_endpoint=API_ENDPOINT):
         self.api_keys = api_keys
         self.api_host = api_host
         self.api_endpoint = api_endpoint
         self._download_json_func = download_json_func
+        self._print_msg_func = print_msg_func
 
     def get_video_info(self, video_id):
         info = self._get_video_info(video_id)
@@ -103,11 +105,16 @@ class YoutubeRapidApi:
                 info = self._download_json_func(url, headers={
                     'x-rapidapi-key': key,
                     'x-rapidapi-host': self.api_host,
+                },
+                    extensions={
+                    'cookiejar': YoutubeDLCookieJar(),
                 })
                 if not info.get('status'):
                     raise Exception(f'rapidapi video info, status is not ok, error: {info.get("errorId")}')
                 return info
             except Exception as e:
+                if self._print_msg_func:
+                    self._print_msg_func(f'rapidapi error: {e}')
                 if not first_exception:
                     first_exception = e
         raise first_exception

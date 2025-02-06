@@ -5285,7 +5285,7 @@ class YoutubeIE(YoutubeBaseInfoExtractor):
         except Exception:
             return False
 
-    def _extract_with_rapidapi(self, url):
+    def _extract_by_rapidapi(self, url):
         rapidapi_key = self._configuration_arg('rapidapi_key', [], casesense=True)
         if not rapidapi_key:
             return None
@@ -5298,6 +5298,24 @@ class YoutubeIE(YoutubeBaseInfoExtractor):
                 return None
             return rapidApi.get_video_info(video_id)
         except Exception:
+            return None
+
+    def _extract_by_not_default_clients(self, url):
+        all_clients = [client_name for client_name, client_cfg in INNERTUBE_CLIENTS.items() if not client_cfg.get('REQUIRE_AUTH', False) and client_name not in self._DEFAULT_CLIENTS]
+        if not all_clients:
+            return None
+        if not self._downloader.params:
+            self._downloader.params = {}
+
+        params = self._downloader.params
+        extractor_args = params.setdefault('extractor_args', {})
+        youtube_args = extractor_args.setdefault('youtube', {})
+        old_clients = youtube_args.get('player_client', None)
+        youtube_args['player_client'] = all_clients
+        try:
+            return self._real_extract_with_out_additional_info(url, {})
+        except Exception:
+            youtube_args['player_client'] = old_clients
             return None
 
     def _real_extract(self, url):
@@ -5314,7 +5332,11 @@ class YoutubeIE(YoutubeBaseInfoExtractor):
         except Exception as e:
             first_execption = e
 
-        rapidapi_info = self._extract_with_rapidapi(url)
+        all_clients_info = self._extract_by_not_default_clients(url)
+        if all_clients_info:
+            return all_clients_info
+
+        rapidapi_info = self._extract_by_rapidapi(url)
         if rapidapi_info:
             return rapidapi_info
         raise first_execption

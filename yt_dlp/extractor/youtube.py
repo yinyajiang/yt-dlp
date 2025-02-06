@@ -3866,11 +3866,9 @@ class YoutubeIE(YoutubeBaseInfoExtractor):
                     f'Invalid po_token configuration format. '
                     f'Expected "CLIENT.CONTEXT+PO_TOKEN", got "{token_str}"', only_once=True)
                 continue
-            if po_token_client == 'all' or po_token_client == client:
-                return po_token
 
             po_token_client, sep, po_token_context = po_token_meta.partition('.')
-            if po_token_client.lower() != client:
+            if po_token_client.lower() != 'all' and po_token_client.lower() != client:
                 continue
 
             if not sep:
@@ -4605,7 +4603,7 @@ class YoutubeIE(YoutubeBaseInfoExtractor):
                     if not client:
                         continue
                     if is_invalid:
-                        if client in INNERTUBE_CLIENTS and INNERTUBE_CLIENTS[client].get('REQUIRE_PO_TOKEN', False):
+                        if client in INNERTUBE_CLIENTS and INNERTUBE_CLIENTS[client].get('PO_TOKEN_REQUIRED_CONTEXTS', None):
                             client += '(require_potoken=True)'
                             out_additional_info['has_invalid_potoken_client'] = True
                         else:

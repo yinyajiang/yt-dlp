@@ -4556,7 +4556,7 @@ class YoutubeIE(YoutubeBaseInfoExtractor):
                 } for j in range(math.ceil(fragment_count))],
             }
 
-    def _download_player_responses(self, url, smuggled_data, video_id, webpage_url, out_additional_info=None):
+    def _download_player_responses(self, url, smuggled_data, video_id, webpage_url, in_out_additional_info=None):
         webpage = None
         if 'webpage' not in self._configuration_arg('player_skip'):
             query = {'bpctr': '9999999999', 'has_verified': '1'}
@@ -4586,28 +4586,27 @@ class YoutubeIE(YoutubeBaseInfoExtractor):
             except Exception as e:
                 self.report_warning(f'Failed to extract player responses for android_vr: {e}')
 
-        self._report_invalid_clients(player_responses, out_additional_info)
+        self._report_invalid_clients(player_responses, in_out_additional_info)
 
         return webpage, master_ytcfg, player_responses, player_url
 
-    def _report_invalid_clients(self, player_responses, out_additional_info=None):
+    def _report_invalid_clients(self, player_responses, in_out_additional_info=None):
         try:
-            if out_additional_info is None:
-                out_additional_info = {}
+            if in_out_additional_info is None:
+                in_out_additional_info = {}
             invalid_client = []
             valid_client = []
-            out_additional_info['has_invalid_potoken_client'] = False
+            in_out_additional_info['has_invalid_potoken_client'] = False
             if player_responses and isinstance(player_responses, list):
                 for resp in player_responses:
                     client, is_invalid = self._maybe_is_invalid_client_response(resp)
                     if not client:
                         continue
                     if is_invalid:
-                        if client in INNERTUBE_CLIENTS and INNERTUBE_CLIENTS[client].get('PO_TOKEN_REQUIRED_CONTEXTS', None):
-                            client += '(require_potoken=True)'
-                            out_additional_info['has_invalid_potoken_client'] = True
-                        else:
-                            client += '(require_potoken=False)'
+                        is_potoken, potoken_type = self._is_potoken_client(client)
+                        if is_potoken:
+                            client += f'(potoken={potoken_type})'
+                            in_out_additional_info['has_invalid_potoken_client'] = True
                         invalid_client.append(client)
                     else:
                         valid_client.append(client)
@@ -4617,6 +4616,18 @@ class YoutubeIE(YoutubeBaseInfoExtractor):
                 self.to_screen(f'Valid youtube clients: {", ".join(valid_client)}')
         except Exception:
             pass
+
+    def _is_potoken_client(self, client):
+        if client not in INNERTUBE_CLIENTS or not INNERTUBE_CLIENTS[client].get('PO_TOKEN_REQUIRED_CONTEXTS', None):
+            return False, ''
+        context = INNERTUBE_CLIENTS[client].get('PO_TOKEN_REQUIRED_CONTEXTS')
+        if _PoTokenContext.GVS in context and _PoTokenContext.PLAYER in context:
+            return True, 'gvs,player'
+        if _PoTokenContext.GVS in context:
+            return True, 'gvs'
+        if _PoTokenContext.PLAYER in context:
+            return True, 'player'
+        return False, ''
 
     def _maybe_is_invalid_client_response(self, resp):
         try:
@@ -4677,14 +4688,14 @@ class YoutubeIE(YoutubeBaseInfoExtractor):
 
         return live_broadcast_details, live_status, streaming_data, formats, subtitles
 
-    def _real_extract_with_out_additional_info(self, url, out_additional_info=None):
+    def _real_extract_with_additional_info(self, url, in_out_additional_info=None):
         url, smuggled_data = unsmuggle_url(url, {})
         video_id = self._match_id(url)
 
         base_url = self.http_scheme() + '//www.youtube.com/'
         webpage_url = base_url + 'watch?v=' + video_id
 
-        webpage, master_ytcfg, player_responses, player_url = self._download_player_responses(url, smuggled_data, video_id, webpage_url, out_additional_info)
+        webpage, master_ytcfg, player_responses, player_url = self._download_player_responses(url, smuggled_data, video_id, webpage_url, in_out_additional_info)
 
         playability_statuses = traverse_obj(
             player_responses, (..., 'playabilityStatus'), expected_type=dict)
@@ -5313,16 +5324,34 @@ class YoutubeIE(YoutubeBaseInfoExtractor):
         old_clients = youtube_args.get('player_client', None)
         youtube_args['player_client'] = all_clients
         try:
-            return self._real_extract_with_out_additional_info(url, {})
+            return self._real_extract_with_additional_info(url, {})
         except Exception:
             youtube_args['player_client'] = old_clients
             return None
+
+    def _extract_by_auto_potoken(self, url, last_out_additional_info={}):
+        last_out_additional_info['use_auto_potoken'] = False
+        if last_out_additional_info.get('has_invalid_potoken_client', False):
+            load_potoken_ok, load_potoken_from_file = self._auto_load_potoken(disable_from_file=False)
+            if load_potoken_ok:
+                try:
+                    result = self._real_extract_with_additional_info(url, last_out_additional_info)
+                    if not self._downloader._has_formats_to_download(result):
+                        self.report_warning('use inner potoken but not found formats to download')
+                    if not load_potoken_from_file:
+                        self._save_current_potoken_to_file()
+
+                    last_out_additional_info['use_auto_potoken'] = True
+                    return result
+                except Exception:
+                    pass
+        return None
 
     def _real_extract(self, url):
         out_additional_info = {}
         first_execption = None
         try:
-            result = self._real_extract_with_out_additional_info(url, out_additional_info)
+            result = self._real_extract_with_additional_info(url, out_additional_info)
             result_type = result.get('_type', 'video')
             if result_type == 'video' and not self._downloader._has_formats_to_download(result) and not self._has_config_potoken():
                 # try to use potoken
@@ -5342,25 +5371,13 @@ class YoutubeIE(YoutubeBaseInfoExtractor):
         raise first_execption
 
         # po token is invalid
-
         if 'Sign in to confirm you’re not a bot.' in str(first_execption) and self._has_config_potoken():
             raise first_execption
 
-        try_pass_po_token = False
-        if out_additional_info.get('has_invalid_potoken_client', False):
-            load_potoken_ok, load_potoken_from_file = self._auto_load_potoken(disable_from_file=False)
-            if load_potoken_ok:
-                try:
-                    new_result = self._real_extract_with_out_additional_info(url, out_additional_info)
-                    if not self._downloader._has_formats_to_download(new_result):
-                        self.report_warning('use inner potoken but not found formats to download')
-                    if not load_potoken_from_file:
-                        self._save_current_potoken_to_file()
-                    return new_result
-                except Exception:
-                    pass
-            else:
-                try_pass_po_token = True
+        auto_pot_result = self._extract_by_auto_potoken(url, out_additional_info)
+        if auto_pot_result:
+            return auto_pot_result
+        try_pass_po_token = not out_additional_info['use_auto_potoken']
 
         if first_execption:
             if try_pass_po_token:

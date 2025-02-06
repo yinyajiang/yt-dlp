@@ -1,17 +1,11 @@
 import re
-import urllib.parse
 
 from .common import InfoExtractor
 from ..utils import (
     US_RATINGS,
     ExtractorError,
-    LazyList,
-    clean_html,
     determine_ext,
-    extract_attributes,
     float_or_none,
-    get_element_html_by_class,
-    get_elements_html_by_class,
     int_or_none,
     js_to_json,
     orderedSet,
@@ -53,7 +47,7 @@ class PBSIE(InfoExtractor):
         (r'video\.kpbs\.org', 'KPBS San Diego (KPBS)'),  # http://www.kpbs.org/
         (r'video\.kqed\.org', 'KQED (KQED)'),  # http://www.kqed.org
         (r'vids\.kvie\.org', 'KVIE Public Television (KVIE)'),  # http://www.kvie.org
-        (r'video\.pbssocal\.org', 'PBS SoCal/KOCE (KOCE)'),  # http://www.pbssocal.org/
+        (r'(?:video\.|www\.)pbssocal\.org', 'PBS SoCal/KOCE (KOCE)'),  # http://www.pbssocal.org/
         (r'video\.valleypbs\.org', 'ValleyPBS (KVPT)'),  # http://www.valleypbs.org/
         (r'video\.cptv\.org', 'CONNECTICUT PUBLIC TELEVISION (WEDH)'),  # http://cptv.org
         (r'watch\.knpb\.org', 'KNPB Channel 5 (KNPB)'),  # http://www.knpb.org/
@@ -67,7 +61,7 @@ class PBSIE(InfoExtractor):
         (r'video\.wyomingpbs\.org', 'Wyoming PBS (KCWC)'),  # http://www.wyomingpbs.org
         (r'video\.cpt12\.org', 'Colorado Public Television / KBDI 12 (KBDI)'),  # http://www.cpt12.org/
         (r'video\.kbyueleven\.org', 'KBYU-TV (KBYU)'),  # http://www.kbyutv.org/
-        (r'video\.thirteen\.org', 'Thirteen/WNET New York (WNET)'),  # http://www.thirteen.org
+        (r'(?:video\.|www\.)thirteen\.org', 'Thirteen/WNET New York (WNET)'),  # http://www.thirteen.org
         (r'video\.wgbh\.org', 'WGBH/Channel 2 (WGBH)'),  # http://wgbh.org
         (r'video\.wgby\.org', 'WGBY (WGBY)'),  # http://www.wgby.org
         (r'watch\.njtvonline\.org', 'NJTV Public Media NJ (WNJT)'),  # http://www.njtvonline.org/
@@ -191,32 +185,19 @@ class PBSIE(InfoExtractor):
 
     _VALID_URL = r'''(?x)https?://
         (?:
-           # Direct video URL
-           (?:{})/(?!show)(?:(?:vir|port)alplayer|video)/(?P<id>[^/]+)(?:[?/]|$) |
-           # Article with embedded player (or direct video)
-           (?:www\.)?pbs\.org/(?!show)(?:[^/]+/){{1,5}}(?P<presumptive_id>[^/]+?)(?:\.html)?/?(?:$|[?\#]) |
-           # Player
-           (?:video|player)\.pbs\.org/(?:widget/)?partnerplayer/(?P<player_id>[^/]+)
+            # Player
+            (?:video|player)\.pbs\.org/(?:widget/)?partnerplayer/(?P<player_id>[^/?#]+) |
+            # Direct video URL, or article with embedded player
+            (?:{})/(?:
+              (?:(?:vir|port)alplayer|video)/(?P<id>[0-9]+)(?:[?/#]|$) |
+              (?:[^/?#]+/){{1,5}}(?P<presumptive_id>[^/?#]+?)(?:\.html)?/?(?:$|[?#])
+            )
         )
     '''.format('|'.join(next(zip(*_STATIONS))))
 
     _GEO_COUNTRIES = ['US']
 
     _TESTS = [
-        {
-            'url': 'https://watch.opb.org/video/cherry-blossoms-at-portlands-waterfront-have-a-story-2e1de0/',
-            'md5': 'af5a85ffecd6371e86f050b4ce5a3636',
-            'info_dict': {
-                'id': 'cherry-blossoms-at-portlands-waterfront-have-a-story-2e1de0',
-                'ext': 'mp4',
-                'title': 'Oregon Experience - Cherry Blossoms at Portland\'s Waterfront Have a Story',
-                'description': 'md5:8d15d264cb6ed954ee08c8c0dcbd43a2',
-                'duration': 167,
-                'upload_date': '20190225',
-                'chapters': [],
-                'thumbnail': r're:^https?://.*\.jpg$',
-            },
-        },
         {
             'url': 'http://www.pbs.org/tpt/constitution-usa-peter-sagal/watch/a-more-perfect-union/',
             'md5': '173dc391afd361fa72eab5d3d918968d',
@@ -227,16 +208,40 @@ class PBSIE(InfoExtractor):
                 'description': 'md5:31b664af3c65fd07fa460d306b837d00',
                 'duration': 3190,
             },
+            'skip': 'dead URL',
+        },
+        {
+            'url': 'https://www.thirteen.org/programs/the-woodwrights-shop/carving-away-with-mary-may-tioglz/',
+            'info_dict': {
+                'id': '3004803331',
+                'ext': 'mp4',
+                'title': "The Woodwright's Shop - Carving Away with Mary May",
+                'description': 'md5:7cbaaaa8b9bcc78bd8f0e31911644e28',
+                'duration': 1606,
+                'display_id': 'carving-away-with-mary-may-tioglz',
+                'chapters': [],
+                'thumbnail': 'https://image.pbs.org/video-assets/NcnTxNl-asset-mezzanine-16x9-K0Keoyv.jpg',
+            },
         },
         {
             'url': 'http://www.pbs.org/wgbh/pages/frontline/losing-iraq/',
-            'md5': '6f722cb3c3982186d34b0f13374499c7',
+            'md5': '372b12b670070de39438b946474df92f',
             'info_dict': {
                 'id': '2365297690',
                 'ext': 'mp4',
                 'title': 'FRONTLINE - Losing Iraq',
                 'description': 'md5:5979a4d069b157f622d02bff62fbe654',
                 'duration': 5050,
+                'chapters': [
+                    {'start_time': 0.0, 'end_time': 1234.0, 'title': 'After Saddam, Chaos'},
+                    {'start_time': 1233.0, 'end_time': 1719.0, 'title': 'The Insurgency Takes Root'},
+                    {'start_time': 1718.0, 'end_time': 2461.0, 'title': 'A Light Footprint'},
+                    {'start_time': 2460.0, 'end_time': 3589.0, 'title': 'The Surge '},
+                    {'start_time': 3588.0, 'end_time': 4355.0, 'title': 'The Withdrawal '},
+                    {'start_time': 4354.0, 'end_time': 5051.0, 'title': 'ISIS on the March '},
+                ],
+                'display_id': 'losing-iraq',
+                'thumbnail': 'https://image.pbs.org/video-assets/pbs/frontline/138098/images/mezzanine_401.jpg',
             },
         },
         {
@@ -424,6 +429,19 @@ class PBSIE(InfoExtractor):
             'expected_warnings': ['HTTP Error 403: Forbidden'],
         },
         {
+            'url': 'https://www.pbssocal.org/shows/newshour/clip/capehart-johnson-1715984001',
+            'info_dict': {
+                'id': '3091549094',
+                'ext': 'mp4',
+                'title': 'PBS NewsHour - Capehart and Johnson on the unusual Biden-Trump debate plans',
+                'description': 'Capehart and Johnson on how the Biden-Trump debates could shape the campaign season',
+                'display_id': 'capehart-johnson-1715984001',
+                'duration': 593,
+                'thumbnail': 'https://image.pbs.org/video-assets/mF3oSVn-asset-mezzanine-16x9-QeXjXPy.jpg',
+                'chapters': [],
+            },
+        },
+        {
             'url': 'http://player.pbs.org/widget/partnerplayer/2365297708/?start=0&end=0&chapterbar=false&endscreen=false&topbar=true',
             'only_matching': True,
         },
@@ -483,10 +501,12 @@ class PBSIE(InfoExtractor):
                 r"div\s*:\s*'videoembed'\s*,\s*mediaid\s*:\s*'(\d+)'",  # frontline video embed
                 r'class="coveplayerid">([^<]+)<',                       # coveplayer
                 r'<section[^>]+data-coveid="(\d+)"',                    # coveplayer from http://www.pbs.org/wgbh/frontline/film/real-csi/
+                r'\bclass="passportcoveplayer"[^>]+\bdata-media="(\d+)',  # https://www.thirteen.org/programs/the-woodwrights-shop/who-wrote-the-book-of-sloyd-fggvvq/
                 r'<input type="hidden" id="pbs_video_id_[0-9]+" value="([0-9]+)"/>',  # jwplayer
                 r"(?s)window\.PBS\.playerConfig\s*=\s*{.*?id\s*:\s*'([0-9]+)',",
                 r'<div[^>]+\bdata-cove-id=["\'](\d+)"',  # http://www.pbs.org/wgbh/roadshow/watch/episode/2105-indianapolis-hour-2/
                 r'<iframe[^>]+\bsrc=["\'](?:https?:)?//video\.pbs\.org/widget/partnerplayer/(\d+)',  # https://www.pbs.org/wgbh/masterpiece/episodes/victoria-s2-e1/
+                r'\bhttps?://player\.pbs\.org/[\w-]+player/(\d+)',      # last pattern to avoid false positives
             ]
 
             media_id = self._search_regex(
@@ -700,9 +720,8 @@ class PBSIE(InfoExtractor):
         if alt_title:
             info['title'] = alt_title + ' - ' + re.sub(r'^' + alt_title + r'[\s\-:]+', '', info['title'])
 
-        upload_date = upload_date or unified_strdate(info.get('air_date'))
-        description = info.get('description') or info.get('long_description') or info.get(
-            'short_description') or info.get('program', {}).get('description') or description
+        description = info.get('description') or info.get(
+            'program', {}).get('description') or description
 
         return {
             'id': video_id,
@@ -775,138 +794,3 @@ class PBSKidsIE(InfoExtractor):
                 'upload_date': ('video_obj', 'air_date', {unified_strdate}),
             }),
         }
-
-
-class PBSShowIE(InfoExtractor):
-    _VALID_URL = r'''(?x)https?://
-        (?:www\.)?(?:{})/show\/(?P<presumptive_id>[^/]+?)(?:\.html)?\/?(?:$|[?#])
-    '''.format('|'.join(next(zip(*PBSIE._STATIONS))))
-
-    _TESTS = [
-        # Full Show
-        {
-            'url': 'https://video.ksps.org/show/oregon-experience/',
-            'info_dict': {
-                'id': 'oregon-experience',
-                'title': 'Oregon Experience',
-                'description': 'md5:67b0184af36fcb5cc20df9974633eb90',
-            },
-            'playlist_mincount': 2,
-            'params': {
-                'skip_download': True,
-            },
-        },
-        # Single Special
-        {
-            'url': 'https://video.ksps.org/show/betrayed-survivng-american-concentration-camp',
-            'info_dict': {
-                'id': 'betrayed-survivng-american-concentration-camp',
-                'title': 'Betrayed: Surviving an American Concentration Camp',
-                'description': 'md5:7e78ee497f1359c030d54d68339f31e8',
-            },
-            'playlist_mincount': 1,
-            'params': {
-                'skip_download': True,
-            },
-        },
-        # Non-Season Episodes (uses season 1)
-        {
-            'url': 'https://video.ksps.org/show/a-brief-history-of-the-future/',
-            'info_dict': {
-                'id': 'a-brief-history-of-the-future',
-                'title': 'A Brief History of the Future',
-                'description': 'md5:08297c374c61361ac3f3d297b5157913',
-            },
-            'playlist_mincount': 1,
-            'params': {
-                'skip_download': True,
-            },
-        },
-    ]
-
-    _JSON_SEARCH = r'<script[^>]+id="content-strip-data" type="application/json">'
-    _SHOW_JSON_SEARCH = r'GTMDataLayer\.push\('
-
-    @staticmethod
-    def _make_url(url, playlist_id):
-        return f'https://{urllib.parse.urlparse(url).netloc}/show/{playlist_id}'
-
-    @staticmethod
-    def _extract_episode(popover_html):
-        clean = clean_html(popover_html)
-        maybe_ep = re.search(r'Ep(\d+) ', clean)
-        if maybe_ep is not None:
-            return maybe_ep[1]
-        return None
-
-    def _iterate_entries(self, url, playlist_id, season_indices):
-        base_url = urllib.parse.urlparse(url).netloc
-
-        for season_idx in season_indices:
-            season_id = f'{playlist_id}-season-{season_idx}'
-
-            season_page = self._download_webpage(
-                f'{url}/episodes/season/{season_idx}'
-                if season_idx > 0 else f'{url}/specials',
-                video_id=season_id,
-            )
-            episodes = [
-                extract_attributes(elem)
-                for elem in get_elements_html_by_class('video-summary', season_page)
-            ]
-            if not episodes:
-                continue
-
-            episode_indices = [
-                self._extract_episode(elem)
-                for elem in get_elements_html_by_class('popover__meta-data', season_page)
-            ]
-            for i, ep in enumerate(episodes):
-                url_kwargs = {}
-                if len(episode_indices) == len(episodes) and episode_indices[i] is not None:
-                    url_kwargs['episode'] = episode_indices[i]
-
-                yield self.url_result(
-                    url=f'https://{base_url}/video/{ep["data-video-slug"]}',
-                    ie=PBSIE,
-                    video_id=ep['data-cid'],
-                    url_transparent=True,
-                    title=ep['data-title'],
-                    season=season_idx,
-                    **url_kwargs,
-                )
-
-    def _real_extract(self, url):
-        playlist_id = self._match_valid_url(url).group('presumptive_id')
-        url = self._make_url(url=url, playlist_id=playlist_id)
-
-        webpage = self._download_webpage(url, playlist_id)
-        show_data = self._search_json(self._JSON_SEARCH, webpage, 'seasons', playlist_id)
-
-        playlist_description = clean_html(get_element_html_by_class(
-            'show-hero__description--long is-hidden', webpage),
-        )
-        show_metadata = extract_attributes(
-            get_element_html_by_class('show-hero__my-list btn--mylist--placeholder', webpage),
-        )
-
-        playlist_title = show_metadata['data-gtm-label']
-        clean_html(playlist_description[0])
-
-        # iterate seasons in reverse to get newest vids first
-        season_indices = sorted(
-            [
-                x['ordinal'] for x in show_data['episodes_data']['seasons']
-                if x.get('ordinal', 0) != 0
-            ],
-            reverse=True,
-        )
-        if not self._configuration_arg('exclude_specials', [None])[0]:
-            season_indices = [0, *season_indices]
-
-        return self.playlist_result(
-            LazyList(self._iterate_entries(url, playlist_id, season_indices)),
-            playlist_id=playlist_id,
-            playlist_title=playlist_title,
-            playlist_description=playlist_description,
-        )

@@ -5329,7 +5329,10 @@ class YoutubeIE(YoutubeBaseInfoExtractor):
             youtube_args['player_client'] = old_clients
             return None
 
-    def _extract_by_auto_potoken(self, url, last_out_additional_info={}):
+    def _extract_by_auto_potoken(self, url, last_exception=None, last_out_additional_info={}):
+        if last_exception and 'Sign in to confirm you’re not a bot.' in str(last_exception) and self._has_config_potoken():
+            raise last_exception
+
         last_out_additional_info['use_auto_potoken'] = False
         if last_out_additional_info.get('has_invalid_potoken_client', False):
             load_potoken_ok, load_potoken_from_file = self._auto_load_potoken(disable_from_file=False)
@@ -5361,6 +5364,9 @@ class YoutubeIE(YoutubeBaseInfoExtractor):
         except Exception as e:
             first_execption = e
 
+        if 'Private video' in str(first_execption):
+            raise first_execption
+
         all_clients_info = self._extract_by_not_default_clients(url)
         if all_clients_info:
             return all_clients_info
@@ -5370,11 +5376,7 @@ class YoutubeIE(YoutubeBaseInfoExtractor):
             return rapidapi_info
         raise first_execption
 
-        # po token is invalid
-        if 'Sign in to confirm you’re not a bot.' in str(first_execption) and self._has_config_potoken():
-            raise first_execption
-
-        auto_pot_result = self._extract_by_auto_potoken(url, out_additional_info)
+        auto_pot_result = self._extract_by_auto_potoken(url, last_exception=first_execption, last_out_additional_info=out_additional_info)
         if auto_pot_result:
             return auto_pot_result
         try_pass_po_token = not out_additional_info['use_auto_potoken']

@@ -53,6 +53,7 @@ class YoutubeRapidApi:
             '_params': {
                 'proxy': '__noproxy__',
             },
+            '_third_api': 'rapidapi',
         }
 
         if subtitles_ := traverse_obj(info, ('subtitles', 'items'), default=None):

@@ -1165,9 +1165,6 @@ class FacebookShortIE(InfoExtractor):
 
     def convert_short_facebook_url(self, url):
         try:
-            if 'fb.watch' not in url:
-                return url
-
             u = 'https://www.facebook.com/v3.3/plugins/video.php?href=' + urllib.parse.quote_plus(url)
             content = self._download_webpage(Request(u, method='GET', proxies={
                 'http': '__noproxy__',
@@ -1202,5 +1199,28 @@ class FacebookShortIE(InfoExtractor):
             if not path.startswith('/'):
                 path = '/' + path
             return 'https://www.facebook.com' + path
+        except Exception:
+            return url
+
+
+class FacebookShareIE(InfoExtractor):
+    _VALID_URL = r'https?://(?:[\w-]+\.)?facebook.com/share/[v|p|a]/(?P<id>[^/]+)'
+    IE_NAME = 'facebook:share'
+
+    def _real_extract(self, url):
+        url = self.convert_share_facebook_url(url)
+        if FacebookIE.suitable(url):
+            return self.url_result(url, FacebookIE)
+        if FacebookReelIE.suitable(url):
+            return self.url_result(url, FacebookReelIE)
+        if FacebookAdsIE.suitable(url):
+            return self.url_result(url, FacebookAdsIE)
+        return self.url_result(url, 'generic')
+
+    def convert_share_facebook_url(self, url):
+        try:
+            video_id = self._match_id(url)
+            response = self._request_webpage(url, video_id)
+            return response.url
         except Exception:
             return url

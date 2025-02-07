@@ -5,6 +5,8 @@ from ..utils import (
     mimetype2codecs,
 )
 from ..cookies import YoutubeDLCookieJar
+import random
+import time
 
 
 def _date_convert(date_str):
@@ -101,6 +103,8 @@ class YoutubeRapidApi:
             except Exception as e:
                 if 'per second' not in str(e).lower():
                     raise e
+                random_sleep = random.randint(0, 1000) / 1000.0
+                time.sleep(random_sleep)
 
     def __get_video_info(self, video_id):
         if not self._download_json_func:

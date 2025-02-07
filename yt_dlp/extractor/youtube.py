@@ -5372,7 +5372,7 @@ class YoutubeIE(YoutubeBaseInfoExtractor):
         except Exception as e:
             first_execption = e
 
-        if 'Private video' in str(first_execption) or 'Video unavailable' in str(first_execption):
+        if self._is_expected_exception(first_execption):
             raise first_execption
 
         all_clients_info = self._extract_by_not_default_clients(url)
@@ -5401,6 +5401,17 @@ class YoutubeIE(YoutubeBaseInfoExtractor):
             return self._configuration_arg('po_token', [], casesense=True) and self._configuration_arg('visitor_data', [], casesense=True)
         except Exception:
             return False
+
+    def _is_expected_exception(self, execption):
+        s = str(execption)
+        return any(e in s for e in [
+            'Private video',
+            'Video unavailable',
+            'Premieres in'
+            'Join this channel',
+            'not available',
+            'DRM protected',
+        ])
 
     def _save_current_potoken_to_file(self):
         try:

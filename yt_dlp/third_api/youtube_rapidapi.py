@@ -107,10 +107,7 @@ class YoutubeRapidApi:
             raise ValueError('Download json function not provided')
 
         first_exception = None
-        is_expected_error = False
         for key in self.api_keys:
-            if is_expected_error and first_exception:
-                raise first_exception
             try:
                 url = f'{self.api_endpoint}?videoId={video_id}'
                 info = self._download_json_func(url, headers={

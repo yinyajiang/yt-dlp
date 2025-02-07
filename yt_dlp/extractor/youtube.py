@@ -5314,7 +5314,8 @@ class YoutubeIE(YoutubeBaseInfoExtractor):
             return None
 
     def _extract_by_not_default_clients(self, url):
-        all_clients = [client_name for client_name, client_cfg in INNERTUBE_CLIENTS.items() if not client_cfg.get('REQUIRE_AUTH', False) and client_name not in self._DEFAULT_CLIENTS]
+        exclude = ['web_music', 'android_vr']
+        all_clients = [name for name, cfg in INNERTUBE_CLIENTS.items() if (not cfg.get('REQUIRE_AUTH', False)) and (name not in self._DEFAULT_CLIENTS) and (name not in exclude)]
         if not all_clients:
             return None
         if not self._downloader.params:
@@ -5371,7 +5372,7 @@ class YoutubeIE(YoutubeBaseInfoExtractor):
         except Exception as e:
             first_execption = e
 
-        if 'Private video' in str(first_execption):
+        if 'Private video' in str(first_execption) or 'Video unavailable' in str(first_execption):
             raise first_execption
 
         all_clients_info = self._extract_by_not_default_clients(url)

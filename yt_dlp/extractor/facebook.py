@@ -1215,7 +1215,7 @@ class FacebookShareIE(InfoExtractor):
             return self.url_result(url, FacebookReelIE)
         if FacebookAdsIE.suitable(url):
             return self.url_result(url, FacebookAdsIE)
-        return self.url_result(url, 'generic')
+        return self.url_result(url, 'Generic')
 
     def convert_share_facebook_url(self, url):
         try:

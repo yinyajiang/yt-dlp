@@ -975,9 +975,16 @@ class TikTokUserIE(TikTokBaseIE):
 
         cursor = int(time.time() * 1E3)
         for page in itertools.count(1):
-            response = self._download_json(
-                self._API_BASE_URL, display_id, f'Downloading page {page}',
-                query=self._build_web_query(sec_uid, cursor), headers={'User-Agent': self._USER_AGENT})
+            try:
+                response = self._download_json(
+                    self._API_BASE_URL, display_id, f'Downloading page {page}',
+                    query=self._build_web_query(sec_uid, cursor), headers={'User-Agent': self._USER_AGENT})
+            except Exception as e:
+                if page != 1:
+                    self.report_warning(f'Downloading page {page} error: {e}, ignore the remaining')
+                    break
+                else:
+                    raise e
 
             for video in traverse_obj(response, ('itemList', lambda _, v: v['id'])):
                 video_id = video['id']
@@ -1188,9 +1195,16 @@ class TikTokCollectionIE(TikTokBaseIE):
     def _entries(self, collection_id):
         cursor = 0
         for page in itertools.count(1):
-            response = self._download_json(
-                self._API_BASE_URL, collection_id, f'Downloading page {page}',
-                query=self._build_web_query(collection_id, cursor))
+            try:
+                response = self._download_json(
+                    self._API_BASE_URL, collection_id, f'Downloading page {page}',
+                    query=self._build_web_query(collection_id, cursor))
+            except Exception as e:
+                if page != 1:
+                    self.report_warning(f'Downloading page {page} error: {e}, ignore the remaining')
+                    break
+                else:
+                    raise e
 
             for video in traverse_obj(response, ('itemList', lambda _, v: v['id'])):
                 video_id = video['id']

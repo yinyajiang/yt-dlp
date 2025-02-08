@@ -1204,7 +1204,7 @@ class FacebookShortIE(InfoExtractor):
 
 
 class FacebookShareIE(InfoExtractor):
-    _VALID_URL = r'https?://(?:[\w-]+\.)?facebook.com/share/[v|p|a]/(?P<id>[^/]+)'
+    _VALID_URL = r'https?://(?:[\w-]+\.)?facebook.com/share/\w+/(?P<id>[^/]+)'
     IE_NAME = 'facebook:share'
 
     def _real_extract(self, url):

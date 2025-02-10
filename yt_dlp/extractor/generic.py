@@ -18,6 +18,7 @@ from ..utils import (
     ExtractorError,
     UnsupportedError,
     determine_ext,
+    determine_is_know_media_ext,
     determine_protocol,
     dict_get,
     extract_basic_auth,
@@ -2566,6 +2567,24 @@ class GenericIE(InfoExtractor):
             return merge_dicts(embeds[0], info_dict)
         elif embeds:
             return self.playlist_result(embeds, **info_dict)
+
+        self._downloader.write_debug('Looking for src')
+        src_urls = re.findall(r'src\s*=\s*"(.+?)"\s*', webpage)
+        if src_urls:
+            media_urls = [src for src in src_urls if determine_is_know_media_ext(src)]
+            if len(media_urls) == 1:
+                return merge_dicts(info_dict, {
+                    'formats': [{
+                        'url': media_urls[0],
+                        'format_id': 'src',
+                    }],
+                })
+            if len(media_urls) > 1:
+                return self.playlist_result([{
+                    '_type': 'url',
+                    'url': src,
+                } for src in media_urls], **info_dict)
+
         raise UnsupportedError(url)
 
     def _extract_embeds(self, url, webpage, *, urlh=None, info_dict={}):

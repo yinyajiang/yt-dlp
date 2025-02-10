@@ -1976,6 +1976,14 @@ def base_url(url):
     return re.match(r'https?://[^?#]+/', url).group()
 
 
+def api_base_url(url):
+    if not url:
+        return url
+    url = url.replace('//', '\\')
+    url = url.strip('/').split('/')[0]
+    return url.replace('\\', '//')
+
+
 @partial_application
 def urljoin(base, path):
     if isinstance(path, bytes):

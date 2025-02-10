@@ -4,6 +4,54 @@
 # To create a release, dispatch the https://github.com/yt-dlp/yt-dlp/actions/workflows/release.yml workflow on master
 -->
 
+### 2025.02.10.014009
+
+#### Core changes
+- [Merge remote-tracking branch 'upstream'](https://github.com/yt-dlp/yt-dlp/commit/debd7aef9ed56c816a71fad1d0cb07821f94ef26) by [pukkandan](https://github.com/pukkandan)
+- [Merge remote-tracking branch 'upstream'](https://github.com/yt-dlp/yt-dlp/commit/2f48f8041f9cb60e77d9eb58f2d230c17a2e2a01) by [pukkandan](https://github.com/pukkandan)
+- [Update facebook.py](https://github.com/yt-dlp/yt-dlp/commit/f1753e452e63f77523b4ac2171feed78d8c629fd) by [pukkandan](https://github.com/pukkandan)
+- [Update facebook.py](https://github.com/yt-dlp/yt-dlp/commit/a97fbc0cc1c09d52e9752d8f372463c30ad15bcc) by [pukkandan](https://github.com/pukkandan)
+- [Update facebook.py](https://github.com/yt-dlp/yt-dlp/commit/21d837f4b00493e7150aeb36a75eb1a4e52977ab) by [pukkandan](https://github.com/pukkandan)
+- [Update tiktok.py](https://github.com/yt-dlp/yt-dlp/commit/3f0c4816ac989f8a3b5fb66b60ea602cf8c373c8) by [pukkandan](https://github.com/pukkandan)
+- [Update youtube.py](https://github.com/yt-dlp/yt-dlp/commit/67238144982d73ad8a4d1a0478ed5b9722a82b51) by [pukkandan](https://github.com/pukkandan)
+- [Update youtube.py](https://github.com/yt-dlp/yt-dlp/commit/b47eea37cb6bfc19e231f9a72644e4f49f65e75b) by [pukkandan](https://github.com/pukkandan)
+- [Update youtube.py](https://github.com/yt-dlp/yt-dlp/commit/7109c6c5b5144e64579b57b284c5a6f1dd77ab64) by [pukkandan](https://github.com/pukkandan)
+- [Update youtube.py](https://github.com/yt-dlp/yt-dlp/commit/42c3349b81243aedd75350aa3f84095c2d6ec70f) by [pukkandan](https://github.com/pukkandan)
+- [Update youtube_rapidapi.py](https://github.com/yt-dlp/yt-dlp/commit/698768c0f33f483dd6daa22711de687591c163ae) by [pukkandan](https://github.com/pukkandan)
+- [Update youtube_rapidapi.py](https://github.com/yt-dlp/yt-dlp/commit/d8e389c0c4b08fa89c65aa865411800e7a8e6072) by [pukkandan](https://github.com/pukkandan)
+- [Update youtube_rapidapi.py](https://github.com/yt-dlp/yt-dlp/commit/b57132026796921756d6db0000c7a12ef15ec1c0) by [pukkandan](https://github.com/pukkandan)
+- [Update youtube_rapidapi.py](https://github.com/yt-dlp/yt-dlp/commit/38d882a54753441301961daad9baaba16db4d0e0) by [pukkandan](https://github.com/pukkandan)
+- [up](https://github.com/yt-dlp/yt-dlp/commit/1d0852d3882e14f527f9fb33ae2cd778e84f671e) by [pukkandan](https://github.com/pukkandan)
+- [up](https://github.com/yt-dlp/yt-dlp/commit/22f120e3056b5a111bc8feff975c0841fb6a735c) by [pukkandan](https://github.com/pukkandan)
+- [up](https://github.com/yt-dlp/yt-dlp/commit/0b69f9e18fee8b74bd94ab777fc2aee31644b386) by [pukkandan](https://github.com/pukkandan)
+- [up](https://github.com/yt-dlp/yt-dlp/commit/1d7e1595b95a905ac5246148a54a58f8569204a7) by [pukkandan](https://github.com/pukkandan)
+- [update](https://github.com/yt-dlp/yt-dlp/commit/6b377c94fde7f43775cf8947e4a7b4f3b1e4058c) by [pukkandan](https://github.com/pukkandan)
+- **jsinterp**
+    - [Add `js_number_to_string`](https://github.com/yt-dlp/yt-dlp/commit/0d9f061d38c3a4da61972e2adad317079f2f1c84) ([#12110](https://github.com/yt-dlp/yt-dlp/issues/12110)) by [Grub4K](https://github.com/Grub4K)
+    - [Improve zeroise](https://github.com/yt-dlp/yt-dlp/commit/4ca8c44a073d5aa3a3e3112c35b2b23d6ce25ac6) ([#12313](https://github.com/yt-dlp/yt-dlp/issues/12313)) by [seproDev](https://github.com/seproDev)
+
+#### Extractor changes
+- **acast**: [Support shows.acast.com URLs](https://github.com/yt-dlp/yt-dlp/commit/57c717fee4bfbc9309845bbb48901b72e4b69304) ([#12223](https://github.com/yt-dlp/yt-dlp/issues/12223)) by [barsnick](https://github.com/barsnick)
+- **cwtv**
+    - [Fix extractor](https://github.com/yt-dlp/yt-dlp/commit/18a28514e306e822eab4f3a79c76d515bf076406) ([#12207](https://github.com/yt-dlp/yt-dlp/issues/12207)) by [arantius](https://github.com/arantius)
+    - movie: [Add extractor](https://github.com/yt-dlp/yt-dlp/commit/03c3d705778c07739e0034b51490877cffdc0983) ([#12227](https://github.com/yt-dlp/yt-dlp/issues/12227)) by [bashonly](https://github.com/bashonly)
+- **dropbox**: [Fix extraction](https://github.com/yt-dlp/yt-dlp/commit/861aeec449c8f3c062d962945b234ff0341f61f3) ([#12228](https://github.com/yt-dlp/yt-dlp/issues/12228)) by [bashonly](https://github.com/bashonly)
+- **francetv**
+    - site
+        - [Fix extractor](https://github.com/yt-dlp/yt-dlp/commit/817483ccc68aed6049ed9c4a2ffae44ca82d2b1c) ([#12236](https://github.com/yt-dlp/yt-dlp/issues/12236)) by [bashonly](https://github.com/bashonly)
+        - [Fix livestream extraction](https://github.com/yt-dlp/yt-dlp/commit/1295bbedd45fa8d9bc3f7a194864ae280297848e) ([#12316](https://github.com/yt-dlp/yt-dlp/issues/12316)) by [bashonly](https://github.com/bashonly)
+- **generic**: [Extract `live_status` for DASH manifest URLs](https://github.com/yt-dlp/yt-dlp/commit/19edaa44fcd375f54e63d6227b092f5252d3e889) ([#12256](https://github.com/yt-dlp/yt-dlp/issues/12256)) by [mp3butcher](https://github.com/mp3butcher)
+- **globo**: [Fix extractor](https://github.com/yt-dlp/yt-dlp/commit/f8d0161455f00add65585ca1a476a7b5d56f5f96) ([#11795](https://github.com/yt-dlp/yt-dlp/issues/11795)) by [slipinthedove](https://github.com/slipinthedove), [YoshiTabletopGamer](https://github.com/YoshiTabletopGamer)
+- **goplay**: [Fix extractor](https://github.com/yt-dlp/yt-dlp/commit/d59f14a0a7a8b55e6bf468237def62b73ab4a517) ([#12237](https://github.com/yt-dlp/yt-dlp/issues/12237)) by [alard](https://github.com/alard)
+- **pbs**: [Support www.thirteen.org URLs](https://github.com/yt-dlp/yt-dlp/commit/9fb8ab2ff67fb699f60cce09163a580976e90c0e) ([#11191](https://github.com/yt-dlp/yt-dlp/issues/11191)) by [rohieb](https://github.com/rohieb)
+- **zdf**: [Extract more metadata](https://github.com/yt-dlp/yt-dlp/commit/241ace4f104d50fdf7638f9203927aefcf57a1f7) ([#9565](https://github.com/yt-dlp/yt-dlp/issues/9565)) by [StefanLobbenmeier](https://github.com/StefanLobbenmeier)
+
+#### Downloader changes
+- **hls**: [Fix `BYTERANGE` logic](https://github.com/yt-dlp/yt-dlp/commit/10b7ff68e98f17655e31952f6e17120b2d7dda96) ([#11972](https://github.com/yt-dlp/yt-dlp/issues/11972)) by [entourage8](https://github.com/entourage8)
+
+#### Misc. changes
+- [Improve Issue/PR templates](https://github.com/yt-dlp/yt-dlp/commit/517ddf3c3f12560ab93e3d36244dc82db9f97818) ([#11499](https://github.com/yt-dlp/yt-dlp/issues/11499)) by [seproDev](https://github.com/seproDev)
+
 ### 2025.01.26
 
 #### Core changes

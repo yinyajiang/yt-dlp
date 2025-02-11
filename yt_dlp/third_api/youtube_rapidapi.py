@@ -20,14 +20,15 @@ class YoutubeRapidApi:
     API_ENDPOINT = 'https://youtube-media-downloader.p.rapidapi.com/v2/video/details'
     API_HOST = 'youtube-media-downloader.p.rapidapi.com'
 
-    def __init__(self, api_keys, download_json_func, print_msg_func=None, api_host=API_HOST, api_endpoint=API_ENDPOINT):
+    def __init__(self, api_keys, ie, api_host=API_HOST, api_endpoint=API_ENDPOINT):
         self.api_keys = api_keys
         self.api_host = api_host
         self.api_endpoint = api_endpoint
-        self._download_json_func = download_json_func
-        self._print_msg_func = print_msg_func
+        self._ie = ie
+        if not ie:
+            raise ValueError('ie is required')
 
-    def get_video_info(self, video_id):
+    def extract_info(self, video_id):
         info = self._get_video_info(video_id)
 
         ytb_info = {
@@ -108,14 +109,14 @@ class YoutubeRapidApi:
                 time.sleep(random_sleep)
 
     def __get_video_info(self, video_id):
-        if not self._download_json_func:
-            raise ValueError('Download json function not provided')
+        download_json = lambda url, **kwargs: self._ie._download_json(url, video_id, **kwargs)
+        print_msg = lambda msg: self._ie.report_msg(msg)
 
         first_exception = None
         for key in self.api_keys:
             try:
                 url = f'{self.api_endpoint}?videoId={video_id}'
-                info = self._download_json_func(url, headers={
+                info = download_json(url, headers={
                     'x-rapidapi-key': key,
                     'x-rapidapi-host': self.api_host,
                 },
@@ -127,11 +128,10 @@ class YoutubeRapidApi:
                 if 'status' not in info and 'message' in info:
                     raise Exception(f'{info.get("message")}')
                 if not info.get('status'):
-                    raise Exception(f'rapidapi video info, status is not ok, error: {info.get("errorId")}')
+                    raise Exception(f'rapidapi video info, status is not ok, error: {info.get("errorId", "")}, reason: {info.get("reason", "")}')
                 return info
             except Exception as e:
-                if self._print_msg_func:
-                    self._print_msg_func(f'rapidapi error: {e}')
+                print_msg(f'rapidapi error: {e}')
                 if not first_exception:
                     first_exception = e
                 if any(errorId.lower() in str(e).lower() for errorId in ['per second', 'DRM', 'PaymentRequired', 'MembersOnly', 'LiveStreamOffline', 'RegionUnavailable', 'VideoNotFound']):

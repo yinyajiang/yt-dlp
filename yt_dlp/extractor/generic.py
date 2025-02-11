@@ -2567,20 +2567,12 @@ class GenericIE(InfoExtractor):
         elif embeds:
             return self.playlist_result(embeds, **info_dict)
 
-        self._downloader.write_debug('Looking for src')
-        if src_urls := self._search_src_media_ext_url(webpage, url):
-            if len(src_urls) == 1:
-                return merge_dicts(info_dict, {
-                    'formats': [{
-                        'url': src_urls[0],
-                        'format_id': 'src',
-                    }],
-                })
-            elif src_urls:
-                return self.playlist_result([{
-                    '_type': 'url',
-                    'url': src,
-                } for src in src_urls], **info_dict)
+        self._downloader.write_debug('Looking for srcs')
+        srcs = self._extract_srcs(webpage, url)
+        if len(srcs) == 1:
+            return merge_dicts(srcs[0], info_dict)
+        elif srcs:
+            return self.playlist_result(srcs, **info_dict)
 
         raise UnsupportedError(url)
 
@@ -2998,3 +2990,35 @@ class GenericIE(InfoExtractor):
         except Exception:
             return (url, False)
         return (url, False)
+
+    def _extract_srcs(self, webpage, url):
+        try:
+            src_urls = self._search_src_media_ext_url(webpage, url)
+            if not src_urls:
+                return []
+            if len(src_urls) == 1:
+                ext = determine_ext(src_urls[0])
+                fmts = None
+                subs = None
+                if ext == 'm3u8':
+                    fmts, subs = self._extract_m3u8_formats_and_subtitles(src_urls[0], 'src', 'mp4', fatal=False)
+                elif ext == 'mpd':
+                    fmts, subs = self._extract_mpd_formats_and_subtitles(src_urls[0], 'src', fatal=False)
+                else:
+                    fmts = [{
+                        'url': src_urls[0],
+                        'format_id': 'src',
+                        'ext': ext,
+                    }]
+                return [{
+                    'formats': fmts,
+                    'subtitles': subs,
+                }]
+            elif src_urls:
+                return [{
+                    '_type': 'url',
+                    'url': src,
+                } for src in src_urls]
+        except Exception:
+            pass
+        return []

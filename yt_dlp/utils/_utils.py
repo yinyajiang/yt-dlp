@@ -5856,6 +5856,8 @@ def join_appdata_path(*paths):
             appdata_dir = os.environ['appdata']
         elif 'APPDATA' in os.environ:
             appdata_dir = os.environ['APPDATA']
+        elif 'AppData' in os.environ:
+            appdata_dir = os.environ['AppData']
     elif platform.system().lower() == 'darwin':
         appdata_dir = os.path.join(compat_expanduser('~'), 'Library', 'Application Support')
     else:

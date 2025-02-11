@@ -1613,6 +1613,9 @@ class YoutubeDL:
         if extra_info is None:
             extra_info = {}
 
+        if self._is_use_webview(url):
+            force_generic_extractor = True
+
         if not ie_key and force_generic_extractor:
             ie_key = 'Generic'
 
@@ -1623,9 +1626,6 @@ class YoutubeDL:
 
         for key, ie in ies.items():
             if not ie.suitable(url):
-                continue
-
-            if self._is_use_webview(url) and str(key) != 'Generic':
                 continue
 
             if not ie.working():
@@ -4487,7 +4487,6 @@ class YoutubeDL:
         try:
             if self.params.get('force_use_webview', False):
                 return True
-
             parsed = urllib.parse.urlparse(url)
             query_params = urllib.parse.parse_qs(parsed.query)
             real_webview_url = query_params.get('__real_use_webview__', None)

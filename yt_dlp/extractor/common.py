@@ -4194,12 +4194,12 @@ class InfoExtractor:
         return True
 
     def _search_src_media_ext_url(self, html, origin_url=None):
-        src_urls = re.findall(r'src\s*=\s*["\'](.+?)["\']\s*', html)
+        src_urls = re.findall(r'(?:src|content)\s*=\s*["\'](.+?)["\']\s*', html)
         base = api_base_url(origin_url)
         if base and base.endswith('/'):
             base = base[:-1]
         if src_urls:
-            media_srcs = [src for src in src_urls if determine_is_know_media_ext(src)]
+            media_srcs = list({src for src in src_urls if determine_is_know_media_ext(src)})
             if media_srcs:
                 for i in range(len(media_srcs)):
                     if base and media_srcs[i].startswith('/'):

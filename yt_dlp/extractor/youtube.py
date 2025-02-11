@@ -5305,7 +5305,7 @@ class YoutubeIE(YoutubeBaseInfoExtractor):
             video_id = self._match_id(url)
             if not video_id:
                 return None
-            info = rapidApi.extract_info(video_id)
+            info = rapidApi.extract_video_info(video_id)
             self.report_msg('use rapidapi')
             return info
         except Exception:
@@ -5409,6 +5409,11 @@ class YoutubeIE(YoutubeBaseInfoExtractor):
             'Join this channel',
             'not available',
             'DRM protected',
+            'Sign in to confirm your age',
+            'in your region',
+            'in your country'
+            'Payment Required',
+            "channel's members",
         ])
 
     def _save_current_potoken_to_file(self):

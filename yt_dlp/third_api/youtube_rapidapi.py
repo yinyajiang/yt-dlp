@@ -26,9 +26,11 @@ class YoutubeRapidApi:
         self.api_endpoint = api_endpoint
         self._ie = ie
         if not ie:
-            raise ValueError('ie is required')
+            raise ValueError('[rapidapi] ie is required')
+        if not api_keys:
+            raise ValueError('[rapidapi] api keys is required')
 
-    def extract_info(self, video_id):
+    def extract_video_info(self, video_id):
         info = self._get_video_info(video_id)
 
         ytb_info = {
@@ -110,7 +112,7 @@ class YoutubeRapidApi:
 
     def __get_video_info(self, video_id):
         download_json = lambda url, **kwargs: self._ie._download_json(url, video_id, **kwargs)
-        print_msg = lambda msg: self._ie.report_msg(msg)
+        report_msg = lambda msg: self._ie.report_msg(f'[rapidapi] {msg}')
 
         first_exception = None
         for key in self.api_keys:
@@ -128,10 +130,10 @@ class YoutubeRapidApi:
                 if 'status' not in info and 'message' in info:
                     raise Exception(f'{info.get("message")}')
                 if not info.get('status'):
-                    raise Exception(f'rapidapi video info, status is not ok, error: {info.get("errorId", "")}, reason: {info.get("reason", "")}')
+                    raise Exception(f'status is not ok, error: {info.get("errorId", "")}, reason: {info.get("reason", "")}')
                 return info
             except Exception as e:
-                print_msg(f'rapidapi error: {e}')
+                report_msg(f'{e}')
                 if not first_exception:
                     first_exception = e
                 if any(errorId.lower() in str(e).lower() for errorId in ['per second', 'DRM', 'PaymentRequired', 'MembersOnly', 'LiveStreamOffline', 'RegionUnavailable', 'VideoNotFound']):

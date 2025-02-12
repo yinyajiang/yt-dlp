@@ -1,112 +1,130 @@
-import urllib.parse
-
-from yt_dlp.utils import int_or_none
-
+from .common import InfoExtractor
 from .youtube import YoutubeIE
-from ..networking import Request
+from ..utils import clean_html, int_or_none, traverse_obj, url_or_none, urlencode_postdata
 
 
-class DigiviewIE(YoutubeIE):
-    IE_DESC = 'Digiview'
-    IE_NAME = 'digiview'
+class DigiviewIE(InfoExtractor):
     _VALID_URL = r'https?://(?:www\.)?ladigitale\.dev/digiview/#/v/(?P<id>[0-9a-f]+)'
-    _TESTS = [
-        {
-            # normal video
-            'url': 'https://ladigitale.dev/digiview/#/v/663e17b35e979',
-            'md5': 'acdf2c99c1e4d67664c9fbc5695986a9',
-            'info_dict': {
-                'id': 'BaW_jenozKc',
-                'ext': 'mp4',
-                'title': 'youtube-dl test video "\'/\\ä↭𝕐',
-                'channel': 'Philipp Hagemeister',
-                'channel_id': 'UCLqxVugv74EIW3VWh2NOa3Q',
-                'channel_url': r're:https?://(?:www\.)?youtube\.com/channel/UCLqxVugv74EIW3VWh2NOa3Q',
-                'upload_date': '20121002',
-                'description': 'md5:8fb536f4877b8a7455c2ec23794dbc22',
-                'categories': ['Science & Technology'],
-                'tags': ['youtube-dl'],
-                'duration': 10,
-                'view_count': int,
-                'like_count': int,
-                'availability': 'public',
-                'playable_in_embed': True,
-                'thumbnail': 'https://i.ytimg.com/vi/BaW_jenozKc/maxresdefault.jpg',
-                'live_status': 'not_live',
-                'age_limit': 0,
-                'comment_count': int,
-                'channel_follower_count': int,
-                'uploader': 'Philipp Hagemeister',
-                'uploader_url': 'https://www.youtube.com/@PhilippHagemeister',
-                'uploader_id': '@PhilippHagemeister',
-                'heatmap': 'count:100',
-            },
+    _TESTS = [{
+        # normal video
+        'url': 'https://ladigitale.dev/digiview/#/v/67a8e50aee2ec',
+        'info_dict': {
+            'id': '67a8e50aee2ec',
+            'ext': 'mp4',
+            'title': 'Big Buck Bunny 60fps 4K - Official Blender Foundation Short Film',
+            'thumbnail': 'https://i.ytimg.com/vi/aqz-KE-bpKQ/hqdefault.jpg',
+            'upload_date': '20141110',
+            'playable_in_embed': True,
+            'duration': 635,
+            'view_count': int,
+            'comment_count': int,
+            'channel': 'Blender',
+            'license': 'Creative Commons Attribution license (reuse allowed)',
+            'like_count': int,
+            'tags': 'count:8',
+            'live_status': 'not_live',
+            'channel_id': 'UCSMOQeBJ2RAnuFungnQOxLg',
+            'channel_follower_count': int,
+            'channel_url': 'https://www.youtube.com/channel/UCSMOQeBJ2RAnuFungnQOxLg',
+            'uploader_id': '@BlenderOfficial',
+            'description': 'md5:8f3ed18a53a1bb36cbb3b70a15782fd0',
+            'categories': ['Film & Animation'],
+            'channel_is_verified': True,
+            'heatmap': 'count:100',
+            'section_end': 635,
+            'uploader': 'Blender',
+            'timestamp': 1415628355,
+            'uploader_url': 'https://www.youtube.com/@BlenderOfficial',
+            'age_limit': 0,
+            'section_start': 0,
+            'availability': 'public',
         },
-        {
-            # cut video
-            'url': 'https://ladigitale.dev/digiview/#/v/663e17f2f3f18',
-            'md5': 'acdf2c99c1e4d67664c9fbc5695986a9',
-            'info_dict': {
-                'id': 'BaW_jenozKc',
-                'ext': 'mp4',
-                'title': 'youtube-dl test video "\'/\\ä↭𝕐',
-                'channel': 'Philipp Hagemeister',
-                'channel_id': 'UCLqxVugv74EIW3VWh2NOa3Q',
-                'channel_url': r're:https?://(?:www\.)?youtube\.com/channel/UCLqxVugv74EIW3VWh2NOa3Q',
-                'upload_date': '20121002',
-                'description': 'md5:8fb536f4877b8a7455c2ec23794dbc22',
-                'categories': ['Science & Technology'],
-                'tags': ['youtube-dl'],
-                'duration': 3,
-                'view_count': int,
-                'like_count': int,
-                'availability': 'public',
-                'playable_in_embed': True,
-                'thumbnail': 'https://i.ytimg.com/vi/BaW_jenozKc/maxresdefault.jpg',
-                'live_status': 'not_live',
-                'age_limit': 0,
-                'comment_count': int,
-                'channel_follower_count': int,
-                'uploader': 'Philipp Hagemeister',
-                'uploader_url': 'https://www.youtube.com/@PhilippHagemeister',
-                'uploader_id': '@PhilippHagemeister',
-                'heatmap': 'count:100',
-            },
+    }, {
+        # cut video
+        'url': 'https://ladigitale.dev/digiview/#/v/67a8e51d0dd58',
+        'info_dict': {
+            'id': '67a8e51d0dd58',
+            'ext': 'mp4',
+            'title': 'Big Buck Bunny 60fps 4K - Official Blender Foundation Short Film',
+            'thumbnail': 'https://i.ytimg.com/vi/aqz-KE-bpKQ/hqdefault.jpg',
+            'upload_date': '20141110',
+            'playable_in_embed': True,
+            'duration': 5,
+            'view_count': int,
+            'comment_count': int,
+            'channel': 'Blender',
+            'license': 'Creative Commons Attribution license (reuse allowed)',
+            'like_count': int,
+            'tags': 'count:8',
+            'live_status': 'not_live',
+            'channel_id': 'UCSMOQeBJ2RAnuFungnQOxLg',
+            'channel_follower_count': int,
+            'channel_url': 'https://www.youtube.com/channel/UCSMOQeBJ2RAnuFungnQOxLg',
+            'uploader_id': '@BlenderOfficial',
+            'description': 'md5:8f3ed18a53a1bb36cbb3b70a15782fd0',
+            'categories': ['Film & Animation'],
+            'channel_is_verified': True,
+            'heatmap': 'count:100',
+            'section_end': 10,
+            'uploader': 'Blender',
+            'timestamp': 1415628355,
+            'uploader_url': 'https://www.youtube.com/@BlenderOfficial',
+            'age_limit': 0,
+            'section_start': 5,
+            'availability': 'public',
         },
-    ]
+    }, {
+        # changed title
+        'url': 'https://ladigitale.dev/digiview/#/v/67a8ea5644d7a',
+        'info_dict': {
+            'id': '67a8ea5644d7a',
+            'ext': 'mp4',
+            'title': 'Big Buck Bunny (with title changed)',
+            'thumbnail': 'https://i.ytimg.com/vi/aqz-KE-bpKQ/hqdefault.jpg',
+            'upload_date': '20141110',
+            'playable_in_embed': True,
+            'duration': 5,
+            'view_count': int,
+            'comment_count': int,
+            'channel': 'Blender',
+            'license': 'Creative Commons Attribution license (reuse allowed)',
+            'like_count': int,
+            'tags': 'count:8',
+            'live_status': 'not_live',
+            'channel_id': 'UCSMOQeBJ2RAnuFungnQOxLg',
+            'channel_follower_count': int,
+            'channel_url': 'https://www.youtube.com/channel/UCSMOQeBJ2RAnuFungnQOxLg',
+            'uploader_id': '@BlenderOfficial',
+            'description': 'md5:8f3ed18a53a1bb36cbb3b70a15782fd0',
+            'categories': ['Film & Animation'],
+            'channel_is_verified': True,
+            'heatmap': 'count:100',
+            'section_end': 15,
+            'uploader': 'Blender',
+            'timestamp': 1415628355,
+            'uploader_url': 'https://www.youtube.com/@BlenderOfficial',
+            'age_limit': 0,
+            'section_start': 10,
+            'availability': 'public',
+        },
+    }]
 
     def _real_extract(self, url):
         video_id = self._match_id(url)
-        webpage_data = self._download_json(
-            Request(
-                'https://ladigitale.dev/digiview/inc/recuperer_video.php',
-                data=urllib.parse.urlencode({'id': video_id}).encode(),
-                method='POST',
-            ),
-            video_id,
+        video_data = self._download_json(
+            'https://ladigitale.dev/digiview/inc/recuperer_video.php', video_id,
+            data=urlencode_postdata({'id': video_id}))
+
+        clip_id = video_data['videoId']
+        return self.url_result(
+            f'https://www.youtube.com/watch?v={clip_id}',
+            YoutubeIE, video_id, url_transparent=True,
+            **traverse_obj(video_data, {
+                'section_start': ('debut', {int_or_none}),
+                'section_end': ('fin', {int_or_none}),
+                'description': ('description', {clean_html}, filter),
+                'title': ('titre', {str}),
+                'thumbnail': ('vignette', {url_or_none}),
+                'view_count': ('vues', {int_or_none}),
+            }),
         )
-
-        youtube_ie = YoutubeIE()
-        youtube_ie.set_downloader(self._downloader)
-        info = youtube_ie._real_extract(webpage_data['videoId'])
-
-        # replace the YouTube metadata by the Digiview one
-        info['title'] = webpage_data.get('titre') or info['title']
-        info['description'] = webpage_data.get('description') or info['description']
-
-        ffmpeg_args = []
-
-        start_time = int_or_none(webpage_data.get('debut'))
-        if start_time is not None and start_time != 0:
-            ffmpeg_args.extend(['-ss', str(start_time)])
-
-        end_time = int_or_none(webpage_data.get('fin'))
-        if end_time is not None and end_time != info['duration']:
-            ffmpeg_args.extend(['-t', str(end_time - (start_time or 0))])
-
-        if ffmpeg_args and self._downloader:
-            # cut the video if specified in the Digiview webpage
-            ppargs = self._downloader.params.get('postprocessor_args')
-            ppargs.setdefault('merger', []).extend(ffmpeg_args)
-
-        return info

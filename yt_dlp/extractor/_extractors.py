@@ -1817,6 +1817,7 @@ from .rtvslo import (
 )
 from .rudovideo import RudoVideoIE
 from .rule34video import Rule34VideoIE
+from .rule34xxx import Rule34XXXIE
 from .rumble import (
     RumbleChannelIE,
     RumbleEmbedIE,

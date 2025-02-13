@@ -4,7 +4,6 @@ from .common import InfoExtractor
 from ..utils import traverse_obj, url_or_none
 
 _HANIME_BASE_URL: str = 'https://hanime.tv'
-_CDN_BASE_URL: str = 'https://m3u8s.highwinds-cdn.com/api/v9/m3u8s'
 
 
 class HanimeIE(InfoExtractor):

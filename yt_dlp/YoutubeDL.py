@@ -3082,7 +3082,7 @@ class YoutubeDL:
         info_dict.update(best_format)
 
         if 'formats' not in info_dict and best_format:
-            info_dict['formats'] = copy.deepcopy(best_format)
+            info_dict['formats'] = [copy.deepcopy(best_format)]
 
         return info_dict
 
@@ -3931,6 +3931,9 @@ class YoutubeDL:
             if info_dict.get('url') and info_dict.get('_type', 'video') == 'video':
                 return [info_dict]
             return []
+        else:
+            if info_dict['formats'] and isinstance(info_dict['formats'], dict):
+                return [info_dict['formats']]
         return info_dict['formats']
 
     def render_formats_table(self, info_dict):

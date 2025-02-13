@@ -1311,6 +1311,7 @@ from .neteasemusic import (
     NetEaseMusicProgramIE,
     NetEaseMusicSingerIE,
 )
+from .netflix import NetflixIE, NetflixPageIE
 from .netverse import (
     NetverseIE,
     NetversePlaylistIE,

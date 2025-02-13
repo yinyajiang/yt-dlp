@@ -82,6 +82,13 @@ class HlsFD(FragmentFD):
             man_url = urlh.url
             s = urlh.read().decode('utf-8', 'ignore')
 
+        if rekeys := info_dict.get('hls_media_playlist_removes'):
+            lines = s.splitlines()
+            for rkey in rekeys:
+                r = re.compile(rkey)
+                lines = [line for line in lines if r.search(line) is None]
+            s = '\n'.join(lines)
+
         can_download, message = self.can_download(s, info_dict, self.params.get('allow_unplayable_formats')), None
         if can_download:
             has_ffmpeg = FFmpegFD.available()

@@ -128,4 +128,5 @@ yt-dlp.zip
 ytdlp_plugins/
 yt-dlp-plugins
 
+pull_requests.json
 debug/

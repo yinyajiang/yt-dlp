@@ -1639,7 +1639,17 @@ class YoutubeDL:
                 if self.params.get('break_on_existing', False):
                     raise ExistingVideoReached
                 break
-            return self.__extract_info(url, self.get_info_extractor(key), download, extra_info, process)
+            try:
+                return self.__extract_info(url, self.get_info_extractor(key), download, extra_info, process)
+            except Exception as e:
+                if not self._try_generic(key):
+                    raise e
+                self.report_msg('trying Generic extractor')
+                try:
+                    return self.__extract_info(url, self.get_info_extractor('Generic'), download, extra_info, process)
+                except Exception:
+                    raise e
+
         else:
             extractors_restricted = self.params.get('allowed_extractors') not in (None, ['default'])
             self.report_error(f'No suitable extractor{format_field(ie_key, None, " (%s)")} found for URL {url}',
@@ -4505,5 +4515,16 @@ class YoutubeDL:
                 format_selector = self.build_format_selector(req_format)
             formats_to_download = self._select_formats(info_dict['formats'], format_selector)
             return len(formats_to_download) > 0
+        except Exception:
+            return False
+
+    def _try_generic(self, ie_key):
+        try:
+            ie = self.get_info_extractor(ie_key)
+            if not ie or not hasattr(ie, '_TRY_GENERIC'):
+                return False
+            if ie.IE_NAME.lower() == 'generic':
+                return False
+            return ie._TRY_GENERIC
         except Exception:
             return False

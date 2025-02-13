@@ -40,7 +40,7 @@ class HanimeIE(InfoExtractor):
         return {
             'id': video_id,
             'title': traverse_obj(meta, ('hentai_video', 'name'), expected_type=str),
-            'thumbnail': traverse_obj(meta, ('hentai_video', 'poster_url'), expected_type=url_or_none),
+            'thumbnail': traverse_obj(meta, ('hentai_video', 'poster_url'), expected_type=url_or_none, default=None),
             'uploader': traverse_obj(meta, ('brand', 'title'), expected_type=str),
             'formats': self._get_formats(video_id, streams),
         }

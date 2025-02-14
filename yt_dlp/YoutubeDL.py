@@ -4524,6 +4524,12 @@ class YoutubeDL:
     def _try_generic(self, ie_key):
         try:
             ie = self.get_info_extractor(ie_key)
+
+            if ie and hasattr(ie, '_FORCE_USE_WEBVIEW'):
+                if ie._FORCE_USE_WEBVIEW:
+                    self.params['force_use_webview'] = True
+                    return True
+
             if not ie or not hasattr(ie, '_TRY_GENERIC'):
                 return False
             if ie.IE_NAME.lower() == 'generic':

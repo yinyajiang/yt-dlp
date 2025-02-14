@@ -960,7 +960,7 @@ from .jtbc import (
     JTBCIE,
     JTBCProgramIE,
 )
-from .jutsu import JutSuAnimeIE, JutSuEpisodeIE
+from .jutsu import JutSuIE
 from .jwplatform import JWPlatformIE
 from .kakao import KakaoIE
 from .kaltura import KalturaIE

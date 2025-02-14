@@ -2,7 +2,7 @@ import re
 
 from yt_dlp.utils import determine_ext
 
-from .common import InfoExtractor
+from .common import ExtractorError, InfoExtractor
 
 
 def create_formats_from_episode_info(episode_info):
@@ -30,11 +30,25 @@ def parse_episode(webpage, extractor):
     }
 
 
-class JutSuAnimeIE(InfoExtractor):
+class JutSuIE(InfoExtractor):
     _VALID_URL = r'https:\/\/jut\.su\/(?P<name>[\w-]+)\/?'
     _TRY_GENERIC = True
+    _TESTS = [
+        {
+            'url': 'https://jut.su/kaze-no-stigma/episode-9.html',
+            'info_dict': {
+                'ext': 'mp4',
+                'id': 'kaze-no-stigma-None-9',
+                'title': 'Печать ветра 9 серия',
+                'thumbnail': r're:^https?://.*\.jpg$',
+            },
+        },
+    ]
 
-    def _real_extract(self, url):
+    def _extract_anime(self, url):
+        m = re.match(r'https:\/\/jut\.su\/(?P<name>[\w-]+)\/?', url)
+        if not m:
+            return False
         anime_name = self._match_valid_url(url).group('name')
 
         episodes = []
@@ -52,26 +66,14 @@ class JutSuAnimeIE(InfoExtractor):
 
         return self.playlist_result(episodes, anime_name)
 
+    def _extract_episode(self, url):
+        m = re.match(r'https:\/\/jut\.su\/(?P<name>[\w-]+)\/(?:season-(?P<season>[1-9])+)?\/?(?:episode-(?P<episode>[1-9]+))\.html', url)
+        if not m:
+            return False
 
-class JutSuEpisodeIE(InfoExtractor):
-    _VALID_URL = r'https:\/\/jut\.su\/(?P<name>[\w-]+)\/(?:season-(?P<season>[1-9])+)?\/?(?:episode-(?P<episode>[1-9]+))\.html'  # https://regex101.com/r/HY9Z6F/1
-    _TRY_GENERIC = True
-    _TESTS = [
-        {
-            'url': 'https://jut.su/kaze-no-stigma/episode-9.html',
-            'info_dict': {
-                'ext': 'mp4',
-                'id': 'kaze-no-stigma-None-9',
-                'title': 'Печать ветра 9 серия',
-                'thumbnail': r're:^https?://.*\.jpg$',
-            },
-        },
-    ]
-
-    def _real_extract(self, url):
-        episode = self._match_valid_url(url).group('episode')
-        season = self._match_valid_url(url).group('season')
-        anime_name = self._match_valid_url(url).group('name')
+        episode = m.group('episode')
+        season = m.group('season')
+        anime_name = m.group('name')
 
         video_id = f'{anime_name}-{season}-{episode}'
         webpage = self._download_webpage(url, video_id)
@@ -79,3 +81,9 @@ class JutSuEpisodeIE(InfoExtractor):
         parsed = parse_episode(webpage, self)
 
         return create_result_from_episode_info(parsed, video_id)
+
+    def _real_extract(self, url):
+        info = self._extract_episode(url) or self._extract_anime(url)
+        if info:
+            return info
+        raise ExtractorError('not support url match')

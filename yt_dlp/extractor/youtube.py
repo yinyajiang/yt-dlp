@@ -5414,7 +5414,7 @@ class YoutubeIE(YoutubeBaseInfoExtractor):
             'in your country'
             'Payment Required',
             "channel's members",
-            "has been removed",
+            'has been removed',
         ])
 
     def _save_current_potoken_to_file(self):

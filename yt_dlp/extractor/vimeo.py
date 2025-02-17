@@ -333,12 +333,13 @@ class VimeoIE(VimeoBaseInfoExtractor):
                                      play_redirect_hls|
                                      moogaloop\.swf)\?clip_id=
                              )?
-                             (?:videos?/)?
+                             (?(q)|videos?/)?
                          )
                          (?P<id>[0-9]+)
                          (?(u)
                              /(?!videos|likes)[^/?#]+/?|
-                             (?(q)|/(?P<unlisted_hash>[\da-f]{10}))?
+                             (?(q)|/(?P<unlisted_hash>[\da-f]{10})?)?
+                             (?(unlisted_hash)/?)
                          )
                          (?:(?(q)[&]|(?(u)|/?)[?]).*?)?(?:[#].*)?$
                  '''
@@ -1597,3 +1598,28 @@ class VimeoProIE(VimeoBaseInfoExtractor):
 
         return self.url_result(vimeo_url, VimeoIE, video_id, url_transparent=True,
                                description=description)
+
+
+class VHXSubscriptionsIE(VimeoBaseInfoExtractor):
+    IE_NAME = 'vhx:subscriptions'
+    _VALID_URL = r'https?://embed\.vhx\.tv/subscriptions/(?P<id>\d+)'
+    _EMBED_REGEX = [r'<iframe[^>]+src="(?P<url>https?://embed\.vhx\.tv/subscriptions/\d+[^"]*)"']
+
+    @classmethod
+    def _extract_embed_urls(cls, url, webpage):
+        for embed_url in super()._extract_embed_urls(url, webpage):
+            yield cls._smuggle_referrer(embed_url, url)
+
+    def _real_extract(self, url):
+        video_id = self._match_id(url)
+        url, _, headers = self._unsmuggle_headers(url)
+        url = url + '?vimeo=1'
+        webpage = self._download_webpage(url, video_id, headers=headers)
+        config_url = self._parse_json(self._search_regex(
+            r'window\.OTTData\s*=\s*({.+})', webpage,
+            'ott data'), video_id, js_to_json)['config_url']
+        config = self._download_json(config_url, video_id)
+        info = self._parse_config(config, video_id)
+        info['id'] = video_id
+        self._vimeo_sort_formats(info['formats'])
+        return info

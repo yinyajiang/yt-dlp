@@ -407,6 +407,7 @@ from .cliprs import ClipRsIE
 from .closertotruth import CloserToTruthIE
 from .cloudflarestream import CloudflareStreamIE
 from .cloudycdn import CloudyCDNIE
+from .clubhouse import ClubhouseIE
 from .clubic import ClubicIE
 from .clyp import ClypIE
 from .cmt import CMTIE

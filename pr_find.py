@@ -5,7 +5,6 @@ import time
 import subprocess
 import argparse
 import re
-import sys
 import pr_ignore
 
 try:
@@ -48,7 +47,7 @@ def fetch_dont_merged_prs():
         page += 1
         pull_requests.extend([pr for pr in page_pull_requests if (pr['state'] != 'closed' or not pr.get('merged_at')) and not is_invalid_pr(pr)])
 
-    json.dump(pull_requests, open('pull_requests.json', 'w'))
+    json.dump(pull_requests, open('pull_requests.json', 'w'), indent=4)
 
     return pull_requests
 
@@ -100,13 +99,13 @@ def find_prs(filter_func, pull_requests, ignore_invalid_pr=True):
 def get_ie(title):
     title = title.lower()
     ie = ''
-    rs = [r'\[ie/(.+?)\]', 
-          r'\[extractor/(.+?)\]', 
-          r'\[(.+?)\]', 
+    rs = [r'\[ie/(.+?)\]',
+          r'\[extractor/(.+?)\]',
+          r'\[(.+?)\]',
           r'\s+([^\s]+?)\s+extractor',
           r'fix \s*([^\s]+?)',
           r'add support for \s*([^\s]+?)',
-          r'add \s*([^\s]+?)\s+support', 
+          r'add \s*([^\s]+?)\s+support',
           r'extractor for \s*([^\s]+?)',
           ]
     for r in rs:
@@ -116,7 +115,7 @@ def get_ie(title):
             break
     if not ie:
         ie = title
-    if ie.endswith('.com') or ie.endswith('.org') or ie.endswith('.net'):
+    if ie.endswith(('.com', '.org', '.net')):
         ie = ie[:-4]
     if ie.startswith('www.'):
         ie = ie[4:]

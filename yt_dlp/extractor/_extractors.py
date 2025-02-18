@@ -1646,6 +1646,7 @@ from .prx import (
     PRXStoriesSearchIE,
     PRXStoryIE,
 )
+from .pttco import PttcoIE, PttcoPlaylistIE
 from .puhutv import (
     PuhuTVIE,
     PuhuTVSerieIE,

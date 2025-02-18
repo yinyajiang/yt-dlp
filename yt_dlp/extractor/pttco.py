@@ -6,7 +6,7 @@ from ..utils import get_elements_html_by_class
 
 
 class PttcoIE(InfoExtractor):
-    _VALID_URL = r'https?://(?:www\.)?ptt.co/(?P<plid>[0-9]+)/(?P<id>[0-9]+)/?'
+    _VALID_URL = r'https?://(?:www\.)?ptt.co/(?:[\w\-]+/)?(?P<plid>[0-9]+)/(?P<id>[0-9]+)/?'
     _TRY_GENERIC = True
 
     def _real_extract(self, url):
@@ -119,7 +119,7 @@ class PttcoIE(InfoExtractor):
 
 
 class PttcoPlaylistIE(InfoExtractor):
-    _VALID_URL = r'https?://(?:www\.)?ptt.co/v/(?P<id>[0-9]+)/?'
+    _VALID_URL = r'https?://(?:www\.)?ptt.co/(?:[\w\-]+/)?v/(?P<id>[0-9]+)/?'
     _TRY_GENERIC = True
 
     def _real_extract(self, url):

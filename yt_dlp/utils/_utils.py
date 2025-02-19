@@ -5840,13 +5840,17 @@ def get_app_executable_path(path):
     return path
 
 
-def determine_is_know_media_ext(url):
-    ext = determine_ext(url)
+def is_know_media_ext(ext):
     if not ext:
         return False
     if ext[0] == '.':
         ext = ext[1:]
     return ext in KNOWN_EXTENSIONS
+
+
+def determine_is_know_media_ext(url):
+    ext = determine_ext(url)
+    return is_know_media_ext(ext)
 
 
 def join_appdata_path(*paths):

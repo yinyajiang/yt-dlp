@@ -17,6 +17,7 @@ from ..utils import (
     extract_attributes,
     get_element_by_id,
     int_or_none,
+    is_know_media_ext,
     join_nonempty,
     js_to_json,
     merge_dicts,
@@ -245,7 +246,7 @@ class ArchiveOrgIE(InfoExtractor):
 
         # Archive.org metadata API doesn't clearly demarcate playlist entries
         # or subtitle tracks, so we get them from the embeddable player.
-        embed_page = self._download_webpage(f'https://archive.org/embed/{identifier}', identifier)
+        embed_page = self._download_webpage2(f'https://archive.org/embed/{identifier}', identifier, tries=5, timeout=1)
         playlist = self._playlist_data(embed_page)
 
         entries = {}
@@ -270,7 +271,14 @@ class ArchiveOrgIE(InfoExtractor):
                     'url': 'https://archive.org/' + track['file'].lstrip('/'),
                 }
 
-        metadata = self._download_json('http://archive.org/metadata/' + identifier, identifier)
+        try:
+            metadata = self._download_json2('http://archive.org/metadata/' + identifier, identifier, tries=10, timeout=1, impersonate=True)
+        except Exception:
+            r = self._fetch_info_from_webpage_playlist_data(identifier=identifier, entry_id=entry_id, webpage=embed_page, playlist_data=playlist)
+            if r:
+                return r
+            raise
+
         m = metadata['metadata']
         identifier = m['identifier']
 
@@ -360,6 +368,59 @@ class ArchiveOrgIE(InfoExtractor):
                     'parent': 'root'})
 
         return info
+
+    def _fetch_info_from_webpage_playlist_data(self, identifier, entry_id, webpage, playlist_data):
+        entries = []
+        for i, p in enumerate(playlist_data):
+            # If the user specified a playlist entry in the URL, ignore the
+            # rest of the playlist.
+            if entry_id and p['orig'] != entry_id:
+                continue
+
+            entry = {
+                'id': f'{identifier}_{i}',
+                'title': p.get('title'),
+                'formats': [],
+                'thumbnails': [],
+                'subtitles': {},
+                'duration': p.get('duration'),
+            }
+            for track in p.get('tracks', []):
+                if track['kind'] == 'subtitles':
+                    sub = 'https://archive.org/' + track['file'].lstrip('/')
+                    if entry['subtitles'].get(track['label']):
+                        entry['subtitles'][track['label']].append({'url': sub})
+                    else:
+                        entry['subtitles'][track['label']] = [{'url': sub}]
+                elif track['kind'] == 'thumbnails':
+                    entry['thumbnails'].append({
+                        'url': 'https://archive.org/' + track['file'].lstrip('/'),
+                    })
+            for i, source in enumerate(p.get('sources', [])):
+                if not is_know_media_ext(source['type']):
+                    continue
+                entry['formats'].append({
+                    'url': 'https://archive.org/' + source['file'].lstrip('/'),
+                    'ext': source['type'],
+                    'height': int_or_none(source.get('height')),
+                    'width': int_or_none(source.get('width')),
+                    'format_node': source.get('label'),
+                    'format_id': f'{i}-{source['type']}',
+                })
+            if entry['formats']:
+                entries.append(entry)
+        if not entries:
+            return None
+
+        html_title = self._html_extract_title(webpage)
+        if html_title:
+            html_title = html_title.replace('Free Download, Borrow, and Streaming : Internet Archive', '').strip().strip(':').strip()
+        if len(entries) == 1:
+            if html_title:
+                entries[0]['title'] = html_title
+            return entries[0]
+
+        return self.playlist_result(entries, identifier, html_title if html_title else identifier)
 
 
 class YoutubeWebArchiveIE(InfoExtractor):
@@ -713,9 +774,9 @@ class YoutubeWebArchiveIE(InfoExtractor):
             'collapse': collapse or [],
             **(query or {}),
         }
-        res = self._download_json(
+        res = self._download_json2(
             'https://web.archive.org/cdx/search/cdx', item_id,
-            note or 'Downloading CDX API JSON', query=query, fatal=fatal)
+            note or 'Downloading CDX API JSON', query=query, fatal=fatal, tries=5, timeout=1)
         if isinstance(res, list) and len(res) >= 2:
             # format response to make it easier to use
             return [dict(zip(res[0], v)) for v in res[1:]]
@@ -933,10 +994,10 @@ class YoutubeWebArchiveIE(InfoExtractor):
         self.write_debug('Captures to try: ' + join_nonempty(*capture_dates, delim=', '))
         info = {'id': video_id}
         for capture in capture_dates:
-            webpage = self._download_webpage(
+            webpage = self._download_webpage2(
                 (self._WAYBACK_BASE_URL + 'http://www.youtube.com/watch?v=%s') % (capture, video_id),
                 video_id=video_id, fatal=False, errnote='unable to download capture webpage (it may not be archived)',
-                note='Downloading capture webpage')
+                note='Downloading capture webpage', tries=5, timeout=1)
             current_info = self._extract_metadata(video_id, webpage or '')
             # Try avoid getting deleted video metadata
             if current_info.get('title'):

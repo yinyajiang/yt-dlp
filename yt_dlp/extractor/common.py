@@ -1216,6 +1216,32 @@ class InfoExtractor:
                     raise e
                 self._sleep(timeout, video_id)
 
+    def _download_webpage2(
+            self, url_or_request, video_id, note=None, errnote=None,
+            fatal=True, tries=1, timeout=NO_DEFAULT, *args, **kwargs):
+        try_count = 0
+        while True:
+            try:
+                return self._download_webpage(url_or_request, video_id, note, errnote, None, fatal, *args, **kwargs)
+            except Exception as e:
+                try_count += 1
+                if try_count >= tries:
+                    raise e
+                self._sleep(timeout, video_id)
+
+    def _download_json2(
+            self, url_or_request, video_id, note=None, errnote=None,
+            fatal=True, tries=1, timeout=NO_DEFAULT, *args, **kwargs):
+        try_count = 0
+        while True:
+            try:
+                return self._download_json(url_or_request, video_id, note, errnote, None, fatal, *args, **kwargs)
+            except Exception as e:
+                try_count += 1
+                if try_count >= tries:
+                    raise e
+                self._sleep(timeout, video_id)
+
     def report_warning(self, msg, video_id=None, *args, only_once=False, **kwargs):
         idstr = format_field(video_id, None, '%s: ')
         msg = f'[{self.IE_NAME}] {idstr}{msg}'

@@ -405,7 +405,7 @@ class ArchiveOrgIE(InfoExtractor):
                     'height': int_or_none(source.get('height')),
                     'width': int_or_none(source.get('width')),
                     'format_node': source.get('label'),
-                    'format_id': f'{i}-{source['type']}',
+                    'format_id': f'{i}-{source["type"]}',
                 })
             if entry['formats']:
                 entries.append(entry)

@@ -11,6 +11,7 @@ from ..utils import (
 
 class ChaturbateIE(InfoExtractor):
     _VALID_URL = r'https?://(?:[^/]+\.)?chaturbate\.(?P<tld>com|eu|global)/(?:fullvideo/?\?.*?\bb=)?(?P<id>[^/?&#]+)'
+    _TRY_GENERIC = True
     _TESTS = [{
         'url': 'https://www.chaturbate.com/siswet19/',
         'info_dict': {

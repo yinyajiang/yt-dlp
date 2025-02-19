@@ -29,6 +29,7 @@ class XHamsterIE(InfoExtractor):
                             videos/(?P<display_id_2>[^/]*)-(?P<id_2>[\dA-Za-z]+)
                         )
                     '''
+    _TRY_GENERIC = True
     _TESTS = [{
         'url': 'https://xhamster.com/videos/femaleagent-shy-beauty-takes-the-bait-1509445',
         'md5': 'e009ea6b849b129e3bebaeb9cf0dee51',
@@ -389,6 +390,7 @@ class XHamsterIE(InfoExtractor):
 
 class XHamsterEmbedIE(InfoExtractor):
     _VALID_URL = rf'https?://(?:[^/?#]+\.)?{XHamsterIE._DOMAINS}/xembed\.php\?video=(?P<id>\d+)'
+    _TRY_GENERIC = True
     _EMBED_REGEX = [r'<iframe[^>]+?src=(["\'])(?P<url>(?:https?:)?//(?:www\.)?xhamster\.com/xembed\.php\?video=\d+)\1']
     _TEST = {
         'url': 'http://xhamster.com/xembed.php?video=3328539',
@@ -424,6 +426,7 @@ class XHamsterEmbedIE(InfoExtractor):
 
 class XHamsterUserIE(InfoExtractor):
     _VALID_URL = rf'https?://(?:[^/?#]+\.)?{XHamsterIE._DOMAINS}/(?:(?P<user>users)|creators)/(?P<id>[^/?#&]+)'
+    _TRY_GENERIC = True
     _TESTS = [{
         # Paginated user profile
         'url': 'https://xhamster.com/users/netvideogirls/videos',

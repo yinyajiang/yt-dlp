@@ -5729,30 +5729,65 @@ class _YDLLogger:
 def find_json_possible_str(string, key):
     if not isinstance(string, str):
         string = json.dumps(string)
-    start_match = re.search(f'"{key}"' + r'\s*:\s*(?P<bracket>[{\[])', string)
-    if not start_match:
-        return None
-    bracketPair = ('[', ']') if start_match.group('bracket') == '[' else ('{', '}')
-    start_index = start_match.end() - 1
 
-    bracket_count = 1
-    end_index = start_index
-    for i in range(start_index + 1, len(string)):
-        if string[i] == bracketPair[0]:
-            bracket_count += 1
-        elif string[i] == bracketPair[1]:
-            bracket_count -= 1
-            if bracket_count == 0:
-                end_index = i
-                break
+    forward = False
+    if key and key != '[' and key != ']' and key != '{' and key != '}':
+        start_match = re.search(f'"{key}"' + r'\s*:\s*(?P<bracket>[{\[])', string)
+        if not start_match:
+            return (None, None)
+        bracketPair = ('[', ']') if start_match.group('bracket') == '[' else ('{', '}')
+        start_index = start_match.end() - 1
+    elif key == '[' or key == ']':
+        bracketPair = ('[', ']')
+        start_index = string.find('[')
+        if start_index == -1:
+            return (None, None)
+        start_index -= 1
+        forward = True
+    elif key == '{' or key == '}':
+        bracketPair = ('{', '}')
+        start_index = string.find('{')
+        if start_index == -1:
+            return (None, None)
+        start_index -= 1
+        forward = True
 
-    if bracket_count != 0:
-        return None
+    while True:
+        bracket_count = 1
+        end_index = start_index
+        for i in range(start_index + 1, len(string)):
+            if string[i] == bracketPair[0]:
+                bracket_count += 1
+            elif string[i] == bracketPair[1]:
+                bracket_count -= 1
+                if bracket_count == 0:
+                    end_index = i
+                    break
+
+        if bracket_count != 0:
+            if forward:
+                n = string[start_index + 1:].find(bracketPair[0])
+                if n == -1:
+                    return (None, None)
+                start_index += (n + 1)
+                continue
+            return (None, None)
+        break
 
     return (string[start_index:end_index + 1], end_index if end_index < len(string) - 1 else -1)
 
 
-def find_json(string, key, fatal=False):
+def _jsloads(js, is_html=False):
+    try:
+        return json.loads(js)
+    except Exception:
+        if is_html:
+            if js := js_to_json(js):
+                return json.loads(js)
+        raise
+
+
+def find_json(string, key, fatal=False, is_html=False):
     end_index = 0
     while end_index != -1:
         jsonStr, end_index = find_json_possible_str(string, key)
@@ -5762,7 +5797,7 @@ def find_json(string, key, fatal=False):
             return None
 
         try:
-            return json.loads(jsonStr)
+            return _jsloads(jsonStr, is_html)
         except Exception:
             pass
         string = string[end_index + 1:]
@@ -5771,7 +5806,7 @@ def find_json(string, key, fatal=False):
         raise ExtractorError(f'Unable to parse JSON object with key {key}')
 
 
-def find_json_all(string, key, fatal=False):
+def find_json_all(string, key, fatal=False, is_html=False):
     end_index = 0
     jsonList = []
     while end_index != -1:
@@ -5779,7 +5814,7 @@ def find_json_all(string, key, fatal=False):
         if not jsonStr:
             break
         with contextlib.suppress(Exception):
-            jsonList.append(json.loads(jsonStr))
+            jsonList.append(_jsloads(jsonStr, is_html))
         string = string[end_index + 1:]
 
     if not jsonList and fatal:
@@ -5787,8 +5822,8 @@ def find_json_all(string, key, fatal=False):
     return jsonList
 
 
-def find_json_all_by(string, key, filter, fatal=False):
-    jsonListAll = find_json_all(string, key, fatal=fatal)
+def find_json_all_by(string, key, filter, fatal=False, is_html=False):
+    jsonListAll = find_json_all(string, key, fatal=fatal, is_html=is_html)
     jsonList = []
     for js in jsonListAll:
         if try_call(filter, args=[js]):
@@ -5799,7 +5834,7 @@ def find_json_all_by(string, key, filter, fatal=False):
     return jsonList
 
 
-def find_json_by(string, key, filter, fatal=False):
+def find_json_by(string, key, filter, fatal=False, is_html=False):
     jsonby = None
 
     def sink(js):
@@ -5808,11 +5843,11 @@ def find_json_by(string, key, filter, fatal=False):
             jsonby = js
             return False
         return True
-    walk_json(string, key, sink, fatal=fatal)
+    walk_json(string, key, sink, fatal=fatal, is_html=is_html)
     return jsonby
 
 
-def walk_json(string, key, sink, fatal=False):
+def walk_json(string, key, sink, fatal=False, is_html=False):
     has = False
     end_index = 0
     while end_index != -1:
@@ -5820,7 +5855,7 @@ def walk_json(string, key, sink, fatal=False):
         if not jsonStr:
             break
         with contextlib.suppress(Exception):
-            js = json.loads(jsonStr)
+            js = _jsloads(jsonStr, is_html)
             has = True
             if not try_call(sink, args=[js]):
                 return

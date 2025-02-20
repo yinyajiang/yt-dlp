@@ -530,6 +530,12 @@ from .dlive import (
     DLiveVODIE,
 )
 from .doodstream import DoodStreamIE
+from .dorna import (
+    MotoGPGalleryIE,
+    MotoGPIE,
+    WorldSBKIE,
+    WorldSBKPlaylistIE,
+)
 from .douyutv import (
     DouyuShowIE,
     DouyuTVIE,

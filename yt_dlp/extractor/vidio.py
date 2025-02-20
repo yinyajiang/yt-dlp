@@ -1,3 +1,5 @@
+import urllib.parse
+
 from .common import InfoExtractor
 from ..utils import (
     ExtractorError,
@@ -263,6 +265,8 @@ class VidioLiveIE(VidioBaseIE):
         if stream_meta.get('is_drm'):
             if not self.get_param('allow_unplayable_formats'):
                 self.report_drm(video_id)
+
+        first_except = None
         if stream_meta.get('is_premium'):
             sources = self._download_json(
                 f'https://www.vidio.com/interactions_stream.json?video_id={video_id}&type=livestreamings',
@@ -271,27 +275,64 @@ class VidioLiveIE(VidioBaseIE):
                 self.raise_login_required('This video is only available for registered users with the appropriate subscription')
 
             if str_or_none(sources.get('source')):
-                token_json = self._download_json(
-                    f'https://www.vidio.com/live/{video_id}/tokens',
-                    display_id, note='Downloading HLS token JSON', data=b'')
-                formats.extend(self._extract_m3u8_formats(
-                    sources['source'] + '?' + token_json.get('token', ''), display_id, 'mp4', 'm3u8_native'))
-            if str_or_none(sources.get('source_dash')):
-                pass
+                try:
+                    token_json = self._download_json(
+                        f'https://www.vidio.com/live/{video_id}/tokens',
+                        display_id, note='Downloading HLS token JSON', data=b'')
+                    formats.extend(self._extract_m3u8_formats(
+                        sources['source'] + '?' + token_json.get('token', ''), display_id, 'mp4', 'm3u8_native'))
+                except Exception as e:
+                    if not first_except:
+                        first_except = e
+            if str_or_none(sources.get('source_dash')):  # TODO: Find live example with source_dash
+                try:
+                    parsed_base_dash = urllib.parse.urlparse(sources['source_dash'])
+                    token_json = self._download_json(
+                        'https://www.vidio.com/live/%s/tokens?type=dash' % video_id,
+                        display_id, note='Downloading DASH token JSON', data=b'')
+                    parsed_tokenized_dash = parsed_base_dash._replace(path=token_json.get('token', '')
+                                                                      + (parsed_base_dash.path if parsed_base_dash.path[0] == '/'
+                                                                         else '/' + parsed_base_dash.path))
+                    formats.extend(self._extract_mpd_formats(
+                        parsed_tokenized_dash.geturl(), display_id, 'dash'))
+                except Exception as e:
+                    if not first_except:
+                        first_except = e
         else:
             if stream_meta.get('stream_token_url'):
-                token_json = self._download_json(
-                    f'https://www.vidio.com/live/{video_id}/tokens',
-                    display_id, note='Downloading HLS token JSON', data=b'')
-                formats.extend(self._extract_m3u8_formats(
-                    stream_meta['stream_token_url'] + '?' + token_json.get('token', ''),
-                    display_id, 'mp4', 'm3u8_native'))
+                try:
+                    token_json = self._download_json(
+                        f'https://www.vidio.com/live/{video_id}/tokens',
+                        display_id, note='Downloading HLS token JSON', data=b'')
+                    formats.extend(self._extract_m3u8_formats(
+                        stream_meta['stream_token_url'] + '?' + token_json.get('token', ''),
+                        display_id, 'mp4', 'm3u8_native'))
+                except Exception as e:
+                    if not first_except:
+                        first_except = e
             if stream_meta.get('stream_dash_url'):
-                pass
+                try:
+                    parsed_base_dash = urllib.parse.urlparse(stream_meta['stream_dash_url'])
+                    token_json = self._download_json(
+                        'https://www.vidio.com/live/%s/tokens?type=dash' % video_id,
+                        display_id, note='Downloading DASH token JSON', data=b'')
+                    parsed_tokenized_dash = parsed_base_dash._replace(path=token_json.get('token', '')
+                                                                      + (parsed_base_dash.path if parsed_base_dash.path[0] == '/'
+                                                                         else '/' + parsed_base_dash.path))
+                    formats.extend(self._extract_mpd_formats(
+                        parsed_tokenized_dash.geturl(), display_id, 'dash'))
+                except Exception as e:
+                    if not first_except:
+                        first_except = e
             if stream_meta.get('stream_url'):
-                formats.extend(self._extract_m3u8_formats(
-                    stream_meta['stream_url'], display_id, 'mp4', 'm3u8_native'))
-
+                try:
+                    formats.extend(self._extract_m3u8_formats(
+                        stream_meta['stream_url'], display_id, 'mp4', 'm3u8_native'))
+                except Exception as e:
+                    if not first_except:
+                        first_except = e
+        if not formats:
+            raise first_except
         return {
             'id': video_id,
             'display_id': display_id,

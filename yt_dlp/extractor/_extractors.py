@@ -2461,6 +2461,7 @@ from .vtv import (
     VTVGoIE,
 )
 from .vuclip import VuClipIE
+from .vueschool import VueSchoolCourseIE, VueSchoolLessonIE
 from .vvvvid import (
     VVVVIDIE,
     VVVVIDShowIE,

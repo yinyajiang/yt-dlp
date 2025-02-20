@@ -76,8 +76,8 @@ class DornaBaseIE(InfoExtractor):
         clips_and_tags = self._download_json(url, None, fatal=False)
         legends = traverse_obj(clips_and_tags, ('videobar', 'legends'))
         clean_legends = {}
-        for l in legends:
-            clean_legends[l['label']] = l['description']
+        for legend in legends:
+            clean_legends[legend['label']] = legend['description']
 
         for c in traverse_obj(clips_and_tags, ('videobar', 'content')):
             # join various elements to create a title

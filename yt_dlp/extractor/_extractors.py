@@ -1915,7 +1915,6 @@ from .simplecast import (
 from .sina import SinaIE
 from .sixplay import SixPlayIE
 from .skeb import SkebIE
-from .skimag import SkiMagIE
 from .sky import (
     SkyNewsIE,
     SkyNewsStoryIE,

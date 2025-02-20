@@ -17,6 +17,7 @@ from ..utils import (
 
 class MGTVIE(InfoExtractor):
     _VALID_URL = r'https?://(?:w(?:ww)?\.)?mgtv\.com/[bv]/(?:[^/]+/)*(?P<id>\d+)\.html'
+    _TRY_GENERIC = True
     IE_DESC = '芒果TV'
     IE_NAME = 'MangoTV'
 

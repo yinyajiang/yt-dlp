@@ -805,7 +805,7 @@ from .gronkh import (
     GronkhVodsIE,
 )
 from .groupon import GrouponIE
-from .hanime import HanimeIE
+from .hanime import HanimetvBaseIE, HanimetvPlaylistIE
 from .harpodeon import HarpodeonIE
 from .hbo import HBOIE
 from .hearthisat import HearThisAtIE

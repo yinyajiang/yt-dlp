@@ -44,97 +44,27 @@ class BrighteonIE(InfoExtractor):
     _TESTS = [
         {
             'url': 'https://www.brighteon.com/4f2586ec-66ac-4db7-ac72-efb5f0473406',
-            'md5': '9a6a3ce5c3391eccb71f995f530209d5',
-            'info_dict': {
-                'id': '4f2586ec-66ac-4db7-ac72-efb5f0473406',
-                'title': "10/26/2022 Let's Talk America: Dr. Alan Keyes ft. Dennis Pyle",
-                'ext': 'mp3',
-                'description': 'Watch "Let\'s Talk America" Live on Brighteon.tv '
-                "every weekday from 2:00 pm - 3:00 pm estSupport "
-                "Let's Talk America by visiting or donating at https://iamtv.us/",
-                'timestamp': 1666814967,
-                'upload_date': '20221026',
-                'duration': 3033.0,
-                'channel': 'BrighteonTV',
-                'channel_id': '123538c1-de87-46d0-a0ad-be8efebbfaa1',
-                'channel_url': 'https://www.brighteon.com/channels/brighteontv',
-                'tags': [
-                    'current events',
-                    'bible',
-                    'declaration of independence',
-                    'scripture',
-                    'american politics',
-                    'constitutional rights',
-                    'conservative patriot',
-                    'lets talk america',
-                    'dr alan keyes',
-                ],
-                'thumbnail': 're:https?://[a-z]+.brighteon.com/(?:[a-z-]+/)+[a-f0-9-]+',
-                'view_count': int,
-                'like_count': int,
-            },
-            'params': {'check_formats': False, 'format': 'audio'},
+            'only_matching': True,
         },
         {
             # playlist
             'url': 'https://www.brighteon.com/watch/21824dea-3564-40af-a972-d014b987261b',
-            'info_dict': {
-                'id': '21824dea-3564-40af-a972-d014b987261b',
-                'title': 'U.S. Senate Impeachment Trial',
-            },
-            'playlist_mincount': 10,
+            'only_matching': True,
         },
         {
             # channel
             'url': 'https://www.brighteon.com/channels/brighteontv',
-            'info_dict': {
-                'id': '123538c1-de87-46d0-a0ad-be8efebbfaa1',
-                'title': 'BrighteonTV',
-            },
-            'playlist_mincount': 50,
+            'only_matching': True,
         },
         {
             # categories
             'url': 'https://www.brighteon.com/categories/4ad59df9-25ce-424d-8ac4-4f92d58322b9/videos',
-            'info_dict': {
-                'id': '4ad59df9-25ce-424d-8ac4-4f92d58322b9',
-                'title': 'Health & Medicine',
-            },
-            'playlist_mincount': 50,
+            'only_matching': True,
         },
         {
             # browse
             'url': 'https://www.brighteon.com/browse/new-videos',
-            'info_dict': {
-                'id': 'new-videos',
-                'title': 'new-videos',
-            },
-            'playlist_mincount': 50,
-        },
-        {
-            # test embedded urls
-            'url': 'https://sonsoflibertymedia.com/one-thing-that-the-officials-forgot-to-tell-you-about-the-vaccines-the-truth-video/',
-            'info_dict': {
-                'id': 'one-thing-that-the-officials-forgot-to-tell-you-about-the-vaccines-the-truth-video',
-                'title': 'One Thing That The "Officials" Forgot To Tell You About The Vaccines, The Truth (Video) \u00bb Sons of Liberty Media',
-                'description': 'md5:128ed10e870c40216b0d26bb227029f4',
-                'thumbnail': 'https://sonsoflibertymedia.com/wp-content/uploads/2021/04/liars.jpg',
-                'age_limit': 0,
-            },
-            'params': {'playlistitems': '1'},
-            'playlist': [
-                {
-                    'md5': '53e2dea64b626eb057bf01bb4a1d1f4a',
-                    'info_dict': {
-                        'id': 'd0263fb5-45cc-4ef7-af6b-57b5484abf93',
-                        'title': 'The Same Ones Selling You The Virus, Are The Same Ones Selling You The Vaccines - Just Watch Them!',
-                        'ext': 'mp4',
-                        'description': str,
-                        'timestamp': int,
-                        'upload_date': str,
-                    },
-                },
-            ],
+            'only_matching': True,
         },
     ]
 

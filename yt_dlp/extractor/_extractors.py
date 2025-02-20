@@ -1898,6 +1898,7 @@ from .sharepoint import SharePointIE
 from .sharevideos import ShareVideosEmbedIE
 from .shemaroome import ShemarooMeIE
 from .showroomlive import ShowRoomLiveIE
+from .showuptv import ShowupTvIE
 from .sibnet import SibnetEmbedIE
 from .simplecast import (
     SimplecastEpisodeIE,

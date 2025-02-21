@@ -1152,6 +1152,7 @@ from .mediastream import (
 from .mediaworksnz import MediaWorksNZVODIE
 from .medici import MediciIE
 from .megaphone import MegaphoneIE
+from .megatube import MegaTubeIE
 from .megatvcom import (
     MegaTVComEmbedIE,
     MegaTVComIE,

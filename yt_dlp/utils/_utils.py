@@ -5933,6 +5933,7 @@ def join_appdata_path(*paths):
         pkg_name = 'yt-dlp'
     return os.path.join(appdata_dir, pkg_name, *paths)
 
+
 class _ProgressState(enum.Enum):
     """
     Represents a state for a progress bar.

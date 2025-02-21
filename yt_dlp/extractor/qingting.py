@@ -51,7 +51,7 @@ class QingTingIE(InfoExtractor):
 class QingTingChannelIE(InfoExtractor):
     IE_NAME = 'QingTing:Channel'
     IE_DESC = '蜻蜓FM 专辑'
-    _VALID_URL = r'https?://(?:www\.|m\.)?(?:qingting\.fm|qtfm\.cn)/v?channels/(?P<id>\d+)(?:/(?P<pageIdx>\d+))?'
+    _VALID_URL = r'https?://(?:www\.|m\.)?(?:qingting\.fm|qtfm\.cn)/v?channels/(?P<id>\d+)(?:/(?P<pageIdx>\d+))?/?(?:\?[^/]*)?$'
     _TESTS = [{
         'url': 'https://www.qingting.fm/channels/324131',
         'info_dict': {

@@ -2946,7 +2946,7 @@ class GenericIE(InfoExtractor):
                 self.report_warning(f'Generic extractor returned None for {input_url}')
                 return (False, result)
             t = result.get('_type', 'video')
-            if t == 'url' and input_url.rstrip('/') == result.get('url', '').rstrip('/'):
+            if (t == 'url' or t == 'url_transparent') and input_url.rstrip('/') == result.get('url', '').rstrip('/'):
                 self.report_warning(f'Generic extractor returned url same as input for {input_url}')
                 return (False, result)
             if t == 'video' and not result.get('formats', None) and not result.get('url', None):

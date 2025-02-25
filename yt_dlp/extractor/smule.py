@@ -17,6 +17,7 @@ from ..utils import (
 
 class SmuleIE(InfoExtractor):
     _VALID_URL = r'https?://(?:www\.)?smule\.com/(?:recording/(?P<display_id>[^/]+)|sing-recording|p|c)/(?P<id>[0-9]+_[0-9]+)(?:/frame(?:/box)?)?'
+    _TRY_GENERIC = True
     _EMBED_REGEX = [fr'<iframe[^>]+src=["\'](?P<url>{_VALID_URL})']
     _TESTS = [
         {

@@ -1,8 +1,8 @@
-import itertools
 import re
 
 from .common import InfoExtractor
 from ..utils import (
+    RegexNotFoundError,
     int_or_none,
     join_nonempty,
     js_to_json,
@@ -17,18 +17,6 @@ from ..utils import (
 class RadioFranceIE(InfoExtractor):
     _VALID_URL = r'https?://maison\.radiofrance\.fr/radiovisions/(?P<id>[^?#]+)'
     IE_NAME = 'radiofrance'
-
-    _TEST = {
-        'url': 'http://maison.radiofrance.fr/radiovisions/one-one',
-        'md5': 'bdbb28ace95ed0e04faab32ba3160daf',
-        'info_dict': {
-            'id': 'one-one',
-            'ext': 'ogg',
-            'title': 'One to one',
-            'description': "Plutôt que d'imaginer la radio de demain comme technologie ou comme création de contenu, je veux montrer que quelles que soient ses évolutions, j'ai l'intime conviction que la radio continuera d'être un grand média de proximité pour les auditeurs.",
-            'uploader': 'Thomas Hercouët',
-        },
-    }
 
     def _real_extract(self, url):
         m = self._match_valid_url(url)
@@ -271,20 +259,50 @@ class RadioFrancePlaylistBaseIE(RadioFranceBaseIE):
         raise NotImplementedError('This method must be implemented by subclasses')
 
     def _generate_playlist_entries(self, station, content_id, content_response):
-        for _page_num in itertools.count(2):
+        while True:
             for entry in content_response['items']:
-                yield self.url_result(
-                    f'https://www.radiofrance.fr/{entry["path"]}', url_transparent=True, **traverse_obj(entry, {
-                        'title': 'title',
-                        'description': 'standFirst',
-                        'timestamp': ('publishedDate', {int_or_none}),
-                        'thumbnail': ('visual', 'src'),
-                    }))
+                if entry['link'] == '':
+                    yield entry
+                else:
+                    yield self.url_result(
+                        f'https://www.radiofrance.fr{entry["link"]}', url_transparent=True, **traverse_obj(entry, {
+                            'title': 'title',
+                            'description': 'standFirst',
+                            'timestamp': ('publishedDate', {int_or_none}),
+                            'thumbnail': ('visual', 'src'),
+                        }))
 
-            if not content_response['next']:
+            if content_response['next']:
+                content_response = self._call_api(station, content_id, content_response['next'])
+            else:
                 break
 
-            content_response = self._call_api(station, content_id, content_response['next'])
+    def _extract_embedded_episodes(self, item, webpage, content_id):
+        """Certain episodes data are embedded directly in the page, use these if the link is missing"""
+        # this may be empty if the editor uploads a blank 'info' episode. ignore these.
+        if item['playerInfo']['media'] is None:
+            return None
+        links = item['playerInfo']['media']['sources']
+        item['formats'] = []
+        for linkkey in links:
+            url = self._search_regex(linkkey + r'\.url="([^"]+)";', webpage, content_id)
+            dur = int(self._search_regex(linkkey + r'\.duration=(\d+);', webpage, content_id))
+            # Preset describes the audio encoding. Some episodes will be missing a 'preset', simply stating 'null'
+            # In this case, give a generic response
+            try:
+                preset = self._search_json(linkkey + r'\.preset=', webpage, content_id, content_id, contains_pattern=r'\{.+\}', transform_source=js_to_json)
+            except RegexNotFoundError:
+                preset = {'id': '999', 'name': 'unknown format', 'encoding': 'unknown', 'bitrate': 'unknown'}
+            item['formats'].append({
+                'format_id': preset['id'],
+                'url': url,
+                'vcodec': 'none',
+                'acodec': preset['encoding'],
+                'quality': preset['bitrate'],
+                'duration': dur,
+            })
+            item['duration'] = dur
+        return item
 
     def _real_extract(self, url):
         playlist_id = self._match_id(url)
@@ -323,7 +341,7 @@ class RadioFrancePodcastIE(RadioFrancePlaylistBaseIE):
             'id': 'eaf6ef81-a980-4f1c-a7d1-8a75ecd54b17',
             'display_id': 'le-billet-vert',
             'title': 'Le billet sciences',
-            'description': 'md5:eb1007b34b0c0a680daaa71525bbd4c1',
+            'description': 'md5:85d5ce8c488192e71904c551d595f4da',
             'thumbnail': r're:^https?://.*\.(?:jpg|png)',
         },
         'playlist_mincount': 11,
@@ -356,6 +374,16 @@ class RadioFrancePodcastIE(RadioFrancePlaylistBaseIE):
         },
         'playlist_mincount': 321,
     }, {
+        'url': 'http://www.radiofrance.fr/franceculture/podcasts/serie-les-aventures-de-tintin-les-cigares-du-pharaon',
+        'info_dict': {
+            'id': '01b096c6-e7f8-49c4-8319-dd399221885b',
+            'display_id': 'serie-les-aventures-de-tintin-les-cigares-du-pharaon',
+            'title': 'Les Cigares du Pharaon\xa0: les Aventures de Tintin',
+            'description': 'md5:1c5b6d010b2aaeb0d90b2c233b5f7b15',
+            'thumbnail': r're:^https?://.*\.(?:jpg|png)',
+        },
+        'playlist_count': 5,
+    }, {
         'url': 'https://www.radiofrance.fr/franceinter/podcasts/le-7-9',
         'only_matching': True,
     }, {
@@ -371,11 +399,21 @@ class RadioFrancePodcastIE(RadioFrancePlaylistBaseIE):
         webpage = self._download_webpage(url, podcast_id, note=f'Downloading {podcast_id} page {cursor}')
 
         resp = {}
+        resp['items'] = []
 
         # _search_json cannot parse the data as it contains javascript
         # Therefore, parse the episodes objects array separately
-        resp['items'] = self._search_json(r'a.items\s*=\s*', webpage, podcast_id, podcast_id,
-                                          contains_pattern=r'\[.+\]', transform_source=js_to_json)
+        itemlist = self._search_json(r'a.items\s*=\s*', webpage, podcast_id, podcast_id,
+                                     contains_pattern=r'\[.+\]', transform_source=js_to_json)
+
+        for item in itemlist:
+            if item['model'] == 'Expression':
+                if item['link'] == '':
+                    item = self._extract_embedded_episodes(item, webpage, podcast_id)
+                    # If could not extract the right info, skip
+                    if item is None:
+                        continue
+                resp['items'].append(item)
 
         # the pagination data is stored in a javascript object 'a'
         lastPage = int(re.search(r'a\.lastPage\s*=\s*(\d+);', webpage).group(1))
@@ -392,7 +430,7 @@ class RadioFranceProfileIE(RadioFrancePlaylistBaseIE):
     _VALID_URL = rf'{RadioFranceBaseIE._VALID_URL_BASE}/personnes/(?P<id>[\w-]+)'
 
     _TESTS = [{
-        'url': 'https://www.radiofrance.fr/personnes/thomas-pesquet?p=3',
+        'url': 'https://www.radiofrance.fr/personnes/thomas-pesquet',
         'info_dict': {
             'id': '86c62790-e481-11e2-9f7b-782bcb6744eb',
             'display_id': 'thomas-pesquet',
@@ -422,29 +460,28 @@ class RadioFranceProfileIE(RadioFrancePlaylistBaseIE):
         webpage = self._download_webpage(url, profile_id, note=f'Downloading {profile_id} page {cursor}')
 
         resp = {}
-
-        # On profile pages, the data is stored in a javascript array in the final <script>
-        # Each episode is stored as
-        # a[0] = { id: ... }; a[1] = [ id: ... ]; on page 2->
-        # If a page had a thumbnail, the a variable contains image data,
-        # and episode data is stored in b[0]...
         resp['items'] = []
-        podcastindex = 0
-        nextmatch = True
-        while nextmatch:
-            nextmatch = self._search_json(r'\w+\[' + str(podcastindex) + r'\]\s*=\s*', webpage, profile_id,
-                                          profile_id, transform_source=js_to_json, fatal=False, default=None)
-            podcastindex += 1
-            if nextmatch is not None:
-                resp['items'].append(nextmatch)
 
-        # There is more than one pagination key in the final <script>
-        # We should use pick the pagination object which is within a documents object
+        # get episode data from page
         pagedata = self._search_json(r'documents\s*:\s*', webpage, profile_id, profile_id,
                                      transform_source=js_to_json)
-        lastPage = traverse_obj(pagedata, ('pagination', 'lastPage'))
+
+        # get the page data
+        pagekey = pagedata['pagination']
+        hasMorePages = False
+        lastPage = int(self._search_regex(pagekey + r'\.lastPage=(\d+);', webpage, profile_id, '0'))
         hasMorePages = cursor < lastPage
         resp['next'] = cursor + 1 if hasMorePages else None
+
+        # get episode data, note, not all will be A/V, so filter for 'expression'
+        for item in pagedata['items']:
+            if item['model'] == 'Expression':
+                if item.link == '':
+                    item = self._extract_embedded_episodes(item, webpage, profile_id)
+                    # if could not extract info, skip
+                    if item is None:
+                        continue
+                resp['items'].append(item)
 
         resp['metadata'] = self._search_json(r'content:\s*', webpage, profile_id, profile_id,
                                              transform_source=js_to_json)
@@ -470,14 +507,14 @@ class RadioFranceProgramScheduleIE(RadioFranceBaseIE):
             'id': 'franceinter-program-20230217',
             'upload_date': '20230217',
         },
-        'playlist_count': 25,
+        'playlist_count': 27,
     }, {
         'url': 'https://www.radiofrance.fr/franceculture/grille-programmes?date=01-02-2023',
         'info_dict': {
             'id': 'franceculture-program-20230201',
             'upload_date': '20230201',
         },
-        'playlist_count': 25,
+        'playlist_count': 29,
     }, {
         'url': 'https://www.radiofrance.fr/mouv/grille-programmes?date=19-03-2023',
         'info_dict': {
@@ -491,7 +528,7 @@ class RadioFranceProgramScheduleIE(RadioFranceBaseIE):
             'id': 'francemusique-program-20230318',
             'upload_date': '20230318',
         },
-        'playlist_count': 15,
+        'playlist_count': 16,
     }, {
         'url': 'https://www.radiofrance.fr/franceculture/grille-programmes',
         'only_matching': True,

@@ -1860,6 +1860,7 @@ class InfoExtractor:
                 continue
             if attrs.get('type') not in ('hidden', 'submit'):
                 continue
+            name = None
             for attr in variadic(attr_list):
                 name = attrs.get(attr)
                 if name is not None:

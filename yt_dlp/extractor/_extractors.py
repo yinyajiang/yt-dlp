@@ -1959,8 +1959,8 @@ from .slideshare import SlideshareIE
 from .slideslive import SlidesLiveIE
 from .slutload import SlutloadIE
 from .smotrim import SmotrimIE
-from .snapchat import SnapchatSpotlightIE
 from .smule import SmuleIE
+from .snapchat import SnapchatSpotlightIE
 from .snotr import SnotrIE
 from .softwhiteunderbelly import SoftWhiteUnderbellyIE
 from .sohu import (

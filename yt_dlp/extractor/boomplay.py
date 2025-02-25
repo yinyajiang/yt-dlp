@@ -272,6 +272,7 @@ class BoomplayMusicIE(BoomplayBaseIE):
 
 class BoomplayVideoIE(BoomplayBaseIE):
     _VALID_URL = r'https?://(?:www\.)?boomplay\.com/video/(?P<id>\d+)'
+    _TRY_GENERIC = True
     _TESTS = [{
         'url': 'https://www.boomplay.com/video/1154892',
         'md5': 'd9b67ad333d2292a82922062d065352d',

@@ -1004,7 +1004,7 @@ def _real_main(argv=None):
 
     if opts.mp4decrypt_location:
         MP4DecryptPP._mp4decrypt_location.set(opts.mp4decrypt_location)
-        
+
     # load all plugins into the global lookup
     plugin_dirs.value = opts.plugin_dirs
     if plugin_dirs.value:

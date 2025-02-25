@@ -188,20 +188,22 @@ class InstagramBaseIE(InfoExtractor):
 
         timestr = strftime_or_none(info_dict.get('timestamp'), '%Y-%m-%d')
         title = product_info.get('title') or (f'Post by {user_info.get("username")} {timestr}' if timestr else f'Post by {user_info.get("username")}')
-        info_dict['title'] = title
 
         carousel_media = product_info.get('carousel_media')
         if carousel_media:
-            entries = [{**info_dict, **self._extract_product_media(product_media)} for product_media in carousel_media]
-            result = self.playlist_result(entries, info_dict['id'], **info_dict)
-            result['_playlist_media_type'] = 'CAROUSEL'
-            result['extractor'] = self.IE_NAME
-            result['extractor_key'] = self.ie_key()
-            return result
+            return {
+                '_type': 'playlist',
+                '_playlist_media_type': 'CAROUSEL',
+                **info_dict,
+                'title': title,
+                'entries': [{
+                    **info_dict,
+                    **self._extract_product_media(product_media),
+                } for product_media in carousel_media],
+            }
 
         return {
             **info_dict,
-            **self._extract_product_media(product_info),
             **self._extract_product_media(product_info),
         }
 
@@ -500,24 +502,18 @@ class InstagramIE(InstagramBaseIE):
         if not video_url:
             nodes = traverse_obj(media, ('edge_sidecar_to_children', 'edges', ..., 'node'), expected_type=dict) or []
             if nodes:
-                entries = []
-                for entry in self._extract_nodes(nodes, True):
-                    entries.append(entry)
-                if not entries and not self._has_session_id():
-                    self.raise_login_required()
-
+                entries = None
+                try:
+                    entries = self._extract_nodes(nodes, True)
+                except ExtractorError as e:
+                    if not entries and not self._has_session_id():
+                        self.raise_login_required()
+                    if not entries:
+                        raise e
                 return self.playlist_result(entries, video_id,
                                             format_field(username, None, 'Post by %s'), description)
-            try:
-                video_url = self._og_search_video_url(webpage, secure=False)
-            except ExtractorError as e:
-                if not self._has_session_id():
-                    self.raise_login_required()
-                else:
-                    raise e
-                return self.playlist_result(
-                    self._extract_nodes(nodes, True), video_id,
-                    format_field(username, None, 'Post by %s'), description)
+            if not self._has_session_id():
+                self.raise_login_required()
             raise ExtractorError('There is no video in this post', expected=True)
 
         formats = [{

@@ -4054,7 +4054,7 @@ class InfoExtractor:
         else:
             return self._download_json(url, **kwargs)
 
-    def _get_playable_info_by_webview(self, web_url):
+    def __get_playable_info_by_webview(self, web_url, out_error={}):
         if determine_is_know_media_ext(web_url):
             return (False, None)
 
@@ -4109,6 +4109,7 @@ class InfoExtractor:
                             return (True, js)
                         elif js.get('error'):
                             self.report_warning(f'[webview] {js.get("error")}')
+                            out_error['error'] = js.get('error')
                             return (True, None)
                 except Exception:
                     pass
@@ -4124,6 +4125,7 @@ class InfoExtractor:
                         return (True, js)
                     elif js.get('error'):
                         self.report_warning(f'[webview] {js.get("error")}')
+                        out_error['error'] = js.get('error')
             except Exception as e:
                 self.report_warning(f'[webview] {e}')
             return (True, None)
@@ -4227,6 +4229,24 @@ class InfoExtractor:
                         media_srcs[i] = base + media_srcs[i]
                 return media_srcs
         return None
+
+    def _get_playable_info_by_webview(self, web_url):
+        webview_location = self._downloader.params.get('webview_location')
+        if not webview_location:
+            return (False, None)
+        trycount = 1
+        if count_match := re.match(r'^(\d+),', webview_location):
+            trycount = int(count_match.group(1))
+            self._downloader.params['webview_location'] = webview_location[len(count_match.group()):].strip()
+        if trycount <= 0:
+            trycount = 1
+        for i in range(trycount):
+            out_error = {}
+            result = self.__get_playable_info_by_webview(web_url, out_error=out_error)
+            if 'Closed by user' in str(out_error.get('error')) and i < trycount - 1:
+                continue
+            return result
+        return (False, None)
 
 
 class SearchInfoExtractor(InfoExtractor):

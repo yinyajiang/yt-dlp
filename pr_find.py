@@ -6,6 +6,8 @@ import subprocess
 import argparse
 import re
 import pr_ignore
+import datetime
+from pathlib import Path
 
 try:
     import pandas as pd
@@ -72,16 +74,56 @@ def fetch_domains(file_path, fileters, fetch_name):
     return domains
 
 
+_exectror_files = {}
+
+
+def _all_exctoror_files():
+    global _exectror_files
+
+    if _exectror_files:
+        return _exectror_files
+
+    _exectror_files = {}
+
+    for filename in os.listdir(os.path.join(cur_dir, 'yt_dlp', 'extractor')):
+        if not filename.endswith('.py') or filename.startswith('_') or filename == 'generic':
+            continue
+        _exectror_files[filename] = Path(os.path.join(cur_dir, 'yt_dlp', 'extractor', filename)).read_text(encoding='utf-8')
+    return _exectror_files
+
+
+def exist_pr_valid_re(pr):
+    ie = get_ie(pr['title'])
+    for filename, content in _all_exctoror_files().items():
+        if re.search(rf'http:.*{ie}.*', content):
+            return filename
+    return False
+
+
 def pr2fpr(pr):
     return {
         'title': pr['title'],
         'url': pr['html_url'],
         'reject': (pr['state'] == 'closed' and not pr.get('merged_at')) or any(label['name'] == 'do-not-merge' for label in pr.get('labels', [])),
+        'has_valid_re': exist_pr_valid_re(pr),
+        'illegal': any(label['name'] == 'piracy/illegal' for label in pr.get('labels', [])),
+        'date': pr['created_at'] or pr['updated_at'],
+        'updated_at': pr['updated_at'],
     }
+
+
+def frps_sort(frps):
+    if not frps:
+        return
+    frps.sort(key=lambda pr: not pr['has_valid_re'])
+    frps.sort(key=lambda pr: datetime.datetime.fromisoformat(pr['date']).timestamp())
+    frps.sort(key=lambda pr: not pr['reject'])
+    frps.sort(key=lambda pr: not pr['illegal'])
 
 
 def find_prs(filter_func, pull_requests, ignore_invalid_pr=True):
     pull_requests = [pr for pr in pull_requests if (pr['html_url'] not in pr_ignore.ignore_prs) and (not is_invalid_pr(pr) if ignore_invalid_pr else True)]
+    pull_requests = [pr for pr in pull_requests if all(black not in pr['title'] for black in pr_ignore.black_domain)]
 
     fprs = []
     for pr in pull_requests:
@@ -92,7 +134,7 @@ def find_prs(filter_func, pull_requests, ignore_invalid_pr=True):
                 fprs.append(filter_result)
             else:
                 fprs.append(pr2fpr(pr))
-    fprs.sort(key=lambda pr: not pr['reject'])
+    frps_sort(fprs)
     return fprs
 
 
@@ -102,11 +144,11 @@ def get_ie(title):
     rs = [r'\[ie/(.+?)\]',
           r'\[extractor/(.+?)\]',
           r'\[(.+?)\]',
-          r'\s+([^\s]+?)\s+extractor',
-          r'fix \s*([^\s]+?)',
-          r'add support for \s*([^\s]+?)',
+          r'extractor for \s*([^\s]+)',
+          r'add support for \s*([^\s]+)',
           r'add \s*([^\s]+?)\s+support',
-          r'extractor for \s*([^\s]+?)',
+          r'\s*([^\s]+?)\s+extractor',
+          r'fix \s*([^\s]+)',
           ]
     for r in rs:
         g = re.search(r, title)
@@ -135,29 +177,33 @@ def is_match_domain_pr(domain, pr):
         return False
 
     ie = get_ie(title)
-    return bool(ie.lower() == domain.lower() or ie.lower() == origi_domain.lower())
+    if bool(ie.lower() == domain.lower() or ie.lower() == origi_domain.lower()):
+        return True
+    return len(domain) > 3 and domain in ie
 
 
 def find_domains_prs(domains, pull_requests):
-    def filter_domain(pr):
+    def filter_pr(pr):
         for domain in domains:
             if domain in pr_ignore.black_domain:
                 continue
             if is_match_domain_pr(domain, pr):
+                if 'add' in pr['title'].lower() and has_pr_extractor(pr):
+                    continue
                 return {
                     'domain': domain.lower(),
                 }
         return False
 
     fpr_map = {}
-    for fpr in find_prs(filter_domain, pull_requests, ignore_invalid_pr=False):
+    for fpr in find_prs(filter_pr, pull_requests, ignore_invalid_pr=False):
         domain = fpr['domain']
         if domain not in fpr_map:
             fpr_map[domain] = []
         fpr_map[domain].append(fpr)
 
-    for fpr in fpr_map.values():
-        fpr.sort(key=lambda pr: not pr['reject'])
+    for fprs in fpr_map.values():
+        frps_sort(fprs)
     return fpr_map
 
 
@@ -196,16 +242,18 @@ def main():
             return
         prs = fetch_dont_merged_prs()
         fprs = find_domains_prs(domains, prs)
-        print(json.dumps(fprs, indent=4))
-        print('count:', len(fprs))
     else:
         prs = fetch_dont_merged_prs()
 
         def filter_prs(pr):
             return is_only_add_ie_pr(pr) and not has_pr_extractor(pr)
         fprs = find_prs(filter_prs, prs)
+
+    if fprs:
         print(json.dumps(fprs, indent=4))
         print('count:', len(fprs))
+    else:
+        print('PRs Empty')
 
 
 if __name__ == '__main__':

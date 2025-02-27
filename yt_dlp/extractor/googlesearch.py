@@ -1,8 +1,7 @@
 import itertools
 import re
-import urllib.parse
 
-from .common import ExtractorError, InfoExtractor, SearchInfoExtractor
+from .common import InfoExtractor, SearchInfoExtractor
 
 
 class GoogleSearchIE(SearchInfoExtractor):
@@ -61,23 +60,23 @@ class GoogleSearchYoutubeVideoIE(InfoExtractor):
         return self.url_result(f'https://www.youtube.com/watch?v={vid}')
 
 
-class GoogleSearchRedirectIE(InfoExtractor):
-    _VALID_URL = r'https?://(?:www\.)?google\.[a-zA-Z0-9\-]+/url/?.*?url=.+'
-    _TESTS = [
-        {
-            'url': 'https://www.google.com/url?sa=t&source=web&rct=j&opi=89978449&url=https://resetoff.pl/vid/2accz&ved=2ahUKEwiR4oKi16qLAxUmFhAIHdBxDvsQ9KsOegQIDBAB&usg=AOvVaw0RMp6tmJgoccByuZohhQ2L',
-            'only_matching': True,
-        },
-        {
-            'url': 'https://www.google.com/url?sa=t&source=web&rct=j&opi=89978449&url=https://www.youtube.com/watch%3Fv%3DyOhl18rUUjU&ved=2ahUKEwiXs9Kr9auLAxXKTTABHSzIFOYQh-wKegQIFxAD&usg=AOvVaw3tJ-ako_J-kf3Vdgd1jqYz',
-            'only_matching': True,
-        },
-    ]
+# class GoogleSearchRedirectIE(InfoExtractor):
+#     _VALID_URL = r'https?://(?:www\.)?google\.[a-zA-Z0-9\-]+/url/?.*?url=.+'
+#     _TESTS = [
+#         {
+#             'url': 'https://www.google.com/url?sa=t&source=web&rct=j&opi=89978449&url=https://resetoff.pl/vid/2accz&ved=2ahUKEwiR4oKi16qLAxUmFhAIHdBxDvsQ9KsOegQIDBAB&usg=AOvVaw0RMp6tmJgoccByuZohhQ2L',
+#             'only_matching': True,
+#         },
+#         {
+#             'url': 'https://www.google.com/url?sa=t&source=web&rct=j&opi=89978449&url=https://www.youtube.com/watch%3Fv%3DyOhl18rUUjU&ved=2ahUKEwiXs9Kr9auLAxXKTTABHSzIFOYQh-wKegQIFxAD&usg=AOvVaw3tJ-ako_J-kf3Vdgd1jqYz',
+#             'only_matching': True,
+#         },
+#     ]
 
-    def _real_extract(self, url):
-        parsed_url = urllib.parse.urlparse(url)
-        query_params = urllib.parse.parse_qs(parsed_url.query)
-        if ('url' not in query_params) or (not query_params['url']):
-            raise ExtractorError('cannot find url in query params')
-        url = query_params['url'][0]
-        return self.url_result(url)
+#     def _real_extract(self, url):
+#         parsed_url = urllib.parse.urlparse(url)
+#         query_params = urllib.parse.parse_qs(parsed_url.query)
+#         if ('url' not in query_params) or (not query_params['url']):
+#             raise ExtractorError('cannot find url in query params')
+#         url = query_params['url'][0]
+#         return self.url_result(url)

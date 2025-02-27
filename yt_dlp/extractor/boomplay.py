@@ -187,7 +187,10 @@ class BoomplayBaseIE(InfoExtractor):
     @classmethod
     def _extract_embed_urls(cls, url, webpage):
         url, smuggled_data = unsmuggle_url(url)
-        media_types = variadic(smuggled_data.get('media_types', cls._MEDIA_TYPES))
+        if smuggled_data:
+            media_types = variadic(smuggled_data.get('media_types', cls._MEDIA_TYPES))
+        else:
+            media_types = variadic(cls._MEDIA_TYPES)
         media_types = join_nonempty(*(
             re.escape(v)for v in media_types if v in cls._MEDIA_TYPES),
             delim='|')

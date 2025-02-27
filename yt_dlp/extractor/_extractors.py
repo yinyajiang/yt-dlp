@@ -836,7 +836,7 @@ from .googlepodcasts import (
 )
 from .googlesearch import (
     GoogleSearchIE,
-    GoogleSearchPageVideosIE,
+    GoogleSearchPageIE,
 )
 from .goplay import GoPlayIE
 from .gopro import GoProIE

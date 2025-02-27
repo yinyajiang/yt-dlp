@@ -38,7 +38,7 @@ class GoogleSearchIE(SearchInfoExtractor):
                 return
 
 
-class GoogleSearchPageVideosIE(InfoExtractor):
+class GoogleSearchPageIE(InfoExtractor):
     _VALID_URL = r'https?://(?:www\.)?google\.[a-zA-Z0-9\-]+/search/?.*'
     _TESTS = [
         {

@@ -5903,6 +5903,13 @@ def determine_is_know_media_ext(url):
     return is_know_media_ext(ext)
 
 
+def determine_is_invalid_page_url(url):
+    if not url:
+        return True
+    ext = determine_ext(url)
+    return str(ext).lower() in ['ico', 'webp', 'svg', 'gif', 'png', 'jpg', 'jpeg', 'bmp', 'tiff', 'js', 'css', 'json', 'xml', 'txt', 'md']
+
+
 def join_appdata_path(*paths):
     appdata_dir = None
     if platform.system().lower() == 'windows':

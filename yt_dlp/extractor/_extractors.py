@@ -287,6 +287,7 @@ from .bilibili import (
     BiliIntlSeriesIE,
     BiliLiveIE,
 )
+from .bing import BingIE
 from .biobiochiletv import BioBioChileTVIE
 from .bitchute import (
     BitChuteChannelIE,

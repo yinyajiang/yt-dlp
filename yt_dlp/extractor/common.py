@@ -60,6 +60,7 @@ from ..utils import (
     clean_html,
     deprecation_warning,
     determine_ext,
+    determine_is_invalid_page_url,
     determine_is_know_media_ext,
     dict_get,
     encode_data_uri,
@@ -4216,19 +4217,54 @@ class InfoExtractor:
             return to_bool(value)
         return True
 
-    def _search_src_media_ext_url(self, html, origin_url=None):
-        src_urls = re.findall(r'(?:src|content)\s*=\s*["\'](.+?)["\']\s*', html)
+    def _search_webpage_src_media_ext_url(self, webpage, origin_url=None):
+        src_urls = self._search_webpage_src_url(webpage, origin_url=origin_url)
+        if src_urls:
+            return list({src for src in src_urls if determine_is_know_media_ext(src)})
+        return None
+
+    def _search_webpage_src_url(self, webpage, attrs=('src', 'content', 'href'), allow_prefixes=('http', '//'), origin_url=None):
+        src_urls = re.findall(rf'(?:{"|".join(variadic(attrs))})\s*=\s*["\'](.+?)["\']\s*', webpage)
         base = api_base_url(origin_url)
         if base and base.endswith('/'):
             base = base[:-1]
-        if src_urls:
-            media_srcs = list({src for src in src_urls if determine_is_know_media_ext(src)})
-            if media_srcs:
-                for i in range(len(media_srcs)):
-                    if base and media_srcs[i].startswith('/'):
-                        media_srcs[i] = base + media_srcs[i]
-                return media_srcs
-        return None
+
+        result = []
+        for src in src_urls:
+            if determine_is_invalid_page_url(src):
+                continue
+
+            if allow_prefixes:
+                if not any(src.startswith(x) for x in variadic(allow_prefixes)):
+                    continue
+            if base and src.startswith('/'):
+                result.append(base + src)
+            else:
+                result.append(src)
+        return list(orderedSet(result))
+
+    def _search_webpage_support_url(self, webpage, prefers=('https://www.youtube.com', ), attrs=('src', 'content', 'href'), allow_prefixes=('http', '//'), origin_url=None, include_self=False, only_one=True):
+        srcs = self._search_webpage_src_url(webpage, attrs=attrs, allow_prefixes=allow_prefixes, origin_url=origin_url)
+
+        urls = []
+        if prefers:
+            for src in srcs:
+                if any(prefer in src for prefer in prefers):
+                    if only_one:
+                        return [src]
+                    urls.append(src)
+
+        if urls:
+            return urls
+
+        for src in srcs:
+            if not include_self and self.suitable(src):
+                continue
+            if any(ie.ie_key() != 'Generic' and ie.suitable(src) for ie in self._downloader._ies.values()):
+                if only_one:
+                    return [src]
+                urls.append(src)
+        return urls
 
     def _get_playable_info_by_webview(self, web_url):
         webview_location = self._downloader.params.get('webview_location')

@@ -2993,7 +2993,7 @@ class GenericIE(InfoExtractor):
 
     def _extract_srcs(self, webpage, url):
         try:
-            src_urls = self._search_src_media_ext_url(webpage, url)
+            src_urls = self._search_webpage_src_media_ext_url(webpage, origin_url=url)
             if not src_urls:
                 return []
             if len(src_urls) == 1:

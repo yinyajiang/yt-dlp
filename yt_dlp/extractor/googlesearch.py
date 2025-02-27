@@ -1,7 +1,7 @@
 import itertools
 import re
 
-from .common import InfoExtractor, SearchInfoExtractor
+from .common import ExtractorError, InfoExtractor, SearchInfoExtractor
 
 
 class GoogleSearchIE(SearchInfoExtractor):
@@ -38,9 +38,13 @@ class GoogleSearchIE(SearchInfoExtractor):
                 return
 
 
-class GoogleSearchYoutubeVideoIE(InfoExtractor):
-    _VALID_URL = r'https?://(?:www\.)?google\.[a-zA-Z0-9\-]+/search/?.*?#.*?vid:(?P<vid>[^&#,]+)'
+class GoogleSearchPageVideosIE(InfoExtractor):
+    _VALID_URL = r'https?://(?:www\.)?google\.[a-zA-Z0-9\-]+/search/?.*'
     _TESTS = [
+        {
+            'url': 'https://www.google.com/search?sca_esv=6ad49f876c4c6d05&sxsrf=AHTn8zoMjhgBxqv6FCDGwddC8COhuK-qqA:1740634483185&q=sag&udm=7&fbs=ABzOT_CWdhQLP1FcmU5B0fn3xuWpmDtIGL1r84kuKz6yAcD_igefx-eKq1gCPHF3zhthFomUWD4JA37sWEIpiDUfp9if64PTOXxbEepEjc-nDfPpzIEeHPiuNSdNZGuuRQlrLDjlRtxGxtiuxpaGEJ92kmgo0df5dLBhdVCUQf9beyUBCj7tbBto6oXPqq_GDmfgi6xxY3sdZD8M_GL_WrxUB3p48Ff6Xw&sa=X&ved=2ahUKEwiihLfgkOOLAxULle4BHfXWKigQtKgLegQIGRAB&biw=2482&bih=1294&dpr=1',
+            'only_matching': True,
+        },
         {
             'url': 'https://www.google.com/search?q=create%20settings%20on%20computer%20podgo&source=sh/x/gs/m2/5#fpstate=ive&vld=cid:93f2cb2b,vid:QpL8yTYJ-o4,st:0',
             'only_matching': True,
@@ -56,27 +60,19 @@ class GoogleSearchYoutubeVideoIE(InfoExtractor):
     ]
 
     def _real_extract(self, url):
-        vid = self._match_valid_url(url).group('vid')
-        return self.url_result(f'https://www.youtube.com/watch?v={vid}')
+        vid_match = re.search(r'#.*?vid:(?P<vid>[^&#,]+)', url)
+        if vid_match and vid_match.group('vid'):
+            return self.url_result(f'https://www.youtube.com/watch?v={vid_match.group("vid")}')
 
+        result = self._fetch_url_reslut(url, 'google search')
+        if result:
+            return result
+        raise ExtractorError('No video URL found')
 
-# class GoogleSearchRedirectIE(InfoExtractor):
-#     _VALID_URL = r'https?://(?:www\.)?google\.[a-zA-Z0-9\-]+/url/?.*?url=.+'
-#     _TESTS = [
-#         {
-#             'url': 'https://www.google.com/url?sa=t&source=web&rct=j&opi=89978449&url=https://resetoff.pl/vid/2accz&ved=2ahUKEwiR4oKi16qLAxUmFhAIHdBxDvsQ9KsOegQIDBAB&usg=AOvVaw0RMp6tmJgoccByuZohhQ2L',
-#             'only_matching': True,
-#         },
-#         {
-#             'url': 'https://www.google.com/url?sa=t&source=web&rct=j&opi=89978449&url=https://www.youtube.com/watch%3Fv%3DyOhl18rUUjU&ved=2ahUKEwiXs9Kr9auLAxXKTTABHSzIFOYQh-wKegQIFxAD&usg=AOvVaw3tJ-ako_J-kf3Vdgd1jqYz',
-#             'only_matching': True,
-#         },
-#     ]
-
-#     def _real_extract(self, url):
-#         parsed_url = urllib.parse.urlparse(url)
-#         query_params = urllib.parse.parse_qs(parsed_url.query)
-#         if ('url' not in query_params) or (not query_params['url']):
-#             raise ExtractorError('cannot find url in query params')
-#         url = query_params['url'][0]
-#         return self.url_result(url)
+    def _fetch_url_reslut(self, url, hint):
+        webpage = self._download_webpage(url, hint)
+        # search support url
+        srcs = self._search_webpage_support_url(webpage, prefers=('https://www.youtube.com', ), attrs='href', origin_url=url)
+        if srcs:
+            return self.url_result(srcs[0])
+        return None

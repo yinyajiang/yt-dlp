@@ -2560,12 +2560,15 @@ class GenericIE(InfoExtractor):
             'age_limit': self._rta_search(webpage),
         })
 
-        self._downloader.write_debug('Looking for embeds')
-        embeds = list(self._extract_embeds(original_url, webpage, urlh=full_response, info_dict=info_dict))
-        if len(embeds) == 1:
-            return merge_dicts(embeds[0], info_dict)
-        elif embeds:
-            return self.playlist_result(embeds, **info_dict)
+        try:
+            self._downloader.write_debug('Looking for embeds')
+            embeds = list(self._extract_embeds(original_url, webpage, urlh=full_response, info_dict=info_dict))
+            if len(embeds) == 1:
+                return merge_dicts(embeds[0], info_dict)
+            elif embeds:
+                return self.playlist_result(embeds, **info_dict)
+        except Exception as e:
+            self._downloader.report_warning(f'Error extracting embeds: {e}')
 
         self._downloader.write_debug('Looking for srcs')
         srcs = self._extract_srcs(webpage, url)

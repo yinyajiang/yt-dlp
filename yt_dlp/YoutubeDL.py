@@ -1624,6 +1624,8 @@ class YoutubeDL:
         @force_generic_extractor  Force using the generic extractor (Deprecated; use ie_key='Generic')
         """
 
+        url = self._url_correct(url)
+
         if extra_info is None:
             extra_info = {}
 
@@ -4546,3 +4548,28 @@ class YoutubeDL:
             return ie._TRY_GENERIC
         except Exception:
             return False
+
+    def _url_correct(self, url):
+        # only correct the url once
+        if hasattr(self, '__url_has_been_corrected'):
+            return url
+        setattr(self, '__url_has_been_corrected', True)
+
+        if not url:
+            return url
+        if any(url.lower().startswith(prefix) for prefix in [
+            'http', 'blob', 'file', 'ftp', 'sftp',
+            'magnet', 'torrent', 'rtp', 'rtsp',
+            'webdav', 'rtmp', 'srt',
+        ]):
+            return url
+        if url.startswith('<iframe'):
+            matches = re.findall(r'https?://[^\s"\'\\]+', url)
+            if matches:
+                return matches[0]
+        i = url.find('https://')
+        if i == -1:
+            i = url.find('http://')
+        if i == -1:
+            return url
+        return url[i:]

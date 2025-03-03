@@ -689,7 +689,7 @@ class InstagramUserIE(InstagramPlaylistBaseIE):
     def _download_usedata(self, username):
         return self._download_json(
             f'{self._API_BASE_URL}/users/web_profile_info/?username={username}&count=100',
-            username, errnote=False, fatal=False, headers=self._API_HEADERS)
+            username, errnote=False, fatal=False, headers=self._api_headers)
 
     def _real_extract(self, url):
         username = self._match_id(url)
@@ -719,7 +719,7 @@ class InstagramUserIE(InstagramPlaylistBaseIE):
         while True:
             feed_json = self._download_json(
                 f'{self._API_BASE_URL}/feed/user/{username}/username/?count=100&max_id={cursor}',
-                username, errnote=False, fatal=False, headers=self._API_HEADERS)
+                username, errnote=False, fatal=False, headers=self._api_headers)
             if not feed_json:
                 break
             items += traverse_obj(feed_json, 'items', expected_type=list) or []

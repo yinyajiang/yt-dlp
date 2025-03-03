@@ -6,7 +6,7 @@ from ..utils import api_base_url
 
 
 class BingIE(InfoExtractor):
-    _VALID_URL = r'https?://(?:www\.)?bing\.(?P<loc>[a-zA-Z0-9\-]+)/.*'
+    _VALID_URL = r'https?://(?:[a-zA-Z]+\.)?bing\.(?P<loc>[a-zA-Z0-9\-]+)/.*'
 
     _TESTS = [{
         'url': 'https://www.bing.com/ck/a?!&&p=e35b31bb082116548575f8180c318ec77c43cb41560d9748eb02601ed3046311JmltdHM9MTczODE5NTIwMA&ptn=3&ver=2&hsh=4&fclid=109d2c87-26d0-6907-357f-3f73270268af&psq=Alwyn+Crawshaw+Watercolour+Tutorials&u=a1aHR0cHM6Ly93d3cueW91dHViZS5jb20vd2F0Y2g_dj1kblY3eDhHVGlFcw&ntb=1',

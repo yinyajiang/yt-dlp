@@ -5,6 +5,7 @@ import re
 
 from .common import InfoExtractor
 from ..networking.exceptions import HTTPError
+from ..third_api.instagram_hikerapi import InstagramHikerApi
 from ..utils import (
     ExtractorError,
     bug_reports_message,
@@ -395,7 +396,7 @@ class InstagramIE(InstagramBaseIE):
         if mobj:
             return [mobj.group('link')]
 
-    def _real_extract(self, url):
+    def __real_extract(self, url):
         video_id, url = self._match_valid_url(url).group('id', 'url')
         media, webpage = {}, ''
 
@@ -564,6 +565,24 @@ class InstagramIE(InstagramBaseIE):
             },
         }
 
+    def _real_extract(self, url):
+        try:
+            return self.__real_extract(url)
+        except Exception as e:
+            first_exception = e
+
+        try:
+            hikerApi = InstagramHikerApi(self)
+            video_id = self._match_id(url)
+            pk = int_or_none(video_id)
+            if not pk:
+                code = video_id
+            else:
+                code = None
+            return hikerApi.extract_post_info(code=code, id=pk)
+        except Exception:
+            raise first_exception
+
 
 class InstagramPlaylistBaseIE(InstagramBaseIE):
     _gis_tmpl = None  # used to cache GIS request type
@@ -654,7 +673,10 @@ class InstagramPlaylistBaseIE(InstagramBaseIE):
 
 class InstagramUserIE(InstagramPlaylistBaseIE):
     _WORKING = True
-    _VALID_URL = r'https?://(?:www\.)?instagram\.com/(?P<id>[^/]{2,})/?(?:$|[?#])'
+    _VALID_URL = [
+        r'https?://(?:www\.)?instagram\.com/(?P<id>[^/]{2,})/?(?:$|[?#])',
+        r'https?://(?:www\.)?instagram\.com/(?P<id>[^/]{2,})/reels/?(?:$|[?#])',
+    ]
     IE_DESC = 'Instagram user profile'
     IE_NAME = 'instagram:user'
     _TESTS = [{
@@ -691,7 +713,7 @@ class InstagramUserIE(InstagramPlaylistBaseIE):
             f'{self._API_BASE_URL}/users/web_profile_info/?username={username}&count=100',
             username, errnote=False, fatal=False, headers=self._api_headers)
 
-    def _real_extract(self, url):
+    def __real_extract(self, url):
         username = self._match_id(url)
         action = self._configuration_arg(
             'custom_action', default=[''], ie_key=InstagramUserIE)[0]
@@ -741,6 +763,19 @@ class InstagramUserIE(InstagramPlaylistBaseIE):
             self.raise_login_required()
 
         return self.playlist_result(info_data, playlist_id=username, playlist_title=format_field(username, None, 'Posts by %s'))
+
+    def _real_extract(self, url):
+        try:
+            return self.__real_extract(url)
+        except Exception as e:
+            first_exception = e
+
+        try:
+            hikerApi = InstagramHikerApi(self)
+            username = self._match_id(url)
+            return hikerApi.extract_user_posts_info(username=username, prefer_video=True)
+        except Exception:
+            raise first_exception
 
 
 class InstagramTagIE(InstagramPlaylistBaseIE):
@@ -797,7 +832,7 @@ class InstagramStoryIE(InstagramBaseIE):
         'only_matching': True,
     }]
 
-    def _real_extract(self, url):
+    def __real_extract(self, url):
         username, story_id = self._match_valid_url(url).group('user', 'id')
         if username == 'highlights' and not story_id:  # story id is only mandatory for highlights
             raise ExtractorError('Input URL is missing a highlight ID', expected=True)
@@ -842,3 +877,22 @@ class InstagramStoryIE(InstagramBaseIE):
             return traverse_obj(info_data, (lambda _, v: v['id'] == _pk_to_id(story_id), any))
 
         return self.playlist_result(info_data, playlist_id=story_id, playlist_title=story_title)
+
+    def _real_extract(self, url):
+        try:
+            return self.__real_extract(url)
+        except Exception as e:
+            first_exception = e
+
+        try:
+            hikerApi = InstagramHikerApi(self)
+            username, story_id = self._match_valid_url(url).group('user', 'id')
+            if username == 'highlights' and not story_id:
+                self.report_warning(r'[hikerapi] highlights not found story_id')
+                raise first_exception
+
+            if username and not story_id:
+                return hikerApi.extract_user_stories_info(username=username)
+            return hikerApi.extract_story_info(story_id=story_id)
+        except Exception:
+            raise first_exception

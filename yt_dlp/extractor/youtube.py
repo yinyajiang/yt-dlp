@@ -5321,11 +5321,8 @@ class YoutubeIE(YoutubeBaseInfoExtractor):
             return False
 
     def _extract_by_rapidapi(self, url):
-        rapidapi_key = self._configuration_arg('rapidapi_key', [], casesense=True)
-        if not rapidapi_key:
-            return None
         try:
-            rapidApi = YoutubeRapidApi(rapidapi_key, self)
+            rapidApi = YoutubeRapidApi(self)
             video_id = self._match_id(url)
             if not video_id:
                 return None

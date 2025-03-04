@@ -20,14 +20,12 @@ class YoutubeRapidApi:
     API_ENDPOINT = 'https://youtube-media-downloader.p.rapidapi.com/v2/video/details'
     API_HOST = 'youtube-media-downloader.p.rapidapi.com'
 
-    def __init__(self, api_keys, ie, api_host=API_HOST, api_endpoint=API_ENDPOINT):
-        self.api_keys = api_keys
-        self.api_host = api_host
-        self.api_endpoint = api_endpoint
+    def __init__(self, ie):
+        self._api_keys = ie._configuration_arg('rapidapi_key', [], casesense=True)
         self._ie = ie
         if not ie:
             raise ValueError('[rapidapi] ie is required')
-        if not api_keys:
+        if not self._api_keys:
             raise ValueError('[rapidapi] api keys is required')
 
     def extract_video_info(self, video_id):
@@ -115,12 +113,12 @@ class YoutubeRapidApi:
         report_msg = lambda msg: self._ie.report_msg(f'[rapidapi] {msg}')
 
         first_exception = None
-        for key in self.api_keys:
+        for key in self._api_keys:
             try:
-                url = f'{self.api_endpoint}?videoId={video_id}'
+                url = f'{self.API_ENDPOINT}?videoId={video_id}'
                 info = download_json(url, headers={
                     'x-rapidapi-key': key,
-                    'x-rapidapi-host': self.api_host,
+                    'x-rapidapi-host': self.API_HOST,
                 },
                     extensions={
                     'cookiejar': YoutubeDLCookieJar(),

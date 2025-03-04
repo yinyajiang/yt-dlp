@@ -15,6 +15,7 @@ import random
 import re
 import subprocess
 import sys
+import tempfile
 import time
 import types
 import urllib.parse
@@ -1206,15 +1207,25 @@ class InfoExtractor:
 
     def _download_webpage2(
             self, url_or_request, video_id, note=None, errnote=None,
-            fatal=True, tries=1, timeout=NO_DEFAULT, *args, **kwargs):
+            fatal=True, tries=1, timeout=NO_DEFAULT, try_webview=False, *args, **kwargs):
         try_count = 0
         while True:
             try:
-                return self._download_webpage(url_or_request, video_id, note, errnote, None, fatal, *args, **kwargs)
+                webpage = self._download_webpage(url_or_request, video_id, note, errnote, None, fatal, *args, **kwargs)
+                if not webpage:
+                    raise ExtractorError('Failed to download webpage')
+                return webpage
             except Exception as e:
                 try_count += 1
                 if try_count >= tries:
-                    raise e
+                    if try_webview and isinstance(url_or_request, str):
+                        webview_html = self._download_webpage_by_webview(url_or_request)
+                        if webview_html:
+                            return webview_html
+                    if fatal:
+                        raise e
+                    else:
+                        return None
                 self._sleep(timeout, video_id)
 
     def _download_json2(
@@ -4062,39 +4073,11 @@ class InfoExtractor:
         if any(d in web_url for d in ['youtu.be', 'youtube.com', 'accounts.google.com']):
             return (False, None)
 
-        webview_location = self._downloader.params.get('webview_location')
+        webview_location = self._maketrue_install_webview()
         if not webview_location:
-            self.report_warning('webview_location is not set')
             return (False, None)
         if not webview_location.startswith('http'):
-            webview_location = get_app_executable_path(webview_location)
-            if not os.path.exists(webview_location):
-                webview_install = self._downloader.params.get('webview_install')
-                if webview_install:
-                    process = subprocess.run(webview_install, shell=True)
-                    if process.returncode != 0:
-                        self.report_warning(f'{webview_install} failed')
-                        return (False, None)
-                else:
-                    self.report_warning(f'webview_location {webview_location} does not exist')
-                    return (False, None)
-
-            webview_params = self._downloader.params.get('webview_params')
-            args = []
-            put_url = False
-            if webview_params:
-                for param in webview_params.split(' '):
-                    param = param.strip()
-                    if not param:
-                        continue
-                    if '{url}' in param:
-                        param = param.replace('{url}', web_url)
-                        put_url = True
-                    args.append(param)
-
-            if not put_url:
-                args.append(web_url)
-
+            args = self._webview_params_to_run_args(web_url, 'webview_params')
             process = subprocess.run([webview_location, *args],
                                      stdout=subprocess.PIPE, stderr=subprocess.DEVNULL, text=True, encoding='utf-8', errors='replace')
             input_text = process.stdout
@@ -4267,7 +4250,7 @@ class InfoExtractor:
         return urls
 
     def _get_playable_info_by_webview(self, web_url):
-        webview_location = self._downloader.params.get('webview_location')
+        webview_location = self._maketrue_install_webview()
         if not webview_location:
             return (False, None)
         trycount = 1
@@ -4283,6 +4266,76 @@ class InfoExtractor:
                 continue
             return result
         return (False, None)
+
+    def _maketrue_install_webview(self):
+        webview_location = self._downloader.params.get('webview_location')
+        if not webview_location:
+            self.report_warning('webview_location is not set')
+            return ''
+        if not webview_location.startswith('http'):
+            webview_location = get_app_executable_path(webview_location)
+            if not os.path.exists(webview_location):
+                webview_install = self._downloader.params.get('webview_install')
+                if webview_install:
+                    process = subprocess.run(webview_install, shell=True)
+                    if process.returncode != 0:
+                        self.report_warning(f'{webview_install} failed')
+                        return ''
+                else:
+                    self.report_warning(f'webview_location {webview_location} does not exist')
+                    return ''
+        return webview_location
+
+    def _webview_params_to_run_args(self, web_url, params_name):
+        webview_params = self._downloader.params.get(params_name)
+        args = []
+        put_url = False
+        if webview_params:
+            for param in webview_params.split(' '):
+                param = param.strip()
+                if not param:
+                    continue
+                if '{url}' in param:
+                    param = param.replace('{url}', web_url)
+                    put_url = True
+                args.append(param)
+        if not put_url:
+            args.append(web_url)
+        return args
+
+    def _download_webpage_by_webview(self, web_url, *args, **kwargs):
+        webview_location = self._maketrue_install_webview()
+        if not webview_location:
+            return None
+
+        def _temp_file_name():
+            temp_file = tempfile.NamedTemporaryFile(suffix='.tmp', delete=False)
+            temp_file.close()
+            return temp_file.name
+
+        try:
+            temp_name = ''
+            if not webview_location.startswith('http'):
+                args = self._webview_params_to_run_args(web_url, 'webview_downpage_params')
+                if '{file}' not in args:
+                    self.report_warning('webview_downpage_params must contain {file}')
+                    return None
+
+                temp_name = _temp_file_name()
+                args = [arg.replace('{file}', temp_name) for arg in args]
+                subprocess.run([webview_location, *args],
+                               stdout=subprocess.PIPE, stderr=subprocess.DEVNULL, text=True, encoding='utf-8', errors='replace')
+            else:
+                temp_name = _temp_file_name()
+                self._no_proxy_download_large_timeout(webview_location, data=json.dumps({'url': web_url, 'dump_html': temp_name}).encode())
+            with open(temp_name) as f:
+                return f.read()
+        except Exception:
+            pass
+        finally:
+            if temp_name and os.path.exists(temp_name):
+                os.remove(temp_name)
+        return None
 
 
 class SearchInfoExtractor(InfoExtractor):

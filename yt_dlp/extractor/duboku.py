@@ -101,7 +101,7 @@ class DubokuIE(InfoExtractor):
         episode_id = temp[2]
 
         webpage_url = f'https://w.duboku.io/vodplay/{video_id}.html'
-        webpage_html = self._download_webpage(webpage_url, video_id)
+        webpage_html = self._download_webpage2(webpage_url, video_id, try_webview=True)
 
         # extract video url
 
@@ -197,7 +197,7 @@ class DubokuPlaylistIE(InfoExtractor):
         fragment = urllib.parse.urlparse(url).fragment
 
         webpage_url = f'https://w.duboku.io/voddetail/{series_id}.html'
-        webpage_html = self._download_webpage(webpage_url, series_id)
+        webpage_html = self._download_webpage2(webpage_url, series_id, try_webview=True)
 
         # extract title
 

@@ -1509,7 +1509,7 @@ def create_parser():
         dest='webview_params', default=None,
         help='Params of the webview')
     filesystem.add_option(
-        '--webview-download-page-params',
+        '--webview-downpage-params',
         dest='webview_downpage_params', default=None,
         help='Params of the webview to download the webpage')
     filesystem.add_option(

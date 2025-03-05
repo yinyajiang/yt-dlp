@@ -4271,6 +4271,7 @@ class InfoExtractor:
         trycount = 1
         if count_match := re.match(r'^(\d+),', webview_location):
             trycount = int(count_match.group(1))
+            webview_location = webview_location[len(count_match.group()):].strip()
 
         if trycount <= 0:
             trycount = 1

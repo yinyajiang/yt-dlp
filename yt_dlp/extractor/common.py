@@ -4073,7 +4073,7 @@ class InfoExtractor:
         if any(d in web_url for d in ['youtu.be', 'youtube.com', 'accounts.google.com']):
             return (False, None)
 
-        webview_location = self._maketrue_install_webview()
+        _, webview_location = self._maketrue_install_webview()
         if not webview_location:
             return (False, None)
         if not webview_location.startswith('http'):
@@ -4250,15 +4250,10 @@ class InfoExtractor:
         return urls
 
     def _get_playable_info_by_webview(self, web_url):
-        webview_location = self._maketrue_install_webview()
+        trycount, webview_location = self._maketrue_install_webview()
         if not webview_location:
             return (False, None)
-        trycount = 1
-        if count_match := re.match(r'^(\d+),', webview_location):
-            trycount = int(count_match.group(1))
-            self._downloader.params['webview_location'] = webview_location[len(count_match.group()):].strip()
-        if trycount <= 0:
-            trycount = 1
+
         for i in range(trycount):
             out_error = {}
             result = self.__get_playable_info_by_webview(web_url, out_error=out_error)
@@ -4271,7 +4266,15 @@ class InfoExtractor:
         webview_location = self._downloader.params.get('webview_location')
         if not webview_location:
             self.report_warning('webview_location is not set')
-            return ''
+            return 0, ''
+
+        trycount = 1
+        if count_match := re.match(r'^(\d+),', webview_location):
+            trycount = int(count_match.group(1))
+
+        if trycount <= 0:
+            trycount = 1
+
         if not webview_location.startswith('http'):
             webview_location = get_app_executable_path(webview_location)
             if not os.path.exists(webview_location):
@@ -4280,11 +4283,11 @@ class InfoExtractor:
                     process = subprocess.run(webview_install, shell=True)
                     if process.returncode != 0:
                         self.report_warning(f'{webview_install} failed')
-                        return ''
+                        return 0, ''
                 else:
                     self.report_warning(f'webview_location {webview_location} does not exist')
-                    return ''
-        return webview_location
+                    return 0, ''
+        return trycount, webview_location
 
     def _webview_params_to_run_args(self, web_url, params_name):
         webview_params = self._downloader.params.get(params_name)
@@ -4304,7 +4307,7 @@ class InfoExtractor:
         return args
 
     def _download_webpage_by_webview(self, web_url, *args, **kwargs):
-        webview_location = self._maketrue_install_webview()
+        _, webview_location = self._maketrue_install_webview()
         if not webview_location:
             return None
 

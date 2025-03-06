@@ -31,7 +31,7 @@ def is_invalid_pr(pr):
 def fetch_dont_merged_prs():
     cache = 'pull_requests.json'
 
-    if os.path.exists(cache) and (time.time() - os.path.getmtime(cache)) < 3600 * 24 * 4:
+    if os.path.exists(cache) and (time.time() - os.path.getmtime(cache)) < 3600 * 24 * 1:
         return json.load(open(cache))
 
     pull_requests = []
@@ -112,7 +112,7 @@ def pr2fpr(pr):
     }
 
 
-def frps_sort(frps):
+def fprs_sort(frps):
     if not frps:
         return
     frps.sort(key=lambda pr: not pr['has_valid_re'])
@@ -134,7 +134,7 @@ def find_prs(filter_func, pull_requests, ignore_invalid_pr=True):
                 fprs.append(filter_result)
             else:
                 fprs.append(pr2fpr(pr))
-    frps_sort(fprs)
+    fprs_sort(fprs)
     return fprs
 
 
@@ -203,7 +203,7 @@ def find_domains_prs(domains, pull_requests):
         fpr_map[domain].append(fpr)
 
     for fprs in fpr_map.values():
-        frps_sort(fprs)
+        fprs_sort(fprs)
     return fpr_map
 
 

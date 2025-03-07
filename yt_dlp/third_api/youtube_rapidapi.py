@@ -74,7 +74,7 @@ class YoutubeRapidApi:
                     'url': audio.get('url'),
                     'ext': audio.get('extension'),
                     'filesize': audio.get('size'),
-                    'format_id': f'audio-{index} - audio only',
+                    'format_note': 'audio only',
                     **mimetype2codecs(audio.get('mimeType'), assign_only_one_codec='acodec'),
                     'vcodec': 'none',
                 } for index, audio in enumerate(audios)
@@ -90,7 +90,6 @@ class YoutubeRapidApi:
                     'width': video.get('width'),
                     'height': video.get('height'),
                     'format_note': video.get('quality'),
-                    'format_id': f"video-{index} (f{video.get('quality')})",
                     **mimetype2codecs(video.get('mimeType'), assign_only_one_codec='both' if video.get('hasAudio') else 'vcodec', acodec_default='none'),
                 } for index, video in enumerate(videos)
             ]

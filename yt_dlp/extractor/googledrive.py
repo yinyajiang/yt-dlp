@@ -285,6 +285,8 @@ class GoogleDriveIE(InfoExtractor):
         if not formats and reason:
             if title:
                 self.raise_no_formats(reason, expected=True)
+            elif 'Please try again later' in reason:
+                self.raise_login_required(reason)
             else:
                 raise ExtractorError(reason, expected=True)
 

@@ -1,190 +1,215 @@
-
 from .common import InfoExtractor
 from ..utils import (
     ExtractorError,
+    clean_html,
     determine_ext,
-    determine_is_know_media_ext,
     int_or_none,
-    traverse_obj,
-    unescapeHTML,
+    parse_iso8601,
+    url_or_none,
 )
+from ..utils.traversal import traverse_obj
 
 
 class MSNIE(InfoExtractor):
-    _VALID_URL = r'https?://(?:(?:www|preview)\.)?msn\.com/(?P<locale>[^/]+)/(?:[^/]+/)*(?P<display_id>[^/]+)/[a-z]{2}-(?P<id>[\da-zA-Z]+)'
+    _VALID_URL = r'https?://(?:(?:www|preview)\.)?msn\.com/(?P<locale>[a-z]{2}-[a-z]{2})/(?:[^/?#]+/)+(?P<display_id>[^/?#]+)/[a-z]{2}-(?P<id>[\da-zA-Z]+)'
     _TESTS = [{
-        'url': 'https://www.msn.com/en-in/money/video/7-ways-to-get-rid-of-chest-congestion/vi-BBPxU6d',
-        'only_matching': True,
+        'url': 'https://www.msn.com/en-gb/video/news/president-macron-interrupts-trump-over-ukraine-funding/vi-AA1zMcD7',
+        'info_dict': {
+            'id': 'AA1zMcD7',
+            'ext': 'mp4',
+            'display_id': 'president-macron-interrupts-trump-over-ukraine-funding',
+            'title': 'President Macron interrupts Trump over Ukraine funding',
+            'description': 'md5:5fd3857ac25849e7a56cb25fbe1a2a8b',
+            'uploader': 'k! News UK',
+            'uploader_id': 'BB1hz5Rj',
+            'duration': 59,
+            'thumbnail': 'https://img-s-msn-com.akamaized.net/tenant/amp/entityid/AA1zMagX.img',
+            'tags': 'count:14',
+            'timestamp': 1740510914,
+            'upload_date': '20250225',
+            'release_timestamp': 1740513600,
+            'release_date': '20250225',
+            'modified_timestamp': 1741413241,
+            'modified_date': '20250308',
+        },
     }, {
-        # Article, multiple Dailymotion Embeds
-        'url': 'https://www.msn.com/en-in/money/sports/hottest-football-wags-greatest-footballers-turned-managers-and-more/ar-BBpc7Nl',
-        'only_matching': True,
+        'url': 'https://www.msn.com/en-gb/video/watch/films-success-saved-adam-pearsons-acting-career/vi-AA1znZGE?ocid=hpmsn',
+        'info_dict': {
+            'id': 'AA1znZGE',
+            'ext': 'mp4',
+            'display_id': 'films-success-saved-adam-pearsons-acting-career',
+            'title': "Films' success saved Adam Pearson's acting career",
+            'description': 'md5:98c05f7bd9ab4f9c423400f62f2d3da5',
+            'uploader': 'Sky News',
+            'uploader_id': 'AA2eki',
+            'duration': 52,
+            'thumbnail': 'https://img-s-msn-com.akamaized.net/tenant/amp/entityid/AA1zo7nU.img',
+            'timestamp': 1739993965,
+            'upload_date': '20250219',
+            'release_timestamp': 1739977753,
+            'release_date': '20250219',
+            'modified_timestamp': 1742076259,
+            'modified_date': '20250315',
+        },
     }, {
-        'url': 'http://www.msn.com/en-ae/news/offbeat/meet-the-nine-year-old-self-made-millionaire/ar-BBt6ZKf',
-        'only_matching': True,
-    }, {
-        'url': 'http://www.msn.com/en-ae/video/watch/obama-a-lot-of-people-will-be-disappointed/vi-AAhxUMH',
-        'only_matching': True,
-    }, {
-        # geo restricted
-        'url': 'http://www.msn.com/en-ae/foodanddrink/joinourtable/the-first-fart-makes-you-laugh-the-last-fart-makes-you-cry/vp-AAhzIBU',
-        'only_matching': True,
-    }, {
-        'url': 'http://www.msn.com/en-ae/entertainment/bollywood/watch-how-salman-khan-reacted-when-asked-if-he-would-apologize-for-his-‘raped-woman’-comment/vi-AAhvzW6',
-        'only_matching': True,
-    }, {
-        # Vidible(AOL) Embed
-        'url': 'https://www.msn.com/en-us/money/other/jupiter-is-about-to-come-so-close-you-can-see-its-moons-with-binoculars/vi-AACqsHR',
-        'only_matching': True,
+        'url': 'https://www.msn.com/en-us/entertainment/news/rock-frontman-replacements-you-might-not-know-happened/vi-AA1yLVcD',
+        'info_dict': {
+            'id': 'AA1yLVcD',
+            'ext': 'mp4',
+            'display_id': 'rock-frontman-replacements-you-might-not-know-happened',
+            'title': 'Rock Frontman Replacements You Might Not Know Happened',
+            'description': 'md5:451a125496ff0c9f6816055bb1808da9',
+            'uploader': 'Grunge (Video)',
+            'uploader_id': 'BB1oveoV',
+            'duration': 596,
+            'thumbnail': 'https://img-s-msn-com.akamaized.net/tenant/amp/entityid/AA1yM4OJ.img',
+            'timestamp': 1739223456,
+            'upload_date': '20250210',
+            'release_timestamp': 1739219731,
+            'release_date': '20250210',
+            'modified_timestamp': 1741427272,
+            'modified_date': '20250308',
+        },
     }, {
         # Dailymotion Embed
-        'url': 'https://www.msn.com/es-ve/entretenimiento/watch/winston-salem-paire-refait-des-siennes-en-perdant-sa-raquette-au-service/vp-AAG704L',
-        'only_matching': True,
+        'url': 'https://www.msn.com/de-de/nachrichten/other/the-first-descendant-gameplay-trailer-zu-serena-der-neuen-gefl%C3%BCgelten-nachfahrin/vi-AA1B1d06',
+        'info_dict': {
+            'id': 'x9g6oli',
+            'ext': 'mp4',
+            'title': 'The First Descendant: Gameplay-Trailer zu Serena, der neuen geflügelten Nachfahrin',
+            'description': '',
+            'uploader': 'MeinMMO',
+            'uploader_id': 'x2mvqi4',
+            'view_count': int,
+            'like_count': int,
+            'age_limit': 0,
+            'duration': 60,
+            'thumbnail': 'https://s1.dmcdn.net/v/Y3fO61drj56vPB9SS/x1080',
+            'tags': ['MeinMMO', 'The First Descendant'],
+            'timestamp': 1742124877,
+            'upload_date': '20250316',
+        },
     }, {
-        # YouTube Embed
-        'url': 'https://www.msn.com/en-in/money/news/meet-vikram-%E2%80%94-chandrayaan-2s-lander/vi-AAGUr0v',
-        'only_matching': True,
+        # Youtube Embed
+        'url': 'https://www.msn.com/en-gb/video/webcontent/web-content/vi-AA1ybFaJ',
+        'info_dict': {
+            'id': 'kQSChWu95nE',
+            'ext': 'mp4',
+            'title': '7 Daily Habits to Nurture Your Personal Growth',
+            'description': 'md5:6f233c68341b74dee30c8c121924e827',
+            'uploader': 'TopThink',
+            'uploader_id': '@TopThink',
+            'uploader_url': 'https://www.youtube.com/@TopThink',
+            'channel': 'TopThink',
+            'channel_id': 'UCMlGmHokrQRp-RaNO7aq4Uw',
+            'channel_url': 'https://www.youtube.com/channel/UCMlGmHokrQRp-RaNO7aq4Uw',
+            'channel_is_verified': True,
+            'channel_follower_count': int,
+            'comment_count': int,
+            'view_count': int,
+            'like_count': int,
+            'age_limit': 0,
+            'duration': 705,
+            'thumbnail': 'https://i.ytimg.com/vi/kQSChWu95nE/maxresdefault.jpg',
+            'categories': ['Howto & Style'],
+            'tags': ['topthink', 'top think', 'personal growth'],
+            'timestamp': 1722711620,
+            'upload_date': '20240803',
+            'playable_in_embed': True,
+            'availability': 'public',
+            'live_status': 'not_live',
+        },
     }, {
-        # NBCSports Embed
-        'url': 'https://www.msn.com/en-us/money/football_nfl/week-13-preview-redskins-vs-panthers/vi-BBXsCDb',
-        'only_matching': True,
+        # Article with social embed
+        'url': 'https://www.msn.com/en-in/news/techandscience/watch-earth-sets-and-rises-behind-moon-in-breathtaking-blue-ghost-video/ar-AA1zKoAc',
+        'info_dict': {
+            'id': 'AA1zKoAc',
+            'title': 'Watch: Earth sets and rises behind Moon in breathtaking Blue Ghost video',
+            'description': 'md5:0ad51cfa77e42e7f0c46cf98a619dbbf',
+            'uploader': 'India Today',
+            'uploader_id': 'AAyFWG',
+            'tags': 'count:11',
+            'timestamp': 1740485034,
+            'upload_date': '20250225',
+            'release_timestamp': 1740484875,
+            'release_date': '20250225',
+            'modified_timestamp': 1740488561,
+            'modified_date': '20250225',
+        },
+        'playlist_count': 1,
     }]
 
     def _real_extract(self, url):
-        locale, display_id, page_id = self._match_valid_url(url).groups()
-        items_list = []
-        try:
-            js = self._download_json(f'https://assets.msn.com/content/view/v2/Detail/{locale}/{page_id}', display_id)
-            if not js:
-                raise ExtractorError(f'download json failed: https://assets.msn.com/content/view/v2/Detail/{locale}/{page_id}')
-        except Exception as e:
-            if any(status in str(e) for status in ['410', '404']):
-                raise ExtractorError(f'this video is not available, {e}')
-            raise e
+        locale, display_id, page_id = self._match_valid_url(url).group('locale', 'display_id', 'id')
 
-        if isinstance(js, list):
-            items_list = js
-        else:
-            items_list.append(js)
+        json_data = self._download_json(
+            f'https://assets.msn.com/content/view/v2/Detail/{locale}/{page_id}', page_id)
 
-        entries = []
-        for index, item in enumerate(items_list):
-            if not item:
-                continue
-            provider_id = traverse_obj(item, ('provider', 'id', {str}), default='')
-            player_name = traverse_obj(item, ('provider', 'name', {str}), default='')
-            if player_name and provider_id:
-                entry = None
-                if player_name == 'AOL':
-                    if provider_id.startswith('http'):
-                        provider_id = self._search_regex(
-                            r'https?://delivery\.vidible\.tv/video/redirect/([0-9a-f]{24})',
-                            provider_id, 'vidible id')
-                    entry = self.url_result(
-                        'aol-video:' + provider_id, 'Aol', provider_id)
-                elif player_name == 'Dailymotion':
-                    entry = self.url_result(
-                        'https://www.dailymotion.com/video/' + provider_id,
-                        'Dailymotion', provider_id)
-                elif player_name == 'YouTube':
-                    entry = self.url_result(
-                        provider_id, 'Youtube', provider_id)
-                elif player_name == 'NBCSports':
-                    entry = self.url_result(
-                        'http://vplayer.nbcsports.com/p/BxmELC/nbcsports_embed/select/media/' + provider_id,
-                        'NBCSportsVPlayer', provider_id)
-                if entry:
-                    entries.append(entry)
-                    continue
+        common_metadata = traverse_obj(json_data, {
+            'title': ('title', {str}),
+            'description': (('abstract', ('body', {clean_html})), {str}, filter, any),
+            'timestamp': ('createdDateTime', {parse_iso8601}),
+            'release_timestamp': ('publishedDateTime', {parse_iso8601}),
+            'modified_timestamp': ('updatedDateTime', {parse_iso8601}),
+            'thumbnail': ('thumbnail', 'image', 'url', {url_or_none}),
+            'duration': ('videoMetadata', 'playTime', {int_or_none}),
+            'tags': ('keywords', ..., {str}),
+            'uploader': ('provider', 'name', {str}),
+            'uploader_id': ('provider', 'id', {str}),
+        })
 
-            title = item.get('title') or display_id
-            video_id = item.get('id') or f'{display_id}_{index}'
-            thumbnails = []
-            if traverse_obj(item, ('thumbnail', 'image', 'url'), default=None):
-                thumbnails = [{
-                    'width': traverse_obj(item, ('thumbnail', 'image', 'width'), default=None),
-                    'height': traverse_obj(item, ('thumbnail', 'image', 'height'), default=None),
-                    'url': traverse_obj(item, ('thumbnail', 'image', 'url'), default=None),
-                }]
-            if not thumbnails:
-                for image in traverse_obj(item, ('imageResources', {list}), default=[]):
-                    if image.get('url'):
-                        thumbnails.append({
-                            'width': image.get('width', None),
-                            'height': image.get('height', None),
-                            'url': image.get('url'),
-                            'preference': image.get('quality', None),
-                        })
-
+        page_type = json_data['type']
+        source_url = traverse_obj(json_data, ('sourceHref', {url_or_none}))
+        if page_type == 'video':
+            if traverse_obj(json_data, ('thirdPartyVideoPlayer', 'enabled')) and source_url:
+                return self.url_result(source_url)
             formats = []
-            for file_ in traverse_obj(item, ('videoMetadata', 'externalVideoFiles', {list}), default=[]):
-                format_url = file_.get('url')
-                if not format_url:
-                    continue
-                format_url_ext = determine_ext(format_url, 'm3u8')
-
-                if format_url_ext == 'm3u8':
-                    formats.extend(self._extract_m3u8_formats(
-                        format_url, display_id, 'mp4',
-                        m3u8_id='hls', fatal=False))
-                elif format_url_ext == 'mpd':
-                    formats.extend(self._extract_mpd_formats(
-                        format_url, display_id, 'dash', fatal=False))
-                elif format_url_ext == 'ism':
-                    if format_url.endswith('.ism'):
-                        format_url += '/manifest'
-                    formats.extend(self._extract_ism_formats(
-                        format_url, display_id, 'mss', fatal=False))
+            subtitles = {}
+            for file in traverse_obj(json_data, ('videoMetadata', 'externalVideoFiles', lambda _, v: url_or_none(v['url']))):
+                file_url = file['url']
+                ext = determine_ext(file_url)
+                if ext == 'm3u8':
+                    fmts, subs = self._extract_m3u8_formats_and_subtitles(
+                        file_url, page_id, 'mp4', m3u8_id='hls', fatal=False)
+                    formats.extend(fmts)
+                    self._merge_subtitles(subs, target=subtitles)
+                elif ext == 'mpd':
+                    fmts, subs = self._extract_mpd_formats_and_subtitles(
+                        file_url, page_id, mpd_id='dash', fatal=False)
+                    formats.extend(fmts)
+                    self._merge_subtitles(subs, target=subtitles)
                 else:
-                    format_id = file_.get('format', 'mp4')
-                    format_file_size = int_or_none(file_.get('fileSize'))
-                    video_format = {
-                        'url': format_url,
-                        'ext': format_url_ext,
-                        'format_id': format_id,
-                        'width': int_or_none(file_.get('width')),
-                        'height': int_or_none(file_.get('height')),
-                        'quality': 1 if format_id == '1001' else None,
-                    }
-                    if format_file_size:
-                        video_format['filesize'] = format_file_size
-                    formats.append(video_format)
-            if not formats:
-                sourceHref = item.get('sourceHref')
-                if sourceHref and determine_is_know_media_ext(sourceHref):
-                    formats.append({
-                        'url': sourceHref,
-                        'ext': determine_ext(sourceHref),
-                        'format_id': 'source_href',
-                    })
-            if not formats and thumbnails:
-                formats.append({
-                    'url': thumbnails[0].get('url'),
-                    'ext': 'jpg',
-                    'width': thumbnails[0].get('width'),
-                    'height': thumbnails[0].get('height'),
-                    'vcodec': 'jpg',
-                    'format_id': 'image',
-                    '_media_type': 'PHOTO',
+                    formats.append(
+                        traverse_obj(file, {
+                            'url': 'url',
+                            'format_id': ('format', {str}),
+                            'filesize': ('fileSize', {int_or_none}),
+                            'height': ('height', {int_or_none}),
+                            'width': ('width', {int_or_none}),
+                        }))
+            for caption in traverse_obj(json_data, ('videoMetadata', 'closedCaptions', lambda _, v: url_or_none(v['href']))):
+                lang = caption.get('locale') or 'en-us'
+                subtitles.setdefault(lang, []).append({
+                    'url': caption['href'],
+                    'ext': 'ttml',
                 })
 
-            entries.append({
-                'id': video_id,
-                'title': title,
-                'description': traverse_obj(item, ('abstract'), default=None),
-                'thumbnails': thumbnails,
-                'uploader_id': provider_id,
+            return {
+                'id': page_id,
+                'display_id': display_id,
                 'formats': formats,
-                'uploader': item.get('createdBy', None),
-            })
+                'subtitles': subtitles,
+                **common_metadata,
+            }
+        elif page_type == 'webcontent':
+            if not source_url:
+                raise ExtractorError('Could not find source URL')
+            return self.url_result(source_url)
+        elif page_type == 'article':
+            entries = []
+            for embed_url in traverse_obj(json_data, ('socialEmbeds', ..., 'postUrl', {url_or_none})):
+                entries.append(self.url_result(embed_url))
 
-        if not entries:
-            webpage = self._download_webpage(url, display_id)
-            error = unescapeHTML(self._search_regex(
-                r'data-error=(["\'])(?P<error>.+?)\1',
-                webpage, 'error', group='error'))
-            raise ExtractorError(f'{self.IE_NAME} said: {error}', expected=True)
+            return self.playlist_result(entries, page_id, **common_metadata)
 
-        if len(entries) == 1:
-            return entries[0]
-        return self.playlist_result(entries, page_id)
+        raise ExtractorError(f'Unsupported page type: {page_type}')

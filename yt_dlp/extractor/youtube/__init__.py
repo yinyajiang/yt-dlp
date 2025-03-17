@@ -19,8 +19,6 @@ from ._redirect import (
 from ._search import YoutubeMusicSearchURLIE, YoutubeSearchDateIE, YoutubeSearchIE, YoutubeSearchURLIE
 from ._tab import YoutubePlaylistIE, YoutubeTabBaseInfoExtractor, YoutubeTabIE
 from ._video import YoutubeIE
-from ..potoken import gen_po_token_run_params
-from ..third_api.youtube_rapidapi import YoutubeRapidApi
 
 # Hack to allow plugin overrides work
 for _cls in [

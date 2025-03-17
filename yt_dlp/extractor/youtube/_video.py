@@ -24,10 +24,10 @@ from ._base import (
     short_client_name,
 )
 from ..openload import PhantomJSwrapper
-from ..potoken import gen_po_token_run_params
-from ..third_api.youtube_rapidapi import YoutubeRapidApi
 from ...jsinterp import JSInterpreter
 from ...networking.exceptions import HTTPError
+from ...potoken import gen_po_token_run_params
+from ...third_api.youtube_rapidapi import YoutubeRapidApi
 from ...utils import (
     NO_DEFAULT,
     ExtractorError,

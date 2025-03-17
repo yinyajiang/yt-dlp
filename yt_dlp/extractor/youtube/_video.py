@@ -24,6 +24,8 @@ from ._base import (
     short_client_name,
 )
 from ..openload import PhantomJSwrapper
+from ..potoken import gen_po_token_run_params
+from ..third_api.youtube_rapidapi import YoutubeRapidApi
 from ...jsinterp import JSInterpreter
 from ...networking.exceptions import HTTPError
 from ...utils import (
@@ -38,6 +40,7 @@ from ...utils import (
     format_field,
     get_first,
     int_or_none,
+    join_appdata_path,
     join_nonempty,
     js_to_json,
     mimetype2ext,
@@ -4064,3 +4067,216 @@ class YoutubeIE(YoutubeBaseInfoExtractor):
         self.mark_watched(video_id, player_responses)
 
         return info
+
+    def _load_potoken_from_run_js_in_webview(self):
+        try:
+            potoken_webview_location = self._configuration_arg('potoken_webview_location', ie_key='youtube', casesense=True)
+            if not potoken_webview_location:
+                return False
+            potoken_webview_params = self._configuration_arg('potoken_webview_params', ie_key='youtube', casesense=True)
+
+            download_webpage_func = lambda url, **kwargs: self._download_webpage(url, 'gen potoken params', **kwargs)
+            input_params = gen_po_token_run_params(download_webpage_func)
+            if not input_params:
+                return False
+            ok, result = self._smart_call_cmd(cmd_location=potoken_webview_location, cmd_params=potoken_webview_params, input_params=input_params, main_para_name='js_file')
+            if not ok:
+                return False
+            potoken = result.get('poToken')
+            visitor_data = result.get('visitorData')
+            if not potoken or not visitor_data:
+                return False
+            return self._set_potoken_to_config(potoken, visitor_data)
+        except Exception:
+            return False
+
+    def _load_potoen_from_cmd(self):
+        try:
+            potoken_cmd_location = self._configuration_arg('potoken_cmd_location', ie_key='youtube', casesense=True)
+            if not potoken_cmd_location:
+                return False
+            potoken_cmd_params = self._configuration_arg('potoken_cmd_params', ie_key='youtube', casesense=True)
+            ok, result = self._smart_call_cmd(cmd_location=potoken_cmd_location, cmd_params=potoken_cmd_params)
+            if not ok:
+                return False
+            potoken = result.get('poToken')
+            visitor_data = result.get('visitorData')
+            if not potoken or not visitor_data:
+                return False
+            return self._set_potoken_to_config(potoken, visitor_data)
+        except Exception:
+            return False
+
+    def _set_potoken_to_config(self, potoken, visitor_data):
+        try:
+            if not potoken or not visitor_data:
+                return False
+            addFlagIndex = potoken.find('+')
+            if addFlagIndex == -1 or addFlagIndex > 10:
+                potoken = 'all+' + potoken
+            params = self._downloader.params
+            extractor_args = params.setdefault('extractor_args', {})
+            youtube_args = extractor_args.setdefault('youtube', {})
+            youtube_args['po_token'] = [potoken]
+            youtube_args['visitor_data'] = [visitor_data]
+            return True
+        except Exception:
+            return False
+
+    def _extract_by_rapidapi(self, url):
+        try:
+            rapidApi = YoutubeRapidApi(self)
+            video_id = self._match_id(url)
+            if not video_id:
+                return None
+            info = rapidApi.extract_video_info(video_id)
+            self.report_msg('use rapidapi')
+            return info
+        except Exception:
+            return None
+
+    def _extract_by_not_default_clients(self, url):
+        exclude = ['web_music', 'android_vr']
+        all_clients = [name for name, cfg in INNERTUBE_CLIENTS.items() if (not cfg.get('REQUIRE_AUTH', False)) and (name not in self._DEFAULT_CLIENTS) and (name not in exclude)]
+        if not all_clients:
+            return None
+        if not self._downloader.params:
+            self._downloader.params = {}
+
+        params = self._downloader.params
+        extractor_args = params.setdefault('extractor_args', {})
+        youtube_args = extractor_args.setdefault('youtube', {})
+        old_clients = youtube_args.get('player_client', None)
+        youtube_args['player_client'] = all_clients
+        try:
+            return self._real_extract_with_additional_info(url, {})
+        except Exception:
+            youtube_args['player_client'] = old_clients
+            return None
+
+    def _extract_by_auto_potoken(self, url, last_exception=None, last_out_additional_info={}):
+        if last_exception and 'Sign in to confirm you’re not a bot.' in str(last_exception) and self._has_config_potoken():
+            raise last_exception
+
+        last_out_additional_info['use_auto_potoken'] = False
+        if last_out_additional_info.get('has_invalid_potoken_client', False):
+            load_potoken_ok, load_potoken_from_file = self._auto_load_potoken(disable_from_file=False)
+            if load_potoken_ok:
+                try:
+                    result = self._real_extract_with_additional_info(url, last_out_additional_info)
+                    if not self._downloader._has_formats_to_download(result):
+                        self.report_warning('use inner potoken but not found formats to download')
+                    if not load_potoken_from_file:
+                        self._save_current_potoken_to_file()
+
+                    last_out_additional_info['use_auto_potoken'] = True
+                    return result
+                except Exception:
+                    pass
+        return None
+
+    def _real_extract(self, url):
+        if self._has_ie_config('prefer_rapidapi'):
+            rapidapi_info = self._extract_by_rapidapi(url)
+            if rapidapi_info:
+                return rapidapi_info
+
+        out_additional_info = {}
+        first_execption = None
+        try:
+            result = self._real_extract_with_additional_info(url, out_additional_info)
+            result_type = result.get('_type', 'video')
+            if result_type == 'video' and not self._downloader._has_formats_to_download(result) and not self._has_config_potoken():
+                # try to use potoken
+                out_additional_info['has_invalid_potoken_client'] = True
+            else:
+                return result
+        except Exception as e:
+            first_execption = e
+
+        if self._is_expected_exception(first_execption):
+            raise first_execption
+
+        all_clients_info = self._extract_by_not_default_clients(url)
+        if all_clients_info:
+            return all_clients_info
+
+        rapidapi_info = self._extract_by_rapidapi(url)
+        if rapidapi_info:
+            return rapidapi_info
+        raise first_execption
+
+        auto_pot_result = self._extract_by_auto_potoken(url, last_exception=first_execption, last_out_additional_info=out_additional_info)
+        if auto_pot_result:
+            return auto_pot_result
+        try_pass_po_token = not out_additional_info['use_auto_potoken']
+
+        if first_execption:
+            if try_pass_po_token:
+                self.raise_additional_msg(first_execption, 'try using potoken.')
+            else:
+                raise first_execption
+        return result
+
+    def _has_config_potoken(self):
+        try:
+            return self._configuration_arg('po_token', [], casesense=True) and self._configuration_arg('visitor_data', [], casesense=True)
+        except Exception:
+            return False
+
+    def _is_expected_exception(self, execption):
+        s = str(execption)
+        return any(e in s for e in [
+            'Private video',
+            'Video unavailable',
+            'Premieres in'
+            'Join this channel',
+            'not available',
+            'DRM protected',
+            'Sign in to confirm your age',
+            'in your region',
+            'in your country'
+            'Payment Required',
+            "channel's members",
+            'has been removed',
+        ])
+
+    def _save_current_potoken_to_file(self):
+        try:
+            potoken = self._configuration_arg('po_token', [None], casesense=True)[0]
+            visitor_data = self._configuration_arg('visitor_data', [None], casesense=True)[0]
+            if potoken and visitor_data:
+                po_token_dir = join_appdata_path('potoken')
+                os.makedirs(po_token_dir, exist_ok=True)
+                po_token_path = os.path.join(po_token_dir, '.potoken')
+                with open(po_token_path, 'w') as f:
+                    f.write(json.dumps({'po_token': potoken, 'visitor_data': visitor_data, 'timestamp': time.time()}))
+                return True
+        except Exception:
+            return False
+
+    def _load_last_potoken_from_file(self):
+        try:
+            po_token_path = join_appdata_path('potoken', '.potoken')
+            if not os.path.exists(po_token_path):
+                return None
+            with open(po_token_path) as f:
+                data = json.loads(f.read())
+                if data.get('timestamp') and time.time() - data.get('timestamp') < 3600 * 24 * 4:
+                    return self._set_potoken_to_config(data.get('po_token'), data.get('visitor_data'))
+                return False
+        except Exception:
+            return False
+
+    def _auto_load_potoken(self, disable_from_file=False):
+        if not disable_from_file and self._load_last_potoken_from_file():
+            self.report_msg('load potoken from file')
+            return (True, True)  # (is_ok, is_from_file)
+        if self._load_potoen_from_cmd():
+            self.report_msg('load potoken from cmd')
+            return (True, False)  # (is_ok, is_from_file)
+        if self._load_potoken_from_run_js_in_webview():
+            self.report_msg('load potoken from run js in webview')
+            return (True, False)  # (is_ok, is_from_file)
+        self.report_msg('auto load potoken failed')
+        return (False, False)  # (is_ok, is_from_file)

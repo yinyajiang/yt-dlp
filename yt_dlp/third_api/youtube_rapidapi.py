@@ -98,14 +98,28 @@ class YoutubeRapidApi:
         return ytb_info
 
     def _get_video_info(self, video_id):
+
+        def _random_sleep():
+            random_sleep = random.randint(0, 1000) / 1000.0
+            time.sleep(random_sleep)
+
+        later_count = 0
         for _ in range(500):
             try:
                 return self.__get_video_info(video_id)
             except Exception as e:
-                if 'per second' not in str(e).lower():
+                msg = str(e).lower()
+                if 'please try again later' in msg:
+                    later_count += 1
+                    if later_count > 10:
+                        raise e
+                    else:
+                        _random_sleep()
+                        continue
+
+                if 'per second' not in msg:
                     raise e
-                random_sleep = random.randint(0, 1000) / 1000.0
-                time.sleep(random_sleep)
+                _random_sleep()
 
     def __get_video_info(self, video_id):
         download_json = lambda url, **kwargs: self._ie._download_json(url, video_id, **kwargs)

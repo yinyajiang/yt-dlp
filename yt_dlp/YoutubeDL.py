@@ -3543,7 +3543,7 @@ class YoutubeDL:
                             info_dict['__real_download'] = info_dict['__real_download'] or real_download
                             success = success and partial_success
 
-                    if downloaded and merger.available and (not self.params.get('allow_unplayable_formats') or info_dict.get('__will_decrypt')):
+                    if downloaded and merger.available and (len(downloaded) == 2 or not self.params.get('allow_unplayable_formats') or info_dict.get('__will_decrypt')):
                         info_dict['__postprocessors'].append(merger)
                         info_dict['__files_to_merge'] = downloaded
                         # Even if there were no downloads, it is being merged only now

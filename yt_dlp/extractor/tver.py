@@ -1,32 +1,23 @@
-import datetime as dt
-import json
-import re
-import urllib.parse
-
-from .common import InfoExtractor
-from ..networking.exceptions import HTTPError
+from .streaks import StreaksBaseIE
 from ..utils import (
     ExtractorError,
-    float_or_none,
     int_or_none,
     join_nonempty,
-    mimetype2ext,
-    parse_iso8601,
-    qualities,
+    make_archive_id,
     smuggle_url,
     str_or_none,
     strip_or_none,
     update_url_query,
-    url_or_none,
 )
 from ..utils.traversal import require, traverse_obj
 
 
-class TVerIE(InfoExtractor):
+class TVerIE(StreaksBaseIE):
     _VALID_URL = r'https?://(?:www\.)?tver\.jp/(?:(?P<type>lp|corner|series|episodes?|feature)/)+(?P<id>[a-zA-Z0-9]+)'
     _GEO_COUNTRIES = ['JP']
     _GEO_BYPASS = False
     _TESTS = [{
+        # via Streaks backend
         'url': 'https://tver.jp/episodes/epc1hdugbk',
         'info_dict': {
             'id': 'epc1hdugbk',
@@ -35,20 +26,45 @@ class TVerIE(InfoExtractor):
             'title': '神回だけ見せます！ #2 壮烈！車大騎馬戦（木曜スペシャル）',
             'alt_title': '神回だけ見せます！ #2 壮烈！車大騎馬戦（木曜スペシャル） 日テレ',
             'description': 'md5:2726f742d5e3886edeaf72fb6d740fef',
-            'uploader_id': '0b69bd13d7a949f2a7420e982444f138',
+            'uploader_id': 'tver-ntv',
             'channel': '日テレ',
-            'channel_id': 'tver-ntv',
             'duration': 1158.024,
             'thumbnail': 'https://statics.tver.jp/images/content/thumbnail/episode/xlarge/epc1hdugbk.jpg?v=16',
             'series': '神回だけ見せます！',
             'episode': '#2 壮烈！車大騎馬戦（木曜スペシャル）',
             'episode_number': 2,
-            'timestamp': 1651453200,
-            'upload_date': '20220502',
+            'timestamp': 1736486036,
+            'upload_date': '20250110',
             'modified_timestamp': 1736870264,
             'modified_date': '20250114',
             'live_status': 'not_live',
+            'release_timestamp': 1651453200,
+            'release_date': '20220502',
+            '_old_archive_ids': ['brightcovenew ref:baeebeac-a2a6-4dbf-9eb3-c40d59b40068'],
         },
+    }, {
+        # via Brightcove backend (deprecated)
+        'url': 'https://tver.jp/episodes/epc1hdugbk',
+        'info_dict': {
+            'id': 'ref:baeebeac-a2a6-4dbf-9eb3-c40d59b40068',
+            'ext': 'mp4',
+            'title': '神回だけ見せます！ #2 壮烈！車大騎馬戦（木曜スペシャル）',
+            'alt_title': '神回だけ見せます！ #2 壮烈！車大騎馬戦（木曜スペシャル） 日テレ',
+            'description': 'md5:2726f742d5e3886edeaf72fb6d740fef',
+            'uploader_id': '4394098882001',
+            'channel': '日テレ',
+            'duration': 1158.101,
+            'thumbnail': 'https://statics.tver.jp/images/content/thumbnail/episode/xlarge/epc1hdugbk.jpg?v=16',
+            'tags': [],
+            'series': '神回だけ見せます！',
+            'episode': '#2 壮烈！車大騎馬戦（木曜スペシャル）',
+            'episode_number': 2,
+            'timestamp': 1651388531,
+            'upload_date': '20220501',
+            'release_timestamp': 1651453200,
+            'release_date': '20220502',
+        },
+        'params': {'extractor_args': {'tver': {'backend': ['brightcove']}}},
     }, {
         'url': 'https://tver.jp/corner/f0103888',
         'only_matching': True,
@@ -176,186 +192,43 @@ class TVerIE(InfoExtractor):
             'thumbnails': thumbnails,
             **traverse_obj(video_info, {
                 'description': ('description', {str}),
-                'timestamp': ('viewStatus', 'startAt', {int_or_none}),
+                'release_timestamp': ('viewStatus', 'startAt', {int_or_none}),
                 'episode_number': ('no', {int_or_none}),
             }),
         }
 
-        if onair_label:
-            metadata.update(self._format_broadcast_date(onair_label))
+        brightcove_id = traverse_obj(video_info, ('video', ('videoRefID', 'videoID'), {str}, any))
+        if brightcove_id and not brightcove_id.isdecimal():
+            brightcove_id = f'ref:{brightcove_id}'
 
-        if backend == 'brightcove':
-            p_id = video_info['video']['accountID']
-            r_id = traverse_obj(video_info, (
-                'video', ('videoRefID', 'videoID'), {str}, any, {require('reference ID')}))
-            if not r_id.isdecimal():
-                r_id = f'ref:{r_id}'
+        streaks_id = traverse_obj(video_info, ('streaks', 'videoRefID', {str}))
+        if streaks_id and not streaks_id.startswith('ref:'):
+            streaks_id = f'ref:{streaks_id}'
 
+        # Deprecated Brightcove extraction reachable w/extractor-arg or fallback; errors are expected
+        if backend == 'brightcove' or not streaks_id:
+            if backend != 'brightcove':
+                self.report_warning(
+                    'No STREAKS ID found; falling back to Brightcove extraction', video_id=video_id)
+            if not brightcove_id:
+                raise ExtractorError('Unable to extract brightcove reference ID', expected=True)
+            account_id = traverse_obj(video_info, (
+                'video', 'accountID', {str}, {require('brightcove account ID', expected=True)}))
             return {
                 **metadata,
                 '_type': 'url_transparent',
                 'url': smuggle_url(
-                    self.BRIGHTCOVE_URL_TEMPLATE % (p_id, r_id),
+                    self.BRIGHTCOVE_URL_TEMPLATE % (account_id, brightcove_id),
                     {'geo_countries': ['JP']}),
                 'ie_key': 'BrightcoveNew',
             }
 
-        ref_id = video_info['streaks']['videoRefID']
-        if not ref_id.startswith('ref:'):
-            ref_id = f'ref:{ref_id}'
-
         return {
-            **self._extract_from_streaks_api(video_info['streaks']['projectID'], ref_id, {
+            **self._extract_from_streaks_api(video_info['streaks']['projectID'], streaks_id, {
                 'Origin': 'https://tver.jp',
                 'Referer': 'https://tver.jp/',
             }),
             **metadata,
             'id': video_id,
-        }
-
-    def _format_broadcast_date(self, onair_label):
-        """
-        Extracts the broadcast date from the onair label
-
-        Truth to be said, we cannot be sure or guarantee that the broadcast date is correct
-        as TVer doesn't really have consistent date format for the broadcast date.
-        At best we can only assume the following:
-        - If there is only year, this mean the broadcast is old.
-        - If there is only month and day, this mean the broadcast is recent within the current year or the previous year.
-
-        :param onair_label: The onair label string
-        :return: A dictionary containing the formatted broadcast date or an empty dictionary if the date is not found
-
-        """
-        if not onair_label:
-            return {}
-
-        mobj = re.search(
-            r'(?:(?P<year>\d{4})年)|(?:(?P<month>\d{1,2})\D(?P<day>\d{1,2})\D)', onair_label)
-        if not mobj:
-            return {}
-        broadcast_date_info = mobj.groupdict()
-
-        data = {
-            'release_year': int_or_none(broadcast_date_info.get('year')),
-        }
-        day, month = (int_or_none(broadcast_date_info.get(key)) for key in ('day', 'month'))
-        if day and month:
-            year = data.get('release_year') or dt.datetime.now().year
-            dt_ = dt.datetime.strptime(f'{year}-{month}-{day}', '%Y-%m-%d')
-            # If the date is in the future, it means the broadcast date is in the previous year
-            # Ref: https://github.com/yt-dlp/yt-dlp/pull/12282#issuecomment-2678132806
-            if dt_ > dt.datetime.now():
-                year -= 1
-            data['release_timestamp'] = dt.datetime(year=year, month=month, day=day).timestamp()
-
-        return data
-
-    # XXX: Remove everything below and subclass TVerIE from StreaksBaseIE when #12679 is merged
-    _API_URL_TEMPLATE = 'https://{}.api.streaks.jp/v1/projects/{}/medias/{}{}'
-
-    def _extract_from_streaks_api(self, project_id, media_id, headers=None, query=None, ssai=False):
-        try:
-            response = self._download_json(
-                self._API_URL_TEMPLATE.format('playback', project_id, media_id, ''),
-                media_id, 'Downloading streaks playback API JSON',
-                headers={
-                    'Accept': 'application/json',
-                    'Origin': 'https://players.streaks.jp',
-                    **self.geo_verification_headers(),
-                    **(headers or {}),
-                })
-        except ExtractorError as e:
-            if isinstance(e.cause, HTTPError) and e.cause.status in {403, 404}:
-                error = self._parse_json(e.cause.response.read().decode(), media_id, fatal=False)
-                message = traverse_obj(error, ('message', {str}))
-                code = traverse_obj(error, ('code', {str}))
-                if code == 'REQUEST_FAILED':
-                    self.raise_geo_restricted(message, countries=self._GEO_COUNTRIES)
-                elif code == 'MEDIA_NOT_FOUND':
-                    raise ExtractorError(message, expected=True)
-                elif code or message:
-                    raise ExtractorError(join_nonempty(code, message, delim=': '))
-            raise
-
-        streaks_id = response['id']
-        live_status = {
-            'clip': 'was_live',
-            'file': 'not_live',
-            'linear': 'is_live',
-            'live': 'is_live',
-        }.get(response.get('type'))
-
-        audio_quality_func = qualities(('1', '0'))
-        formats, subtitles = [], {}
-        drm_formats = False
-
-        for source in traverse_obj(response, ('sources', lambda _, v: v['src'])):
-            if source.get('key_systems'):
-                drm_formats = True
-                continue
-
-            src_url = source['src']
-            is_live = live_status == 'is_live'
-            ext = mimetype2ext(source.get('type'))
-
-            if ext == 'm3u8':
-                if is_live and ssai:
-                    session_params = traverse_obj(
-                        self._download_json(
-                            self._API_URL_TEMPLATE.format('ssai', project_id, streaks_id, '/ssai/session'),
-                            media_id, 'Downloading session parameters',
-                            headers={'Content-Type': 'application/json'},  # XXX: geo_verification_headers ?
-                            data=json.dumps({'id': source['id']}).encode()),
-                        (0, 'query', {urllib.parse.parse_qs}))
-                    src_url = update_url_query(src_url, session_params)
-
-                fmts, subs = self._extract_m3u8_formats_and_subtitles(
-                    src_url, media_id, 'mp4', m3u8_id='hls',
-                    fatal=False, live=is_live, query=query)
-
-                for fmt in traverse_obj(fmts, lambda _, v: v['vcodec'] == 'none'):
-                    if mobj := re.match(r'hls-[a-z]+_AUDIO-(?P<quality>\d)_\d+-', fmt['format_id']):
-                        fmt['quality'] = audio_quality_func(mobj.group('quality'))
-
-            elif ext == 'mpd':
-                fmts, subs = self._extract_mpd_formats_and_subtitles(
-                    src_url, media_id, mpd_id='dash', fatal=False)
-
-            else:
-                self.report_warning(f'Unsupported stream type: {ext}')
-                continue
-
-            formats.extend(fmts)
-            self._merge_subtitles(subs, target=subtitles)
-
-        if not formats and drm_formats:
-            self.report_drm(media_id)
-
-        self._remove_duplicate_formats(formats)
-
-        for subs in traverse_obj(response, (
-            'tracks', lambda _, v: v['kind'] in ('subtitles', 'captions') and url_or_none(v['src']),
-        )):
-            lang = traverse_obj(subs, ('srclang', {str.lower})) or 'ja'
-            subtitles.setdefault(lang, []).append({'url': subs['src']})
-
-        return {
-            'id': streaks_id,
-            'display_id': media_id,
-            'channel_id': project_id,
-            'formats': formats,
-            'subtitles': subtitles,
-            'live_status': live_status,
-            **traverse_obj(response, {
-                'channel_id': ('project_id', {str}),
-                'uploader_id': ('profile', {str}),
-                'title': ('name', {str}),
-                'description': ('description', {str}, filter),
-                'duration': ('duration', {float_or_none}),
-                'tags': ('tags', ..., {str}),
-                'thumbnails': (('poster', 'thumbnail'), 'src', {'url': {url_or_none}}),
-                'timestamp': ('created_at', {parse_iso8601}),
-                'modified_timestamp': ('updated_at', {parse_iso8601}),
-            }),
+            '_old_archive_ids': [make_archive_id('BrightcoveNew', brightcove_id)] if brightcove_id else None,
         }

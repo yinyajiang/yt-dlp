@@ -573,6 +573,8 @@ class FacebookIE(InfoExtractor):
                 formats.extend(self._parse_mpd_formats(
                     compat_etree_fromstring(urllib.parse.unquote_plus(dash_manifest)),
                     mpd_url=url_or_none(vid_data.get('dash_manifest_url')) or mpd_url))
+                for f in formats:
+                    f['_can_itsoffset'] = True
 
         def process_formats(info):
             # Downloads with browser's User-Agent are rate limited. Working around

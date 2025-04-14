@@ -195,7 +195,7 @@ def _catch_unsafe_extension_error(func):
 
 def _is_unsafe_ext(ext):
     ext = ext.lower()
-    return ext and ext not in _UnsafeExtensionError.ALLOWED_EXTENSIONS
+    return ext and (not ext.startswith('unknown')) and (ext not in _UnsafeExtensionError.ALLOWED_EXTENSIONS)
 
 
 class YoutubeDL:

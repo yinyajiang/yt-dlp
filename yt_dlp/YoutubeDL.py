@@ -2940,7 +2940,9 @@ class YoutubeDL:
         # remove invalid formats(ext)
         if any(fmt.get('ext') and _is_unsafe_ext(fmt.get('ext')) for fmt in formats):
             self.report_warning('Found invalid format(ext) in info_dict, removing it')
-            formats = [fmt for fmt in formats if not _is_unsafe_ext(fmt.get('ext'))]
+            safe_formats = [fmt for fmt in formats if not _is_unsafe_ext(fmt.get('ext'))]
+            if safe_formats:
+                formats = safe_formats
 
         # Safeguard against old/insecure infojson when using --load-info-json
         if info_dict.get('http_headers'):

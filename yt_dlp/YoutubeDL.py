@@ -193,6 +193,11 @@ def _catch_unsafe_extension_error(func):
     return wrapper
 
 
+def _is_unsafe_ext(ext):
+    ext = ext.lower()
+    return ext and ext not in _UnsafeExtensionError.ALLOWED_EXTENSIONS
+
+
 class YoutubeDL:
     """YoutubeDL class.
 
@@ -2931,6 +2936,11 @@ class YoutubeDL:
                     and not fmt.get('filesize') and not fmt.get('filesize_approx')):
                 fmt['filesize_approx'] = filesize_from_tbr(fmt.get('tbr'), info_dict.get('duration'))
             fmt['http_headers'] = self._calc_headers(collections.ChainMap(fmt, info_dict), load_cookies=True)
+
+        # remove invalid formats(ext)
+        if any(fmt.get('ext') and _is_unsafe_ext(fmt.get('ext')) for fmt in formats):
+            self.report_warning('Found invalid format(ext) in info_dict, removing it')
+            formats = [fmt for fmt in formats if not _is_unsafe_ext(fmt.get('ext'))]
 
         # Safeguard against old/insecure infojson when using --load-info-json
         if info_dict.get('http_headers'):

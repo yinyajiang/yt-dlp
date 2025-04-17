@@ -2641,6 +2641,7 @@ from .xumo import XumoIE
 from .xvideos import (
     XVideosIE,
     XVideosQuickiesIE,
+    XVideosUserIE,
 )
 from .xxxymovies import XXXYMoviesIE
 from .yahoo import (

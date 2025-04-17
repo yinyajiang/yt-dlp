@@ -2937,9 +2937,9 @@ class YoutubeDL:
                 fmt['filesize_approx'] = filesize_from_tbr(fmt.get('tbr'), info_dict.get('duration'))
             fmt['http_headers'] = self._calc_headers(collections.ChainMap(fmt, info_dict), load_cookies=True)
 
-        # remove invalid formats(ext)
+        # remove unsafe formats(ext)
         if any(fmt.get('ext') and _is_unsafe_ext(fmt.get('ext')) for fmt in formats):
-            self.report_warning('Found invalid format(ext) in info_dict, removing it')
+            self.report_warning('Found unsafe format(ext) in info_dict, removing it')
             safe_formats = [fmt for fmt in formats if not _is_unsafe_ext(fmt.get('ext'))]
             if safe_formats:
                 formats = safe_formats

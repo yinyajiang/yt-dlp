@@ -1207,6 +1207,7 @@ from .megatvcom import (
     MegaTVComEmbedIE,
     MegaTVComIE,
 )
+from .giniko import GinikoIE
 from .meipai import MeipaiIE
 from .melonvod import MelonVODIE
 from .mercadolibre import MercadoLibreIE

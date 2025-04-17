@@ -2104,8 +2104,8 @@ from .storyfire import (
 from .streaks import StreaksIE
 from .streamable import StreamableIE
 from .streamcz import StreamCZIE
-from .streamsb import StreamsbIE
 from .streamff import StreamffIE
+from .streamsb import StreamsbIE
 from .streetvoice import StreetVoiceIE
 from .stretchinternet import StretchInternetIE
 from .stripchat import StripchatIE

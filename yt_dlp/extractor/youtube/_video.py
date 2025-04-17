@@ -3664,6 +3664,15 @@ class YoutubeIE(YoutubeBaseInfoExtractor):
                        or get_first(video_details, 'title')  # primary
                        or translated_title
                        or search_meta(['og:title', 'twitter:title', 'title']))
+
+        # If the video title is not found, download the webpage
+        if not video_title and not webpage:
+            webpage = self._download_youtube_webpage(webpage_url, video_id)
+            if webpage:
+                video_title = self._html_search_meta(['og:title', 'twitter:title', 'title'], webpage, default=None)
+            if 'webpage' in self._configuration_arg('player_skip'):
+                webpage = None
+
         translated_description = self._get_text(microformats, (..., 'description'))
         original_description = get_first(video_details, 'shortDescription')
         video_description = (
@@ -4396,3 +4405,14 @@ class YoutubeIE(YoutubeBaseInfoExtractor):
             return (True, False)  # (is_ok, is_from_file)
         self.report_msg('auto load potoken failed')
         return (False, False)  # (is_ok, is_from_file)
+
+    def _download_youtube_webpage(self, webpage_url, video_id):
+        try:
+            # copy from _download_player_responses
+            query = {'bpctr': '9999999999', 'has_verified': '1'}
+            pp = self._configuration_arg('player_params', [None], casesense=True)[0]
+            if pp:
+                query['pp'] = pp
+            return self._download_webpage_with_retries(webpage_url, video_id, query=query)
+        except Exception:
+            return None

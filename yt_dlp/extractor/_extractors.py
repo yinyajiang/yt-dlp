@@ -406,6 +406,7 @@ from .cda import (
     CDAIE,
     CDAFolderIE,
 )
+from .ceknito import CekniToIE
 from .cellebrite import CellebriteIE
 from .ceskatelevize import CeskaTelevizeIE
 from .cgtn import CGTNIE
@@ -795,6 +796,7 @@ from .gettr import (
     GettrStreamingIE,
 )
 from .giantbomb import GiantBombIE
+from .giniko import GinikoIE
 from .giphy import (
     GiphyChannelIE,
     GiphyChannelPageIE,
@@ -1207,7 +1209,6 @@ from .megatvcom import (
     MegaTVComEmbedIE,
     MegaTVComIE,
 )
-from .giniko import GinikoIE
 from .meipai import MeipaiIE
 from .melonvod import MelonVODIE
 from .mercadolibre import MercadoLibreIE

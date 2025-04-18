@@ -3666,10 +3666,9 @@ class YoutubeIE(YoutubeBaseInfoExtractor):
                        or search_meta(['og:title', 'twitter:title', 'title']))
 
         # If the video title is not found, download the webpage
+        download_title_note = 'Video title not found, downloading webpage'
         if not video_title and not webpage:
-            webpage = self._download_youtube_webpage(webpage_url, video_id)
-            if webpage:
-                video_title = self._html_search_meta(['og:title', 'twitter:title', 'title'], webpage, default=None)
+            webpage, video_title = self._download_youtube_webpage_and_get_title(webpage_url, video_id, download_title_note)
             if 'webpage' in self._configuration_arg('player_skip'):
                 webpage = None
 
@@ -4191,6 +4190,12 @@ class YoutubeIE(YoutubeBaseInfoExtractor):
 
         self.mark_watched(video_id, player_responses)
 
+        # If the video title is not found, download the webpage
+        if info.get('title') and not webpage:
+            _, video_title = self._download_youtube_webpage_and_get_title(webpage_url, video_id, download_title_note)
+            if video_title:
+                info['title'] = video_title
+
         return info
 
     def _load_potoken_from_run_js_in_webview(self):
@@ -4416,3 +4421,13 @@ class YoutubeIE(YoutubeBaseInfoExtractor):
             return self._download_webpage_with_retries(webpage_url, video_id, query=query)
         except Exception:
             return None
+
+    def _download_youtube_webpage_and_get_title(self, webpage_url, video_id, note=None):
+        if note:
+            self.report_msg(f'{video_id}: {note}')
+
+        video_title = None
+        webpage = self._download_youtube_webpage(webpage_url, video_id)
+        if webpage:
+            video_title = self._html_search_meta(['og:title', 'twitter:title', 'title'], webpage, default=None)
+        return webpage, video_title

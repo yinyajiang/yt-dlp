@@ -3556,7 +3556,7 @@ class YoutubeIE(YoutubeBaseInfoExtractor):
             if invalid_client:
                 self.report_warning(f'Invalid youtube clients: {", ".join(invalid_client)}')
             if valid_client:
-                self.to_screen(f'Valid youtube clients: {", ".join(valid_client)}')
+                self.report_msg(f'Valid youtube clients: {", ".join(valid_client)}')
         except Exception:
             pass
 

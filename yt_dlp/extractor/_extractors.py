@@ -1970,6 +1970,11 @@ from .shahid import (
 from .sharepoint import SharePointIE
 from .sharevideos import ShareVideosEmbedIE
 from .shemaroome import ShemarooMeIE
+from .shouttv import (
+    ShoutTVIE,
+    ShoutTVSeasonIE,
+    ShoutTVSeriesIE,
+)
 from .showroomlive import ShowRoomLiveIE
 from .showuptv import ShowupTvIE
 from .sibnet import SibnetEmbedIE

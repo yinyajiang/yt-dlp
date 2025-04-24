@@ -2929,7 +2929,10 @@ class GenericIE(InfoExtractor):
 
         # if the url is a home url and there is a suitable ie, raise the first exception
         if not force_use_webview and is_home_url(url) and self._is_known_site(url):
-            raise first_exception
+            if first_exception:
+                raise first_exception
+            else:
+                raise ExtractorError('home url is not supported.')
 
         used_webview, playable_info = self._get_playable_info_by_webview(url)
         if playable_info:
@@ -3048,7 +3051,7 @@ class GenericIE(InfoExtractor):
     def _is_known_site(self, url):
         try:
             parsed_url = urllib.parse.urlparse(url)
-            return parsed_url.netloc.lower() in {
+            return parsed_url.netloc.lower().replace('www.', '') in {
                 'x.com',
                 'twitter.com',
                 'instagram.com',

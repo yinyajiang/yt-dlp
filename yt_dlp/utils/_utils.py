@@ -941,6 +941,8 @@ def formatSeconds(secs, delim=':', msec=False):
 
 
 def bug_reports_message(before=';'):
+    if before and before == ';':
+        return ''
     from ..update import REPOSITORY
 
     msg = (f'please report this issue on  https://github.com/{REPOSITORY}/issues?q= , '

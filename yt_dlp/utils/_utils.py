@@ -5938,6 +5938,14 @@ def join_appdata_path(*paths):
     return os.path.join(appdata_dir, pkg_name, *paths)
 
 
+def is_home_url(url):
+    try:
+        parsed_url = urllib.parse.urlparse(url)
+        return parsed_url.path == '/' or parsed_url.path == ''
+    except Exception:
+        return False
+
+
 class _ProgressState(enum.Enum):
     """
     Represents a state for a progress bar.

@@ -24,6 +24,7 @@ from ..utils import (
     filter_dict,
     format_field,
     int_or_none,
+    is_home_url,
     is_html,
     js_to_json,
     merge_dicts,
@@ -2925,6 +2926,11 @@ class GenericIE(InfoExtractor):
                 if 'is not a valid url' in str(e).lower():
                     raise e
                 first_exception = e
+
+        # if the url is a home url and there is a suitable ie, raise the first exception
+        if not force_use_webview and is_home_url(url) and self._is_known_site(url):
+            raise first_exception
+
         used_webview, playable_info = self._get_playable_info_by_webview(url)
         if playable_info:
             # if 'headers' in playable_info:
@@ -3038,3 +3044,18 @@ class GenericIE(InfoExtractor):
         except Exception:
             pass
         return []
+
+    def _is_known_site(self, url):
+        try:
+            parsed_url = urllib.parse.urlparse(url)
+            return parsed_url.netloc.lower() in {
+                'x.com',
+                'twitter.com',
+                'instagram.com',
+                'facebook.com',
+                'tiktok.com',
+                'youtube.com',
+                'youtu.be',
+            }
+        except Exception:
+            return False

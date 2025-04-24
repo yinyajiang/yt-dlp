@@ -4546,6 +4546,9 @@ class YoutubeDL:
         except Exception:
             return False
 
+    def has_suitable_ie(self, url):
+        return any(ie.suitable(url) and key.lower() != 'generic' for key, ie in self._ies.items())
+
     def _try_generic(self, ie_key):
         try:
             ie = self.get_info_extractor(ie_key)

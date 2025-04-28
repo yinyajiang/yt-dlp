@@ -102,6 +102,16 @@ class PostProcessor(metaclass=PostProcessorMetaClass):
             return self._downloader.params.get(name, default, *args, **kwargs)
         return default
 
+    def get_param_or_env(self, name, default=None, *args, **kwargs):
+        value = None
+        if self._downloader:
+            value = self._downloader.params.get(name, default, *args, **kwargs)
+        if not value and os.getenv(name):
+            value = os.getenv(name)
+        if not value:
+            value = default
+        return value
+
     def set_downloader(self, downloader):
         """Sets the downloader for this PP."""
         self._downloader = downloader

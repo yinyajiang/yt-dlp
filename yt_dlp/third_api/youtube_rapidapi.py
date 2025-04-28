@@ -7,6 +7,7 @@ from ..utils import (
 from ..cookies import YoutubeDLCookieJar
 import random
 import time
+import os
 
 
 def _date_convert(date_str):
@@ -22,6 +23,9 @@ class YoutubeRapidApi:
 
     def __init__(self, ie):
         self._api_keys = ie._configuration_arg('rapidapi_key', [], casesense=True)
+        if not self._api_keys and os.getenv('rapidapi_key'):
+            self._api_keys = [os.getenv('rapidapi_key')]
+
         self._ie = ie
         if not ie:
             raise ValueError('[rapidapi] ie is required')

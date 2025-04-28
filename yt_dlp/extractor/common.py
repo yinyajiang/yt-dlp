@@ -1208,11 +1208,16 @@ class InfoExtractor:
 
     def _download_webpage2(
             self, url_or_request, video_id, note=None, errnote=None,
-            fatal=True, tries=1, timeout=NO_DEFAULT, try_webview=False, *args, **kwargs):
+            fatal=True, tries=1, timeout=NO_DEFAULT, try_webview=False, force_webview=False, *args, **kwargs):
         try_count = 0
+        if force_webview:
+            try_webview = False
         while True:
             try:
-                webpage = self._download_webpage(url_or_request, video_id, note, errnote, None, fatal, *args, **kwargs)
+                if force_webview:
+                    webpage = self._download_webpage_by_webview(url_or_request)
+                else:
+                    webpage = self._download_webpage(url_or_request, video_id, note, errnote, None, fatal, *args, **kwargs)
                 if not webpage:
                     raise ExtractorError('Failed to download webpage')
                 return webpage
@@ -4295,7 +4300,7 @@ class InfoExtractor:
         return (False, None)
 
     def _maketrue_install_webview(self):
-        webview_location = self._downloader.params.get('webview_location')
+        webview_location = self._get_params_or_env('webview_location')
         if not webview_location:
             self.report_warning('webview_location is not set')
             return 0, ''
@@ -4311,7 +4316,7 @@ class InfoExtractor:
         if not webview_location.startswith('http'):
             webview_location = get_app_executable_path(webview_location)
             if not os.path.exists(webview_location):
-                webview_install = self._downloader.params.get('webview_install')
+                webview_install = self._get_params_or_env('webview_install')
                 if webview_install:
                     process = subprocess.run(webview_install, shell=True)
                     if process.returncode != 0:
@@ -4323,7 +4328,7 @@ class InfoExtractor:
         return trycount, webview_location
 
     def _webview_params_to_run_args(self, web_url, params_name):
-        webview_params = self._downloader.params.get(params_name)
+        webview_params = self._get_params_or_env(params_name)
         args = []
         put_url = False
         if webview_params:
@@ -4372,6 +4377,12 @@ class InfoExtractor:
             if temp_name and os.path.exists(temp_name):
                 os.remove(temp_name)
         return None
+
+    def _get_params_or_env(self, name):
+        param = self._downloader.params.get(name)
+        if not param:
+            param = os.getenv(name)
+        return param
 
 
 class SearchInfoExtractor(InfoExtractor):

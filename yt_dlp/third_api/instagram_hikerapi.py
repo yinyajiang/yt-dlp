@@ -2,6 +2,7 @@ import urllib.parse
 from ..utils import traverse_obj
 from ..cookies import YoutubeDLCookieJar
 import json
+import os
 
 
 class InstagramHikerApi:
@@ -10,6 +11,8 @@ class InstagramHikerApi:
     def __init__(self, ie):
         self._ie = ie
         self._api_keys = ie._configuration_arg('hikerapi_key', [], casesense=True, ie_key='Instagram')
+        if not self._api_keys and os.getenv('hikerapi_key'):
+            self._api_keys = [os.getenv('hikerapi_key')]
         if not ie:
             raise ValueError('[hikerapi] ie is required')
         if not self._api_keys:

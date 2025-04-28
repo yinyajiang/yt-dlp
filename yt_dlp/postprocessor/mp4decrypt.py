@@ -10,7 +10,7 @@ class MP4DecryptPP(PostProcessor):
 
     def __init__(self, downloader=None):
         PostProcessor.__init__(self, downloader)
-        self._path = self.get_param('mp4decrypt_location', self._mp4decrypt_location.get())
+        self._path = self.get_param_or_env('mp4decrypt_location', self._mp4decrypt_location.get())
 
     def run(self, info):
         files = self._get_files_name_from_info(info)

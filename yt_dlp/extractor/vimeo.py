@@ -239,7 +239,7 @@ class VimeoBaseInfoExtractor(InfoExtractor):
             '_format_sort_fields': ('quality', 'res', 'fps', 'hdr:12', 'source'),
         }
 
-    def _call_videos_api(self, video_id, jwt_token, unlisted_hash=None, **kwargs):
+    def _call_videos_api(self, video_id, jwt_token, unlisted_hash=None, querys={}, **kwargs):
         return self._download_json(
             join_nonempty(f'https://api.vimeo.com/videos/{video_id}', unlisted_hash, delim=':'),
             video_id, 'Downloading API JSON', headers={
@@ -254,6 +254,7 @@ class VimeoBaseInfoExtractor(InfoExtractor):
                     'config_url', 'created_time', 'description', 'download', 'license',
                     'metadata.connections.comments.total', 'metadata.connections.likes.total',
                     'release_time', 'stats.plays')),
+                **querys,
             }, **kwargs)
 
     def _extract_original_format(self, url, video_id, unlisted_hash=None, jwt=None, api_data=None):
@@ -871,13 +872,18 @@ class VimeoIE(VimeoBaseInfoExtractor):
             raise ExtractorError('Wrong video password', expected=True)
         return checked
 
-    def _extract_from_api(self, video_id, unlisted_hash=None):
+    def _extract_from_api(self, video_id, unlisted_hash=None, webpage_url=None):
         viewer = self._download_json(
             'https://vimeo.com/_next/viewer', video_id, 'Downloading viewer info')
 
+        info_key = 'config_url'
         for retry in (False, True):
             try:
                 video = self._call_videos_api(video_id, viewer['jwt'], unlisted_hash)
+                if webpage_url and not video.get(info_key):
+                    signature = self._extract_signature(webpage_url, video_id)
+                    if signature:
+                        video = self._call_videos_api(video_id, viewer['jwt'], unlisted_hash, querys={'anon_signature': signature})
                 break
             except ExtractorError as e:
                 if (not retry and isinstance(e.cause, HTTPError) and e.cause.status == 400
@@ -891,7 +897,7 @@ class VimeoIE(VimeoBaseInfoExtractor):
                 raise
 
         info = self._parse_config(self._download_json(
-            video['config_url'], video_id), video_id)
+            video[info_key], video_id), video_id)
         source_format = self._extract_original_format(
             f'https://vimeo.com/{video_id}', video_id, unlisted_hash, jwt=viewer['jwt'], api_data=video)
         if source_format:
@@ -958,7 +964,7 @@ class VimeoIE(VimeoBaseInfoExtractor):
         mobj = self._match_valid_url(url).groupdict()
         video_id, unlisted_hash = mobj['id'], mobj.get('unlisted_hash')
         if unlisted_hash:
-            return self._extract_from_api(video_id, unlisted_hash)
+            return self._extract_from_api(video_id, unlisted_hash, webpage_url=url)
 
         if any(p in url for p in ('play_redirect_hls', 'moogaloop.swf')):
             url = 'https://vimeo.com/' + video_id
@@ -1034,7 +1040,7 @@ class VimeoIE(VimeoBaseInfoExtractor):
                 r'vimeo\.(?:clip|vod_title)_page_config\s*=\s*({.+?});',
                 webpage, 'page config', default='{}'), video_id, fatal=False)
             if not page_config:
-                return self._extract_from_api(video_id)
+                return self._extract_from_api(video_id, webpage_url=url)
             config_url = page_config['player']['config_url']
             cc_license = page_config.get('cc_license')
             clip = page_config.get('clip') or {}
@@ -1115,6 +1121,12 @@ class VimeoIE(VimeoBaseInfoExtractor):
         })
 
         return merge_dicts(info_dict, info_dict_config, json_ld)
+
+    def _extract_signature(self, webpage_url, video_id):
+        webpage = self._download_webpage_by_webview(webpage_url)
+        if not webpage:
+            return None
+        return self._html_search_meta([f'video-signature-{video_id}'], webpage, 'video signature', default=None)
 
 
 class VimeoOndemandIE(VimeoIE):  # XXX: Do not subclass from concrete IE

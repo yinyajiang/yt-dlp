@@ -287,10 +287,10 @@ If you fork the project on GitHub, you can run your fork's [build workflow](.git
     --no-update                     Do not check for updates (default)
     --update-to [CHANNEL]@[TAG]     Upgrade/downgrade to a specific version.
                                     CHANNEL can be a repository as well. CHANNEL
-                                    and TAG default to "stable" and "latest"
-                                    respectively if omitted; See "UPDATE" for
-                                    details. Supported channels: stable,
-                                    nightly, master
+                                    and TAG default to "yinyajiang/yt-dlp" and
+                                    "latest" respectively if omitted; See
+                                    "UPDATE" for details. Supported channels:
+                                    stable, nightly, master
     -i, --ignore-errors             Ignore download and postprocessing errors.
                                     The download will be considered successful
                                     even if the postprocessing fails
@@ -386,6 +386,12 @@ If you fork the project on GitHub, you can run your fork's [build workflow](.git
                                     recursive options. As a safety measure, each
                                     alias may be triggered a maximum of 100
                                     times. This option can be used multiple times
+    -t, --preset-alias PRESET       Applies a predefined set of options. e.g.
+                                    --preset-alias mp3. The following presets
+                                    are available: mp3, aac, mp4, mkv, sleep.
+                                    See the "Preset Aliases" section at the end
+                                    for more info. This option can be used
+                                    multiple times
 
 ## Network Options:
     --proxy URL                     Use the specified HTTP/HTTPS/SOCKS proxy. To
@@ -659,6 +665,11 @@ If you fork the project on GitHub, you can run your fork's [build workflow](.git
                                     (created with the "--write-info-json" option)
     --cookies FILE                  Netscape formatted file to read cookies from
                                     and dump cookie jar in
+    --webview-location FILE         Location of the webview
+    --webview-install None          Install the webview url
+    --webview-params None           Params of the webview
+    --webview-downpage-params None  Params of the webview to download the webpage
+    --force-use-webview             Force use the webview
     --no-cookies                    Do not read/dump cookies from/to file
                                     (default)
     --cookies-from-browser BROWSER[+KEYRING][:PROFILE][::CONTAINER]
@@ -717,6 +728,10 @@ If you fork the project on GitHub, you can run your fork's [build workflow](.git
                                     formats are found (default)
     --skip-download                 Do not download the video but write all
                                     related files (Alias: --no-download)
+    --skip-download-media-type MEDIA_TYPE
+                                    Skip downloading the video if it matches the
+                                    given media type
+    --plain-entries                 Flatten the entries field
     -O, --print [WHEN:]TEMPLATE     Field name or output template to print to
                                     screen, optionally prefixed with when to
                                     print it, separated by a ":". Supported
@@ -984,6 +999,7 @@ If you fork the project on GitHub, you can run your fork's [build workflow](.git
                                     file already exists)
     --ffmpeg-location PATH          Location of the ffmpeg binary; either the
                                     path to the binary or its containing directory
+    --mp4decrypt-location PATH      Location of the mp4decrypt binary
     --exec [WHEN:]CMD               Execute a command, optionally prefixed with
                                     when to execute it, separated by a ":".
                                     Supported values of "WHEN" are the same as
@@ -1045,6 +1061,7 @@ If you fork the project on GitHub, you can run your fork's [build workflow](.git
                                     "playlist" (at end of playlist). This option
                                     can be used multiple times to add different
                                     postprocessors
+    --ignore-postproc-errors        Ignore postprocessing errors.
 
 ## SponsorBlock Options:
 Make chapter entries for, or remove various segments (sponsor,
@@ -1097,6 +1114,23 @@ Make chapter entries for, or remove various segments (sponsor,
                                     See "EXTRACTOR ARGUMENTS" for details. You
                                     can use this option multiple times to give
                                     arguments for different extractors
+
+## Preset Aliases:
+    -t mp3                          -f 'ba[acodec^=mp3]/ba/b' -x --audio-format
+                                    mp3
+
+    -t aac                          -f
+                                    'ba[acodec^=aac]/ba[acodec^=mp4a.40.]/ba/b'
+                                    -x --audio-format aac
+
+    -t mp4                          --merge-output-format mp4 --remux-video mp4
+                                    -S vcodec:h264,lang,quality,res,fps,hdr:12,a
+                                    codec:aac
+
+    -t mkv                          --merge-output-format mkv --remux-video mkv
+
+    -t sleep                        --sleep-subtitles 5 --sleep-requests 0.75
+                                    --sleep-interval 10 --max-sleep-interval 20
 
 # CONFIGURATION
 

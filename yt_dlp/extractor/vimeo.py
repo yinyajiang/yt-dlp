@@ -1124,14 +1124,17 @@ class VimeoIE(VimeoBaseInfoExtractor):
         return merge_dicts(info_dict, info_dict_config, json_ld)
 
     def _extract_signature(self, webpage_url, video_id):
-        webpage = self._download_webpage_by_webview(webpage_url)
-        if not webpage:
+        try:
+            webpage = self._download_webpage_by_webview(webpage_url)
+            if not webpage:
+                return None
+            return self._html_search_meta([f'video-signature-{video_id}'], webpage, 'video signature', default=None)
+        except ExtractorError:
             return None
-        return self._html_search_meta([f'video-signature-{video_id}'], webpage, 'video signature', default=None)
 
     def _get_jwt_token(self, video_id):
         viewer = self._download_json(
-            'https://vimeo.com/_next/viewer', video_id, 'Downloading viewer info')
+            'https://vimeo.com/_next/viewer', video_id, 'Downloading viewer info', fatal=False)
         if not viewer:
             return None
         return viewer.get('jwt')

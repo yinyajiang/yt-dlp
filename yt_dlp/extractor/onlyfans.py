@@ -1,4 +1,5 @@
 import json
+import os
 import urllib
 import urllib.parse
 import xml
@@ -17,7 +18,9 @@ class OnlyfansIE(InfoExtractor):
     def _get_external_ie_addr(self):
         addr = self._ie_args('external_ie')[0]
         if not addr:
-            raise ExtractorError('external_ie not found')
+            addr = os.getenv('onlyfans_external_ie')
+            if not addr:
+                raise ExtractorError('external_ie not found')
         try:
             port = int(addr)
             if port == 0:

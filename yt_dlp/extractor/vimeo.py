@@ -39,8 +39,14 @@ class VimeoBaseInfoExtractor(InfoExtractor):
     _NETRC_MACHINE = 'vimeo'
     _LOGIN_REQUIRED = False
     _LOGIN_URL = 'https://vimeo.com/log_in'
-    _APP_AUTH = 'MTMxNzViY2Y0NDE0YTQ5YzhjZTc0YmU0NjVjNDQxYzNkYWVjOWRlOTpHKzRvMmgzVUh4UkxjdU5FRW80cDNDbDhDWGR5dVJLNUJZZ055dHBHTTB4V1VzaG41bEx1a2hiN0NWYWNUcldSSW53dzRUdFRYZlJEZmFoTTArOTBUZkJHS3R4V2llYU04Qnl1bERSWWxUdXRidjNqR2J4SHFpVmtFSUcyRktuQw=='
-    _APP_USER_AGENT = 'Vimeo/11.9.0 (com.vimeo; build:110900.64.0; iOS 16.1.1) Alamofire/5.9.0 VimeoNetworking/5.0.0'
+    _IOS_CLIENT_AUTH = 'MTMxNzViY2Y0NDE0YTQ5YzhjZTc0YmU0NjVjNDQxYzNkYWVjOWRlOTpHKzRvMmgzVUh4UkxjdU5FRW80cDNDbDhDWGR5dVJLNUJZZ055dHBHTTB4V1VzaG41bEx1a2hiN0NWYWNUcldSSW53dzRUdFRYZlJEZmFoTTArOTBUZkJHS3R4V2llYU04Qnl1bERSWWxUdXRidjNqR2J4SHFpVmtFSUcyRktuQw=='
+    _IOS_CLIENT_HEADERS = {
+        'Accept': 'application/vnd.vimeo.*+json; version=3.4.10',
+        'Accept-Language': 'en',
+        'User-Agent': 'Vimeo/11.10.0 (com.vimeo; build:250424.164813.0; iOS 18.4.1) Alamofire/5.9.0 VimeoNetworking/5.0.0',
+    }
+    _IOS_OAUTH_CACHE_KEY = 'oauth-token-ios'
+    _ios_oauth_token = None
 
     @staticmethod
     def _smuggle_referrer(url, referrer_url):
@@ -90,13 +96,16 @@ class VimeoBaseInfoExtractor(InfoExtractor):
                 expected=True)
         return password
 
-    def _verify_video_password(self, video_id, password, token):
+    def _verify_video_password(self, video_id):
+        video_password = self._get_video_password()
+        token = self._download_json(
+            'https://vimeo.com/_next/viewer', video_id, 'Downloading viewer info')['xsrft']
         url = f'https://vimeo.com/{video_id}'
         try:
-            return self._download_webpage(
+            self._request_webpage(
                 f'{url}/password', video_id,
                 'Submitting video password', data=json.dumps({
-                    'password': password,
+                    'password': video_password,
                     'token': token,
                 }, separators=(',', ':')).encode(), headers={
                     'Accept': '*/*',
@@ -241,25 +250,40 @@ class VimeoBaseInfoExtractor(InfoExtractor):
             '_format_sort_fields': ('quality', 'res', 'fps', 'hdr:12', 'source'),
         }
 
-    def _call_videos_api(self, video_id, unlisted_hash=None, querys={}, jwt_token=None, **kwargs):
-        ua = {
-            'Accept-Language': 'en',
-            'User-Agent': self._APP_USER_AGENT,
-        } if not jwt_token else {}
+    def _fetch_oauth_token(self):
+        if not self._ios_oauth_token:
+            self._ios_oauth_token = self.cache.load(self._NETRC_MACHINE, self._IOS_OAUTH_CACHE_KEY)
 
+        if not self._ios_oauth_token:
+            self._ios_oauth_token = self._download_json(
+                'https://api.vimeo.com/oauth/authorize/client', None,
+                'Fetching OAuth token', 'Failed to fetch OAuth token',
+                headers={
+                    'Authorization': f'Basic {self._IOS_CLIENT_AUTH}',
+                    **self._IOS_CLIENT_HEADERS,
+                }, data=urlencode_postdata({
+                    'grant_type': 'client_credentials',
+                    'scope': 'private public create edit delete interact upload purchased stats',
+                }, quote_via=urllib.parse.quote))['access_token']
+            self.cache.store(self._NETRC_MACHINE, self._IOS_OAUTH_CACHE_KEY, self._ios_oauth_token)
+
+        return self._ios_oauth_token
+
+    def _call_videos_api(self, video_id, unlisted_hash=None, querys={}, jwt_token=None, **kwargs):
+        headers = {
+            'Authorization': f'Bearer {self._fetch_oauth_token()}',
+            **self._IOS_CLIENT_HEADERS
+        } if not jwt_token else {
+            'Accept-Language': 'en',
+            'User-Agent': 'Vimeo/11.9.0 (com.vimeo; build:110900.64.0; iOS 16.1.1) Alamofire/5.9.0 VimeoNetworking/5.0.0',
+        }
         return self._download_json(
             join_nonempty(f'https://api.vimeo.com/videos/{video_id}', unlisted_hash, delim=':'),
-            video_id, 'Downloading API JSON', headers={
-                'Authorization': f'jwt {jwt_token}' if jwt_token else f'Basic {self._APP_AUTH}',
-                'Accept': 'application/vnd.vimeo.*+json;version=3.4.10',
-                **ua,
-            }, query={
-                'outro': 'beginning',
+            video_id, 'Downloading API JSON', headers=headers, query={
                 'fields': ','.join((
-                    # 'embed_player_config_url' is a viable alternative to 'config_url'
-                    'config_url', 'created_time', 'description', 'download', 'license',
-                    'metadata.connections.comments.total', 'metadata.connections.likes.total',
-                    'release_time', 'stats.plays')),
+                    'config_url', 'embed_player_config_url', 'player_embed_url', 'download', 'play',
+                    'files', 'description', 'license', 'release_time', 'created_time', 'stats.plays',
+                    'metadata.connections.comments.total', 'metadata.connections.likes.total')),
                 **querys,
             }, **kwargs)
 
@@ -890,10 +914,7 @@ class VimeoIE(VimeoBaseInfoExtractor):
                         self._webpage_read_content(e.cause.response, e.cause.response.url, video_id, fatal=False),
                         ({json.loads}, 'invalid_parameters', ..., 'field'),
                 )):
-                    viewer = self._download_json(
-                        'https://vimeo.com/_next/viewer', video_id, 'Downloading viewer info')
-                    self._verify_video_password(
-                        video_id, self._get_video_password(), viewer['xsrft'])
+                    self._verify_video_password(video_id)
                     continue
                 raise
 
@@ -1459,12 +1480,8 @@ class VimeoReviewIE(VimeoBaseInfoExtractor):
         user, video_id, review_hash = self._match_valid_url(url).group('user', 'id', 'hash')
         data_url = f'https://vimeo.com/{user}/review/data/{video_id}/{review_hash}'
         data = self._download_json(data_url, video_id)
-        viewer = {}
         if data.get('isLocked') is True:
-            video_password = self._get_video_password()
-            viewer = self._download_json(
-                'https://vimeo.com/_rv/viewer', video_id)
-            self._verify_video_password(video_id, video_password, viewer['xsrft'])
+            self._verify_video_password(video_id)
             data = self._download_json(data_url, video_id)
         clip_data = data['clipData']
         config_url = clip_data['configUrl']

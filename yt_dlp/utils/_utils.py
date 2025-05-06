@@ -5948,6 +5948,16 @@ def is_home_url(url):
         return False
 
 
+def home_url_join(origin_url, *joins):
+    parsed_url = urllib.parse.urlparse(origin_url)
+    if len(joins) == 1:
+        joins = joins[0].split('/')
+    url = ((parsed_url.scheme + '://') if parsed_url.scheme else '') + parsed_url.netloc
+    for join in joins:
+        url = urllib.parse.urljoin(url, join)
+    return url
+
+
 class _ProgressState(enum.Enum):
     """
     Represents a state for a progress bar.

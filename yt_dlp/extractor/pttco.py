@@ -2,7 +2,7 @@ import re
 import urllib.parse
 
 from .common import ExtractorError, InfoExtractor
-from ..utils import get_elements_html_by_class
+from ..utils import get_elements_html_by_class, home_url_join
 
 
 class PttcoIE(InfoExtractor):
@@ -10,13 +10,17 @@ class PttcoIE(InfoExtractor):
     _TRY_GENERIC = True
 
     def _real_extract(self, url):
-        video_id = self._match_id(url)
+        return self._real_extract_info(url)
+
+    def _real_extract_info(self, url, video_id=None, playlist_id=None, trimtitle=False, single=False):
+        video_id = video_id or self._match_id(url)
         webpage = self._download_webpage(url, video_id)
         title = self._html_extract_title(webpage).strip()
-        playlist_id = self._match_valid_url(url).group('plid')
-        if '_single_' in url:
-            if '_trimtitle_' in url:
-                title = title.split(':')[0].strip()
+        if '_trimtitle_' in url or trimtitle:
+            title = title.split(':')[0].strip()
+
+        playlist_id = playlist_id or self._match_valid_url(url).group('plid')
+        if '_single_' in url or single:
             return self._extract_video(webpage, video_id, title)
 
         seqs = [seq for seq in self._fetch_seqs_urls(webpage, url, fatal=False) if playlist_id in seq]
@@ -26,7 +30,7 @@ class PttcoIE(InfoExtractor):
                 if entries:
                     return self.playlist_result(entries, playlist_id=playlist_id, playlist_title=self._playlist_title(title, playlist_id))
             else:
-                return self._result_url_playlist(self, seqs, playlist_id=playlist_id, playlist_title=self._playlist_title(title, playlist_id))
+                return self._result_url_playlist(seqs, playlist_id=playlist_id, playlist_title=self._playlist_title(title, playlist_id))
 
         return self._extract_video(webpage, video_id, title)
 
@@ -67,15 +71,13 @@ class PttcoIE(InfoExtractor):
                 raise
             return None
 
-    @staticmethod
-    def _playlist_title(title, playlist_id):
+    def _playlist_title(self, title, playlist_id):
         title = title.split('-')[0].strip()
         if not title:
             title = playlist_id
         return title
 
-    @staticmethod
-    def _fetch_seqs_urls(webpage, origin_url, fatal=False):
+    def _fetch_seqs_urls(self, webpage, origin_url, fatal=False):
         seqs = get_elements_html_by_class('seq', webpage)
         herfs = []
         for seq in seqs:
@@ -84,6 +86,11 @@ class PttcoIE(InfoExtractor):
                 continue
             herfs.append(match.group(2))
         if not herfs:
+            u = self._og_search_property('url', webpage, fatal=False)
+            if u and u.startswith('/'):
+                u = home_url_join(origin_url, u)
+            if u and u not in origin_url:
+                return [u]
             if fatal:
                 raise ExtractorError('Unable to find seq')
             return []
@@ -109,8 +116,7 @@ class PttcoIE(InfoExtractor):
 
         return [_url_process(href) for href in herfs]
 
-    @staticmethod
-    def _result_url_playlist(ie, seqs, playlist_id, playlist_title):
+    def _result_url_playlist(self, ie, seqs, playlist_id, playlist_title):
         return ie.playlist_result([
             {
                 'url': href,
@@ -120,23 +126,23 @@ class PttcoIE(InfoExtractor):
         ], playlist_id=playlist_id, playlist_title=playlist_title)
 
 
-class PttcoPlaylistIE(InfoExtractor):
+class PttcoPlaylistIE(PttcoIE):
     _VALID_URL = r'https?://(?:www\.)?ptt.co/(?:[\w\-]+/)?v/(?P<id>[0-9]+)/?'
     _TRY_GENERIC = True
 
     def _real_extract(self, url):
         playlist_id = self._match_id(url)
         webpage = self._download_webpage(url, playlist_id)
-        title = PttcoIE._playlist_title(self._html_extract_title(webpage), playlist_id)
-        herfs = PttcoIE._fetch_seqs_urls(webpage, url, fatal=True)
+        title = self._playlist_title(self._html_extract_title(webpage), playlist_id)
+        herfs = self._fetch_seqs_urls(webpage, url, fatal=False)
+        if len(herfs) == 0:
+            self.report_warning(f'playlist {playlist_id} has no sub-videos, treating as single video')
+            herfs = [url]
         if self._is_as_single_video(herfs, playlist_id):
             single_url = herfs[0]
-            if '?' in single_url:
-                single_url = f'{single_url}&_trimtitle_=1'
-            else:
-                single_url = f'{single_url}?_trimtitle_=1'
-            return self.url_result(single_url, PttcoIE)
-        return PttcoIE._result_url_playlist(self, herfs, playlist_id=playlist_id, playlist_title=title)
+            return super()._real_extract_info(single_url, playlist_id=playlist_id, video_id=playlist_id, single=True, trimtitle=True)
+
+        return self._result_url_playlist(herfs, playlist_id=playlist_id, playlist_title=title)
 
     def _is_as_single_video(self, herfs, vid):
         if len(herfs) == 1:

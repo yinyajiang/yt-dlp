@@ -110,6 +110,14 @@ ignore_prs = [
     'https://github.com/yt-dlp/yt-dlp/pull/10354',
     'https://github.com/yt-dlp/yt-dlp/pull/9933',
     'https://github.com/yt-dlp/yt-dlp/pull/10518',
+    'https://github.com/yt-dlp/yt-dlp/pull/5639',
+    'https://github.com/yt-dlp/yt-dlp/pull/7458',
+    'https://github.com/yt-dlp/yt-dlp/pull/12448',
+    'https://github.com/yt-dlp/yt-dlp/pull/8790',
+    'https://github.com/yt-dlp/yt-dlp/pull/8995',
+    'https://github.com/yt-dlp/yt-dlp/pull/10801',
+    'https://github.com/yt-dlp/yt-dlp/pull/12805',
+    'https://github.com/yt-dlp/yt-dlp/pull/11027',
 ]
 
 black_domain = [

@@ -148,6 +148,7 @@ def get_ie(title):
           r'add support for \s*([^\s]+)',
           r'add \s*([^\s]+?)\s+support',
           r'\s*([^\s]+?)\s+extractor',
+          r'add \s*([^\s]+?)\.py',
           r'fix \s*([^\s]+)',
           ]
     for r in rs:

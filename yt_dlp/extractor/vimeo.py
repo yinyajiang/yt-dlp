@@ -272,7 +272,7 @@ class VimeoBaseInfoExtractor(InfoExtractor):
     def _call_videos_api(self, video_id, unlisted_hash=None, querys={}, jwt_token=None, **kwargs):
         headers = {
             'Authorization': f'Bearer {self._fetch_oauth_token()}',
-            **self._IOS_CLIENT_HEADERS
+            **self._IOS_CLIENT_HEADERS,
         } if not jwt_token else {
             'Accept-Language': 'en',
             'User-Agent': 'Vimeo/11.9.0 (com.vimeo; build:110900.64.0; iOS 16.1.1) Alamofire/5.9.0 VimeoNetworking/5.0.0',

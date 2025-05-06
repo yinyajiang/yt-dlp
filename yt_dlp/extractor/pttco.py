@@ -15,6 +15,8 @@ class PttcoIE(InfoExtractor):
         title = self._html_extract_title(webpage).strip()
         playlist_id = self._match_valid_url(url).group('plid')
         if '_single_' in url:
+            if '_trimtitle_' in url:
+                title = title.split(':')[0].strip()
             return self._extract_video(webpage, video_id, title)
 
         seqs = [seq for seq in self._fetch_seqs_urls(webpage, url, fatal=False) if playlist_id in seq]
@@ -127,4 +129,16 @@ class PttcoPlaylistIE(InfoExtractor):
         webpage = self._download_webpage(url, playlist_id)
         title = PttcoIE._playlist_title(self._html_extract_title(webpage), playlist_id)
         herfs = PttcoIE._fetch_seqs_urls(webpage, url, fatal=True)
+        if self._is_as_single_video(herfs, playlist_id):
+            single_url = herfs[0]
+            if '?' in single_url:
+                single_url = f'{single_url}&_trimtitle_=1'
+            else:
+                single_url = f'{single_url}?_trimtitle_=1'
+            return self.url_result(single_url, PttcoIE)
         return PttcoIE._result_url_playlist(self, herfs, playlist_id=playlist_id, playlist_title=title)
+
+    def _is_as_single_video(self, herfs, vid):
+        if len(herfs) == 1:
+            return True
+        return bool(len(herfs) <= 4 and any(v in herfs[1] for v in [f'{vid}/720', f'{vid}/1080', f'{vid}/2160', f'{vid}/4k']))

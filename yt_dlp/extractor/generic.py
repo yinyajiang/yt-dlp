@@ -1,6 +1,7 @@
 import hashlib
 import os
 import re
+import time
 import types
 import urllib.parse
 import xml.etree.ElementTree
@@ -2426,6 +2427,7 @@ class GenericIE(InfoExtractor):
                 }), impersonate=impersonate)
             except ExtractorError as e:
                 if 'timed out' in str(e) and i < time_out_count - 1:
+                    time.sleep(1)
                     continue
 
                 if not (isinstance(e.cause, HTTPError) and e.cause.status == 403

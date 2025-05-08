@@ -852,7 +852,7 @@ class InfoExtractor:
         return url_or_request
 
     def _request_webpage(self, url_or_request, video_id, note=None, errnote=None, fatal=True, data=None,
-                         headers=None, query=None, expected_status=None, impersonate=None, require_impersonation=False, extensions=None):
+                         headers=None, query=None, expected_status=None, impersonate=None, require_impersonation=False, extensions=None, timeout=None):
         """
         Return the response handle.
 
@@ -885,6 +885,9 @@ class InfoExtractor:
 
         if not extensions:
             extensions = {}
+
+        if timeout:
+            extensions['timeout'] = timeout
 
         if impersonate in (True, ''):
             impersonate = ImpersonateTarget()
@@ -4383,6 +4386,26 @@ class InfoExtractor:
         if not param:
             param = os.getenv(name)
         return param
+
+    def _request_webpage2(self, url_or_request, video_id, note=None, errnote=None, fatal=True, data=None,
+                          headers=None, query=None, expected_status=None, impersonate=None, require_impersonation=False, extensions=None, timeout=None, trycount=1):
+
+        if trycount < 1:
+            trycount = 1
+
+        inner_fatal = fatal
+        if not inner_fatal and trycount > 1:
+            inner_fatal = True
+
+        first_exception = None
+        for _ in range(trycount):
+            try:
+                return self._request_webpage(url_or_request, video_id, note, errnote, inner_fatal, data, headers, query, expected_status, impersonate, require_impersonation, extensions, timeout)
+            except ExtractorError as e:
+                first_exception = e
+        if not fatal:
+            return None
+        raise first_exception
 
 
 class SearchInfoExtractor(InfoExtractor):

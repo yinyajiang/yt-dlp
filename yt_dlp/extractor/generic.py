@@ -2416,28 +2416,34 @@ class GenericIE(InfoExtractor):
         # to accept raw bytes and being able to download only a chunk.
         # It may probably better to solve this by checking Content-Type for application/octet-stream
         # after a HEAD request, but not sure if we can rely on this.
-        try:
-            full_response = self._request_webpage(url, video_id, headers=filter_dict({
-                'Accept-Encoding': 'identity',
-                'Referer': smuggled_data.get('referer'),
-            }), impersonate=impersonate)
-        except ExtractorError as e:
-            if not (isinstance(e.cause, HTTPError) and e.cause.status == 403
-                    and e.cause.response.get_header('cf-mitigated') == 'challenge'
-                    and e.cause.response.extensions.get('impersonate') is None):
-                raise
-            cf_cookie_domain = traverse_obj(
-                LenientSimpleCookie(e.cause.response.get_header('set-cookie')),
-                ('__cf_bm', 'domain'))
-            if cf_cookie_domain:
-                self.write_debug(f'Clearing __cf_bm cookie for {cf_cookie_domain}')
-                self.cookiejar.clear(domain=cf_cookie_domain, path='/', name='__cf_bm')
-            msg = 'Got HTTP Error 403 caused by Cloudflare anti-bot challenge; '
-            if not self._downloader._impersonate_target_available(ImpersonateTarget()):
-                msg += ('see  https://github.com/yt-dlp/yt-dlp#impersonation  for '
-                        'how to install the required impersonation dependency, and ')
-            raise ExtractorError(
-                f'{msg}try again with  --extractor-args "generic:impersonate"', expected=True)
+
+        for _ in range(3):  # timeout 3 times
+            try:
+                full_response = self._request_webpage(url, video_id, headers=filter_dict({
+                    'Accept-Encoding': 'identity',
+                    'Referer': smuggled_data.get('referer'),
+                }), impersonate=impersonate)
+            except ExtractorError as e:
+                if 'timed out' in str(e):
+                    continue
+
+                if not (isinstance(e.cause, HTTPError) and e.cause.status == 403
+                        and e.cause.response.get_header('cf-mitigated') == 'challenge'
+                        and e.cause.response.extensions.get('impersonate') is None):
+                    raise
+
+                cf_cookie_domain = traverse_obj(
+                    LenientSimpleCookie(e.cause.response.get_header('set-cookie')),
+                    ('__cf_bm', 'domain'))
+                if cf_cookie_domain:
+                    self.write_debug(f'Clearing __cf_bm cookie for {cf_cookie_domain}')
+                    self.cookiejar.clear(domain=cf_cookie_domain, path='/', name='__cf_bm')
+                msg = 'Got HTTP Error 403 caused by Cloudflare anti-bot challenge; '
+                if not self._downloader._impersonate_target_available(ImpersonateTarget()):
+                    msg += ('see  https://github.com/yt-dlp/yt-dlp#impersonation  for '
+                            'how to install the required impersonation dependency, and ')
+                raise ExtractorError(
+                    f'{msg}try again with  --extractor-args "generic:impersonate"', expected=True)
 
         new_url = full_response.url
         if new_url != extract_basic_auth(url)[0]:
@@ -2517,6 +2523,10 @@ class GenericIE(InfoExtractor):
 
         if '<title>DPG Media Privacy Gate</title>' in webpage:
             webpage = self._download_webpage(url, video_id)
+
+        if self._configuration_arg('dumphtml', [None], casesense=True)[0]:
+            with open(f'debug/{video_id}.html', 'w') as f:
+                f.write(webpage)
 
         self.report_extraction(video_id)
 

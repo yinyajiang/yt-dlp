@@ -31,7 +31,7 @@ from ..utils import (
 )
 from ..utils.networking import HTTPHeaderDict, normalize_url
 
-DEFAULT_TIMEOUT = 20
+DEFAULT_TIMEOUT = 30
 
 
 def register_preference(*handlers: type[RequestHandler]):

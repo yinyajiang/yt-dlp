@@ -2417,14 +2417,15 @@ class GenericIE(InfoExtractor):
         # It may probably better to solve this by checking Content-Type for application/octet-stream
         # after a HEAD request, but not sure if we can rely on this.
 
-        for i in range(3):  # timeout 3 times
+        time_out_count = 4
+        for i in range(time_out_count):  # timeout 3 times
             try:
                 full_response = self._request_webpage(url, video_id, headers=filter_dict({
                     'Accept-Encoding': 'identity',
                     'Referer': smuggled_data.get('referer'),
                 }), impersonate=impersonate)
             except ExtractorError as e:
-                if 'timed out' in str(e) and i < 2:
+                if 'timed out' in str(e) and i < time_out_count - 1:
                     continue
 
                 if not (isinstance(e.cause, HTTPError) and e.cause.status == 403

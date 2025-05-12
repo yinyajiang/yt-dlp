@@ -104,6 +104,6 @@ class SocialRapidApi:
                              )
         if info.get('error'):
             if info.get('message'):
-                raise ExtractorError(f'{info.get('message')}, status: {info.get("status")}')
+                raise ExtractorError(f'{info.get("message")}, status: {info.get("status")}')
             raise ExtractorError('error')
         return info

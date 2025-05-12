@@ -3,6 +3,7 @@ from ..utils import (
     traverse_obj,
     int_or_none,
     mimetype2codecs,
+    ExtractorError,
 )
 from ..cookies import YoutubeDLCookieJar
 import random
@@ -28,9 +29,9 @@ class YoutubeRapidApi:
 
         self._ie = ie
         if not ie:
-            raise ValueError('[rapidapi] ie is required')
+            raise ExtractorError('[rapidapi] ie is required')
         if not self._api_keys:
-            raise ValueError('[rapidapi] api keys is required')
+            raise ExtractorError('[rapidapi] api keys is required')
 
     def extract_video_info(self, video_id):
         info = self._get_video_info(video_id)
@@ -127,30 +128,19 @@ class YoutubeRapidApi:
 
     def __get_video_info(self, video_id):
         download_json = lambda url, **kwargs: self._ie._download_json(url, video_id, **kwargs)
-        report_msg = lambda msg: self._ie.report_msg(f'[rapidapi] {msg}')
 
-        first_exception = None
-        for key in self._api_keys:
-            try:
-                url = f'{self.API_ENDPOINT}?videoId={video_id}'
-                info = download_json(url, headers={
-                    'x-rapidapi-key': key,
-                    'x-rapidapi-host': self.API_HOST,
-                },
-                    extensions={
-                    'cookiejar': YoutubeDLCookieJar(),
-                },
-                    expected_status=lambda _: True,
-                )
-                if 'status' not in info and 'message' in info:
-                    raise Exception(f'{info.get("message")}')
-                if not info.get('status'):
-                    raise Exception(f'status is not ok, error: {info.get("errorId", "")}, reason: {info.get("reason", "")}')
-                return info
-            except Exception as e:
-                report_msg(f'{e}')
-                if not first_exception:
-                    first_exception = e
-                if any(errorId.lower() in str(e).lower() for errorId in ['per second', 'DRM', 'PaymentRequired', 'MembersOnly', 'LiveStreamOffline', 'RegionUnavailable', 'VideoNotFound']):
-                    break
-        raise first_exception
+        url = f'{self.API_ENDPOINT}?videoId={video_id}'
+        info = download_json(url, headers={
+            'x-rapidapi-key': self._api_keys[0],
+            'x-rapidapi-host': self.API_HOST,
+        },
+            extensions={
+            'cookiejar': YoutubeDLCookieJar(),
+        },
+            expected_status=lambda _: True,
+        )
+        if 'status' not in info and 'message' in info:
+            raise ExtractorError(f'{info.get("message")}')
+        if not info.get('status'):
+            raise ExtractorError(f'status is not ok, error: {info.get("errorId", "")}, reason: {info.get("reason", "")}')
+        return info

@@ -1642,13 +1642,16 @@ class YoutubeDL:
         if not ie_key and force_generic_extractor:
             ie_key = 'Generic'
 
+        if not ie_key and self._use_third_api(url):
+            ie_key = 'ThirdApi'
+
         if ie_key:
             ies = {ie_key: self._ies[ie_key]} if ie_key in self._ies else {}
         else:
             ies = self._ies
 
         for key, ie in ies.items():
-            if not ie.suitable(url):
+            if len(ies) > 1 and not ie.suitable(url):
                 continue
 
             if not ie.working():
@@ -4565,6 +4568,11 @@ class YoutubeDL:
             return ie._TRY_GENERIC
         except Exception:
             return False
+
+    def _use_third_api(self, url):
+        if not url:
+            return False
+        return bool(self.params.get('force_third_api', False) or '__force_third_api__=1' in url or '__force_third_api__=true' in url)
 
     def _url_correct(self, url):
         # only correct the url once

@@ -2225,6 +2225,7 @@ from .theplatform import (
 from .thestar import TheStarIE
 from .thesun import TheSunIE
 from .theweatherchannel import TheWeatherChannelIE
+from .thirdapi import ThirdApiIE
 from .thirtydaysinger import ThirtyDaySingerIE, ThirtyDaySingerPlaylistIE
 from .thisamericanlife import ThisAmericanLifeIE
 from .thisav import ThisAVIE

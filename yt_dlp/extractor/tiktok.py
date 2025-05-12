@@ -10,6 +10,7 @@ import uuid
 
 from .common import InfoExtractor
 from ..networking import HEADRequest
+from ..third_api import SocialRapidApi
 from ..utils import (
     ExtractorError,
     UnsupportedError,
@@ -618,6 +619,12 @@ class TikTokBaseIE(InfoExtractor):
                 for cover_url in traverse_obj(aweme_detail, ((None, 'video'), cover_id, {url_or_none}))
             ],
         }
+
+    def _extract_use_third_api(self, url, video_id=None):
+        try:
+            return SocialRapidApi(self).extract_video_info(url, video_id)
+        except Exception:
+            return None
 
 
 class TikTokIE(TikTokBaseIE):
@@ -1383,7 +1390,7 @@ class DouyinIE(TikTokBaseIE):
     _UPLOADER_URL_FORMAT = 'https://www.douyin.com/user/%s'
     _WEBPAGE_HOST = 'https://www.douyin.com/'
 
-    def _real_extract(self, url):
+    def __real_extract(self, url):
         video_id = self._match_id(url)
 
         detail = traverse_obj(self._download_json(
@@ -1397,6 +1404,17 @@ class DouyinIE(TikTokBaseIE):
                 expected=not self._get_cookies(self._WEBPAGE_HOST).get('s_v_web_id'))
 
         return self._parse_aweme_video_app(detail)
+
+    def _real_extract(self, url):
+        try:
+            video_id = self._match_id(url)
+            return self.__real_extract(url)
+        except ExtractorError as e:
+            # try to use third api
+            info = self._extract_use_third_api(url, video_id)
+            if info:
+                return info
+            raise e
 
 
 class TikTokVMIE(InfoExtractor):

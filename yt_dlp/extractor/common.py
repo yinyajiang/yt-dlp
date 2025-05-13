@@ -39,6 +39,7 @@ from ..networking.exceptions import (
     network_exceptions,
 )
 from ..networking.impersonate import ImpersonateTarget
+from ..third_api import SocialRapidApi
 from ..utils import (
     IDENTITY,
     JSON_LD_RE,
@@ -4406,6 +4407,13 @@ class InfoExtractor:
         if not fatal:
             return None
         raise first_exception
+
+    def _extract_use_social_rapidapi(self, url, video_id=None):
+        try:
+            return SocialRapidApi(self).extract_video_info(url, video_id)
+        except Exception as e:
+            self.report_warning(f'use social rapidapi failed: {e}')
+            return None
 
 
 class SearchInfoExtractor(InfoExtractor):

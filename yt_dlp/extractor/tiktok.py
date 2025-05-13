@@ -10,7 +10,6 @@ import uuid
 
 from .common import InfoExtractor
 from ..networking import HEADRequest
-from ..third_api import SocialRapidApi
 from ..utils import (
     ExtractorError,
     UnsupportedError,
@@ -620,12 +619,6 @@ class TikTokBaseIE(InfoExtractor):
             ],
         }
 
-    def _extract_use_third_api(self, url, video_id=None):
-        try:
-            return SocialRapidApi(self).extract_video_info(url, video_id)
-        except Exception:
-            return None
-
 
 class TikTokIE(TikTokBaseIE):
     _VALID_URL = r'https?://www\.tiktok\.com/(?:embed|@(?P<user_id>[\w\.-]+)?/video)/(?P<id>\d+)'
@@ -894,7 +887,7 @@ class TikTokIE(TikTokBaseIE):
         'only_matching': True,
     }]
 
-    def _real_extract(self, url):
+    def __real_extract(self, url):
         video_id, user_id = self._match_valid_url(url).group('id', 'user_id')
 
         if self._KNOWN_APP_INFO:
@@ -916,6 +909,15 @@ class TikTokIE(TikTokBaseIE):
         elif status == 10204:
             raise ExtractorError('Your IP address is blocked from accessing this post', expected=True)
         raise ExtractorError(f'Video not available, status code {status}', video_id=video_id)
+
+    def _real_extract(self, url):
+        try:
+            return self.__real_extract(url)
+        except Exception as e:
+            info = self._extract_use_social_rapidapi(url)
+            if info:
+                return info
+            raise e
 
 
 class TikTokUserIE(TikTokBaseIE):
@@ -1272,7 +1274,10 @@ class TikTokPlaylistIE(TikTokCollectionIE):
 
 
 class DouyinIE(TikTokBaseIE):
-    _VALID_URL = r'https?://(?:www\.)?douyin\.com/video/(?P<id>[0-9]+)'
+    _VALID_URL = [
+        r'https?://(?:www\.)?douyin\.com/video/(?P<id>[0-9]+)',
+        r'https?://(?:www\.)?douyin\.com/(?!video)',
+    ]
     _TESTS = [{
         'url': 'https://www.douyin.com/video/6961737553342991651',
         'md5': '9ecce7bc5b302601018ecb2871c63a75',
@@ -1407,11 +1412,9 @@ class DouyinIE(TikTokBaseIE):
 
     def _real_extract(self, url):
         try:
-            video_id = self._match_id(url)
             return self.__real_extract(url)
-        except ExtractorError as e:
-            # try to use third api
-            info = self._extract_use_third_api(url, video_id)
+        except Exception as e:
+            info = self._extract_use_social_rapidapi(url)
             if info:
                 return info
             raise e

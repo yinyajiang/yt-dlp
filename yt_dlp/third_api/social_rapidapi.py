@@ -63,7 +63,7 @@ class SocialRapidApi:
 
         return ytb_info
 
-    def _get_video_info(self, video_id):
+    def _get_video_info(self, url):
 
         def _random_sleep():
             random_sleep = random.randint(0, 1000) / 1000.0
@@ -72,7 +72,7 @@ class SocialRapidApi:
         later_count = 0
         for _ in range(500):
             try:
-                return self.__get_video_info(video_id)
+                return self.__get_video_info(url)
             except Exception as e:
                 msg = str(e).lower()
                 if 'please try again later' in msg:

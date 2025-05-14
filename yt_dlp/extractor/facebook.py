@@ -71,7 +71,7 @@ class FacebookIE(InfoExtractor):
 
     _VIDEO_PAGE_TEMPLATE = 'https://www.facebook.com/video/video.php?v=%s'
     _VIDEO_PAGE_TAHOE_TEMPLATE = 'https://www.facebook.com/video/tahoe/async/%s/?chain=true&isvideo=true&payloadtype=primary'
-
+    _INNER_TRY_THIRD_API = True
     _TESTS = [{
         'url': 'https://www.facebook.com/radiokicksfm/videos/3676516585958356/',
         'info_dict': {

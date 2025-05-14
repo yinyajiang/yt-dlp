@@ -5,11 +5,40 @@ import os
 import json
 from hashlib import md5
 from ..utils import ExtractorError, remove_query_params
+import urllib.parse
 
 
 class SocialRapidApi:
     API_ENDPOINT = 'https://auto-download-all-in-one-big.p.rapidapi.com/v1/social/autolink'
     API_HOST = 'auto-download-all-in-one-big.p.rapidapi.com'
+    SUPPORT_SITES = [
+        # 'Tiktok', 'Douyin', 'Capcut', 'Threads', 'Instagram', 'Facebook', 'Kuaishou', 'Espn',
+        # 'Pinterest', 'imdb', 'imgur', 'ifunny', 'Izlesene', 'Reddit', 'Youtube', 'Twitter', 'Vimeo',
+        # 'Snapchat', 'Bilibili', 'Dailymotion', 'Sharechat', 'Likee', 'Linkedin', 'Tumblr', 'Hipi',
+        # 'Telegram', 'Getstickerpack', 'Bitchute', 'Febspot', '9GAG', 'okeru', 'Rumble', 'Streamable',
+        # 'Ted', 'SohuTv', 'Pornbox', 'Xvideos', 'Xnxx', 'Kuaishou', 'Xiaohongshu', 'Ixigua', 'Weibo',
+        # 'Miaopai', 'Meipai', 'Xiaoying', 'Yingke', 'Sina', 'Bluesky', 'Soundcloud', 'Mixcloud', 'Spotify',
+        # 'Zingmp3', 'Bandcamp',
+    ]
+
+    @staticmethod
+    def is_supported_site(hint):
+        try:
+            url = urllib.parse.urlparse(hint)
+            if url.netloc:
+                hint = url.netloc
+        except Exception:
+            pass
+        if not hint:
+            return False
+        hint = hint.lower()
+        if hint.startswith('www.'):
+            hint = hint[4:]
+        hint = hint.split(':')[0]
+        for s in hint.split('.'):
+            if s:
+                return s in [site.lower() for site in SocialRapidApi.SUPPORT_SITES]
+        return False
 
     def __init__(self, ie):
         self._api_keys = ie._configuration_arg('rapidapi_key', [], casesense=True)

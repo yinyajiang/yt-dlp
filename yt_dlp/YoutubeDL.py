@@ -165,6 +165,7 @@ from .utils import (
     windows_enable_vt_mode,
     write_json_file,
     write_string,
+    smuggle_url,
 )
 from .utils._utils import _UnsafeExtensionError, _YDLLogger, _ProgressState
 from .utils.networking import (
@@ -173,6 +174,7 @@ from .utils.networking import (
     clean_proxies,
     std_headers,
 )
+from .third_api import SocialRapidApi
 from .version import CHANNEL, ORIGIN, RELEASE_GIT_HEAD, VARIANT, __version__
 
 if os.name == 'nt':
@@ -1668,6 +1670,10 @@ class YoutubeDL:
             try:
                 return self.__extract_info(url, self.get_info_extractor(key), download, extra_info, process)
             except Exception as e:
+                if self._try_social_rapidapi(key):
+                    with contextlib.suppress(Exception):
+                        return self.__extract_info(smuggle_url(url, {'__third_api__': 'social_rapidapi'}), self.get_info_extractor('ThirdApi'), download, extra_info, process)
+
                 if not self._try_generic(key):
                     raise e
                 self.report_msg('trying Generic extractor')
@@ -4566,6 +4572,19 @@ class YoutubeDL:
             if ie.IE_NAME.lower() == 'generic':
                 return False
             return ie._TRY_GENERIC
+        except Exception:
+            return False
+
+    def _try_social_rapidapi(self, ie_key):
+        try:
+            ie = self.get_info_extractor(ie_key)
+            if not ie or hasattr(ie, '_INNER_TRY_THIRD_API'):
+                return False
+            if not ie or not hasattr(ie, '_TRY_SOCIAL_RAPIDAPI'):
+                return SocialRapidApi.is_supported_site(ie_key)
+            if ie.IE_NAME.lower() == 'generic':
+                return False
+            return ie._TRY_SOCIAL_RAPIDAPI
         except Exception:
             return False
 

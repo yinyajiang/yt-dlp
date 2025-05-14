@@ -33,7 +33,7 @@ class SocialRapidApi:
         ytb_info = {
             'id': video_id,
             'title': info.get('title'),
-            'duration': info.get('duration') / 1000,
+            'duration': int(info.get('duration') / 1000),
             'channel': info.get('author'),
             'uploader': info.get('author'),
             'thumbnails': [

@@ -896,7 +896,7 @@ class FacebookIE(InfoExtractor):
 
         return info_dict
 
-    def _real_extract(self, url):
+    def __real_extract(self, url):
         video_id = self._match_id(url)
 
         real_url = self._VIDEO_PAGE_TEMPLATE % video_id if url.startswith('facebook:') else url
@@ -914,6 +914,15 @@ class FacebookIE(InfoExtractor):
             elif format_ext == 'm4a':
                 f['vcodec'] = 'none'
                 f['acodec'] = 'm4a'
+
+    def _real_extract(self, url):
+        try:
+            return self.__real_extract(url)
+        except Exception as e:
+            info = self._extract_use_social_rapidapi(url)
+            if info:
+                return info
+            raise e
 
 
 class FacebookPluginsVideoIE(InfoExtractor):

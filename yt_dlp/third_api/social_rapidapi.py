@@ -74,14 +74,17 @@ class SocialRapidApi:
             '_third_api': 'rapidapi',
         }
 
+        no_video = True
         for media in info.get('medias', []):
             if media.get('type') == 'video':
+                no_video = False
                 ytb_info['formats'].append({
                     'url': media.get('url'),
                     'ext': media.get('extension'),
                     'format_note': media.get('quality'),
                 })
             elif media.get('type') == 'audio':
+                no_video = False
                 ytb_info['formats'].append({
                     'url': media.get('url'),
                     'ext': media.get('extension'),
@@ -89,7 +92,14 @@ class SocialRapidApi:
                     'vcodec': 'none',
                     'acodec': media.get('extension'),
                 })
-
+            elif media.get('type') == 'image':
+                ytb_info['formats'].append({
+                    'url': media.get('url'),
+                    'ext': media.get('extension'),
+                    'format_note': 'image',
+                })
+        if no_video and ytb_info.get('formats'):
+            ytb_info['_media_type'] = 'PHOTO'
         return ytb_info
 
     def _get_video_info(self, url):

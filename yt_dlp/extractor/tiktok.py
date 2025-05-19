@@ -1277,6 +1277,7 @@ class DouyinIE(TikTokBaseIE):
     _VALID_URL = [
         r'https?://(?:www\.)?douyin\.com/video/(?P<id>[0-9]+)',
         r'https?://(?:www\.)?douyin\.com/(?!video)',
+        r'https?://v\.douyin\.com/(?P<id>[^/?#]+)',
     ]
     _TESTS = [{
         'url': 'https://www.douyin.com/video/6961737553342991651',

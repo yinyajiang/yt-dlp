@@ -149,8 +149,14 @@ class HttpFD(FileDownloader):
                     # Unable to resume (requested range not satisfiable)
                     try:
                         # Open the connection again without the range header
-                        ctx.data = self.ydl.urlopen(
-                            Request(url, request_data, headers))
+                        try:
+                            ctx.data = self.ydl.urlopen(
+                                Request(url, request_data, headers))
+                        except Exception:
+                            rq = Request(url, request_data, headers)
+                            rq.headers.pop('range', None)
+                            ctx.data = self.ydl.urlopen(rq)
+
                         content_length = ctx.data.headers['Content-Length']
                     except HTTPError as err:
                         if err.status < 500 or err.status >= 600:

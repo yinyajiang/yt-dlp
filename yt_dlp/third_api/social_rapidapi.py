@@ -6,6 +6,7 @@ import json
 from hashlib import md5
 from ..utils import ExtractorError, remove_query_params
 import urllib.parse
+from .common import is_retry_rsp, is_over_per_second_rsp, RetryError, OverPerSecondError
 
 
 class SocialRapidApi:
@@ -112,18 +113,14 @@ class SocialRapidApi:
         for _ in range(500):
             try:
                 return self.__get_video_info(url)
-            except Exception as e:
-                msg = str(e).lower()
-                if 'please try again later' in msg:
-                    later_count += 1
-                    if later_count > 10:
-                        raise e
-                    else:
-                        _random_sleep()
-                        continue
-
-                if 'per second' not in msg:
-                    raise e
+            except RetryError:
+                later_count += 1
+                if later_count > 10:
+                    raise
+                else:
+                    _random_sleep()
+                    continue
+            except OverPerSecondError:
                 _random_sleep()
 
     def __get_video_info(self, video_url):
@@ -141,6 +138,13 @@ class SocialRapidApi:
                              },
                              expected_status=lambda _: True,
                              )
+
+        if info and not info.get('medias', None):
+            if is_retry_rsp(info):
+                raise RetryError(info)
+            if is_over_per_second_rsp(info):
+                raise OverPerSecondError(info)
+
         if info.get('error'):
             if info.get('message'):
                 raise ExtractorError(f'{info.get("message")}, status: {info.get("status")}')

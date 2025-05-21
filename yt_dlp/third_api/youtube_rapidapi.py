@@ -113,10 +113,10 @@ class YoutubeRapidApi:
         for _ in range(500):
             try:
                 return self.__get_video_info(video_id)
-            except RetryError as e:
+            except RetryError:
                 later_count += 1
                 if later_count > 10:
-                    raise e
+                    raise
                 else:
                     _random_sleep()
                     continue
@@ -124,6 +124,7 @@ class YoutubeRapidApi:
                 _random_sleep()
 
     def __get_video_info(self, video_id):
+
         download_json = lambda url, **kwargs: self._ie._download_json(url, video_id, **kwargs)
 
         url = f'{self.API_ENDPOINT}?videoId={video_id}&urlAccess=normal&videos=auto&audios=auto'
@@ -144,16 +145,16 @@ class YoutubeRapidApi:
 
         if info and not info.get('videos', None) and not info.get('audios', None):
             if is_retry_rsp(info):
-                raise RetryError(info)
+                raise RetryError('error')
             if is_over_per_second_rsp(info):
-                raise OverPerSecondError(info)
+                raise OverPerSecondError('error')
 
         def __get_error(node):
             if not node:
                 return None
             errorId = node.get('errorId', None)
             if errorId and errorId.lower() != 'success':
-                return node.get('reason', None) or errorId
+                return f'{errorId}, {node.get("reason", "error")}'
             return None
 
         rootError = __get_error(info)

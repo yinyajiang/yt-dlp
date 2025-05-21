@@ -3351,7 +3351,7 @@ class YoutubeDL:
 
         # update params
         self.params.update(info_dict.get('_params', {}))
-        if proxy := traverse_obj(info_dict,('_params', 'proxy'), default=None):
+        if proxy := traverse_obj(info_dict, ('_params', 'proxy'), default=None):
             proxies = None
             if proxy and isinstance(proxy, str):
                 proxies = {

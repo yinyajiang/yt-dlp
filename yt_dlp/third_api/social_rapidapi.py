@@ -141,9 +141,9 @@ class SocialRapidApi:
 
         if info and not info.get('medias', None):
             if is_retry_rsp(info):
-                raise RetryError(info)
+                raise RetryError('error')
             if is_over_per_second_rsp(info):
-                raise OverPerSecondError(info)
+                raise OverPerSecondError('error')
 
         if info.get('error'):
             if info.get('message'):

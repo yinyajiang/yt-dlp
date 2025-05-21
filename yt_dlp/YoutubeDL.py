@@ -3351,6 +3351,18 @@ class YoutubeDL:
 
         # update params
         self.params.update(info_dict.get('_params', {}))
+        if proxy := traverse_obj(info_dict,('_params', 'proxy'), default=None):
+            proxies = None
+            if proxy and isinstance(proxy, str):
+                proxies = {
+                    'all': proxy,
+                }
+            if proxies:
+                # clear proxy cache
+                delattr(self, '_request_director')
+                delattr(self, 'proxies')
+                self.write_debug(f'Proxy map: {self.proxies}')
+                self.write_debug(f'Request Handlers: {", ".join(rh.RH_NAME for rh in self._request_director.handlers.values())}')
 
         if self.params.get('simulate'):
             info_dict['__write_download_archive'] = self.params.get('force_write_download_archive')

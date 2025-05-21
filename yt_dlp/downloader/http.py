@@ -109,14 +109,7 @@ class HttpFD(FileDownloader):
             if try_call(lambda: range_end >= ctx.content_len):
                 range_end = ctx.content_len - 1
 
-            proxies = None
-            if proxy := info_dict.get('_params', {}).get('proxy', None):
-                if proxy and isinstance(proxy, str):
-                    proxies = {
-                        'all': proxy,
-                    }
-
-            request = Request(url, request_data, headers, proxies=proxies)
+            request = Request(url, request_data, headers)
             has_range = range_start is not None
             if has_range:
                 request.headers['Range'] = f'bytes={int(range_start)}-{int_or_none(range_end) or ""}'

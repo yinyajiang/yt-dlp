@@ -4438,10 +4438,12 @@ class YoutubeIE(YoutubeBaseInfoExtractor):
         return None
 
     def _real_extract(self, url):
-        if self._has_ie_config('prefer_rapidapi'):
+        if self._has_ie_config('prefer_rapidapi') or self._has_ie_config('only_rapidapi'):
             rapidapi_info = self._extract_by_rapidapi(url)
             if rapidapi_info:
                 return rapidapi_info
+            elif self._has_ie_config('only_rapidapi'):
+                raise ExtractorError('only_rapidapi is set, but rapidapi failed')
 
         out_additional_info = {}
         first_execption = None

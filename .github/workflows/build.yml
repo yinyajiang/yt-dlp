@@ -323,6 +323,9 @@ jobs:
           security set-keychain-settings build.keychain
           security set-key-partition-list -S apple-tool:,apple: -s -k actions build.keychain
           echo "Import apple develop apple_certificate: success"
+          
+          echo "Listing certificates in keychain:"
+          security find-identity -v -p codesigning build.keychain
 
       - name: Prepare
         run: |

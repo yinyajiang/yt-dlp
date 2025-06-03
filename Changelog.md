@@ -4,6 +4,62 @@
 # To create a release, dispatch the https://github.com/yt-dlp/yt-dlp/actions/workflows/release.yml workflow on master
 -->
 
+### 2025.06.03.023427
+
+#### Core changes
+- [Merge remote-tracking branch 'barsnick/svtplay-fix-svt_id/barsnick/svtplay-fix-svt_id'](https://github.com/yt-dlp/yt-dlp/commit/88acf05c5ec85a7576794c8914b1cb0d0df960c9) by [pukkandan](https://github.com/pukkandan)
+- [Merge remote-tracking branch 'upstream'](https://github.com/yt-dlp/yt-dlp/commit/86adca8f78aa4caca079f3f2236014e320d43d37) by [pukkandan](https://github.com/pukkandan)
+- [Merge remote-tracking branch 'upstream'](https://github.com/yt-dlp/yt-dlp/commit/c54091227bbdb9845cc702aaee068846644aeb42) by [pukkandan](https://github.com/pukkandan)
+- [Merge remote-tracking branch 'upstream'](https://github.com/yt-dlp/yt-dlp/commit/9da15bd10fd412ab432c0212629ab38f232cd245) by [pukkandan](https://github.com/pukkandan)
+- [Merge remote-tracking branch 'upstream'](https://github.com/yt-dlp/yt-dlp/commit/2c8a900dc743c33e261d0f3da90810f35170f803) by [pukkandan](https://github.com/pukkandan)
+- [add `IE_NAME`s](https://github.com/yt-dlp/yt-dlp/commit/274c9d9fb970b42959efc5a75ce70e8805af35ab) by [bashonly](https://github.com/bashonly)
+- [additional refactoring & test fixes](https://github.com/yt-dlp/yt-dlp/commit/f1e982cc9f7c62a44a63b938029ad860f127cfde) by [bashonly](https://github.com/bashonly)
+- [remove dead `SVTIE`](https://github.com/yt-dlp/yt-dlp/commit/b25e561d7dfeffc896b810e8855a7e686ab333b0) by [bashonly](https://github.com/bashonly)
+- [remove pointless baseclass](https://github.com/yt-dlp/yt-dlp/commit/0ed58314634029b56f662db9aedd6ff557bd0f4f) by [bashonly](https://github.com/bashonly)
+
+#### Extractor changes
+- [Improve JSON LD thumbnails extraction](https://github.com/yt-dlp/yt-dlp/commit/85c8a405e3651dc041b758f4744d4fb3c4c55e01) ([#13368](https://github.com/yt-dlp/yt-dlp/issues/13368)) by [bashonly](https://github.com/bashonly), [doe1080](https://github.com/doe1080)
+- **10play**: [Fix extractor](https://github.com/yt-dlp/yt-dlp/commit/6d265388c6e943419ac99e9151cf75a3265f980f) ([#13349](https://github.com/yt-dlp/yt-dlp/issues/13349)) by [bashonly](https://github.com/bashonly)
+- **adobepass**
+    - [Add Fubo MSO](https://github.com/yt-dlp/yt-dlp/commit/eee90acc47d7f8de24afaa8b0271ccaefdf6e88c) ([#13131](https://github.com/yt-dlp/yt-dlp/issues/13131)) by [maxbin123](https://github.com/maxbin123)
+    - [Always add newer user-agent when required](https://github.com/yt-dlp/yt-dlp/commit/0ee1102268cf31b07f8a8318a47424c66b2f7378) ([#13131](https://github.com/yt-dlp/yt-dlp/issues/13131)) by [bashonly](https://github.com/bashonly)
+    - [Fix Philo MSO authentication](https://github.com/yt-dlp/yt-dlp/commit/943083edcd3df45aaa597a6967bc6c95b720f54c) ([#13335](https://github.com/yt-dlp/yt-dlp/issues/13335)) by [Sipherdrakon](https://github.com/Sipherdrakon)
+    - [Rework to require software statement](https://github.com/yt-dlp/yt-dlp/commit/711c5d5d098fee2992a1a624b1c4b30364b91426) ([#13131](https://github.com/yt-dlp/yt-dlp/issues/13131)) by [bashonly](https://github.com/bashonly), [maxbin123](https://github.com/maxbin123)
+    - [Validate login URL before sending credentials](https://github.com/yt-dlp/yt-dlp/commit/89c1b349ad81318d9d3bea76c01c891696e58d38) ([#13131](https://github.com/yt-dlp/yt-dlp/issues/13131)) by [bashonly](https://github.com/bashonly)
+- **aenetworks**: [Fix provider-locked content extraction](https://github.com/yt-dlp/yt-dlp/commit/6693d6603358ae6beca834dbd822a7917498b813) ([#13131](https://github.com/yt-dlp/yt-dlp/issues/13131)) by [maxbin123](https://github.com/maxbin123)
+- **brightcove**: new: [Adapt to new AdobePass requirement](https://github.com/yt-dlp/yt-dlp/commit/98f8eec956e3b16cb66a3d49cc71af3807db795e) ([#13131](https://github.com/yt-dlp/yt-dlp/issues/13131)) by [bashonly](https://github.com/bashonly)
+- **go**: [Fix provider-locked content extraction](https://github.com/yt-dlp/yt-dlp/commit/2e5bf002dad16f5ce35aa2023d392c9e518fcd8f) ([#13131](https://github.com/yt-dlp/yt-dlp/issues/13131)) by [bashonly](https://github.com/bashonly), [maxbin123](https://github.com/maxbin123)
+- **nbc**: [Rework and adapt extractors to new AdobePass flow](https://github.com/yt-dlp/yt-dlp/commit/2d7949d5642bc37d1e71bf00c9a55260e5505d58) ([#13131](https://github.com/yt-dlp/yt-dlp/issues/13131)) by [bashonly](https://github.com/bashonly)
+- **odnoklassniki**: [Detect and raise when login is required](https://github.com/yt-dlp/yt-dlp/commit/148a1eb4c59e127965396c7a6e6acf1979de459e) ([#13361](https://github.com/yt-dlp/yt-dlp/issues/13361)) by [bashonly](https://github.com/bashonly)
+- **patreon**: [Fix m3u8 formats extraction](https://github.com/yt-dlp/yt-dlp/commit/e0d6c0822930f6e63f574d46d946a58b73ecd10c) ([#13266](https://github.com/yt-dlp/yt-dlp/issues/13266)) by [bashonly](https://github.com/bashonly) (With fixes in [1a8a03e](https://github.com/yt-dlp/yt-dlp/commit/1a8a03ea8d827107319a18076ee3505090667c5a))
+- **podchaser**: [Fix extractor](https://github.com/yt-dlp/yt-dlp/commit/538eb305673c26bff6a2b12f1c96375fe02ce41a) ([#13271](https://github.com/yt-dlp/yt-dlp/issues/13271)) by [bashonly](https://github.com/bashonly)
+- **svtplay**
+    - [extract description](https://github.com/yt-dlp/yt-dlp/commit/d39dcddd082aec86553361feebf9872503e605f4) by [pukkandan](https://github.com/pukkandan)
+    - [fix extractor](https://github.com/yt-dlp/yt-dlp/commit/6976a80ba0f76c6ddbe4c2f98fb61be36ac3d58f) by [pukkandan](https://github.com/pukkandan)
+    - [fix test](https://github.com/yt-dlp/yt-dlp/commit/621491141c85bbc6fe8093821e43980060d0d0ef) by [pukkandan](https://github.com/pukkandan)
+    - [rework extractor](https://github.com/yt-dlp/yt-dlp/commit/4c9fe66ad00579af13c9f568e6c7a99abc937458) by [bashonly](https://github.com/bashonly)
+    - [simplify traverse_obj call](https://github.com/yt-dlp/yt-dlp/commit/23ee257f55f12be99e5a4e86251d3754c37b43da) by [pukkandan](https://github.com/pukkandan)
+- **theplatform**: [Improve metadata extraction](https://github.com/yt-dlp/yt-dlp/commit/ed108b3ea481c6a4b5215a9302ba92d74baa2425) ([#13131](https://github.com/yt-dlp/yt-dlp/issues/13131)) by [bashonly](https://github.com/bashonly)
+- **toutiao**: [Add extractor](https://github.com/yt-dlp/yt-dlp/commit/f8051e3a61686c5db1de5f5746366ecfbc3ad20c) ([#13246](https://github.com/yt-dlp/yt-dlp/issues/13246)) by [doe1080](https://github.com/doe1080)
+- **turner**: [Adapt extractors to new AdobePass flow](https://github.com/yt-dlp/yt-dlp/commit/0daddc780d3ac5bebc3a3ec5b884d9243cbc0745) ([#13131](https://github.com/yt-dlp/yt-dlp/issues/13131)) by [bashonly](https://github.com/bashonly)
+- **twitcasting**: [Fix password-protected livestream support](https://github.com/yt-dlp/yt-dlp/commit/52f9729c9a92ad4656d746ff0b1acecb87b3e96d) ([#13097](https://github.com/yt-dlp/yt-dlp/issues/13097)) by [bashonly](https://github.com/bashonly)
+- **twitter**: broadcast: [Support events URLs](https://github.com/yt-dlp/yt-dlp/commit/7794374de8afb20499b023107e2abfd4e6b93ee4) ([#13248](https://github.com/yt-dlp/yt-dlp/issues/13248)) by [doe1080](https://github.com/doe1080)
+- **vice**: [Mark extractors as broken](https://github.com/yt-dlp/yt-dlp/commit/6121559e027a04574690799c1776bc42bb51af31) ([#13131](https://github.com/yt-dlp/yt-dlp/issues/13131)) by [bashonly](https://github.com/bashonly)
+- **vimeo**: [Extract subtitles from player subdomain](https://github.com/yt-dlp/yt-dlp/commit/c723c4e5e78263df178dbe69844a3d05f3ef9e35) ([#13350](https://github.com/yt-dlp/yt-dlp/issues/13350)) by [bashonly](https://github.com/bashonly)
+- **watchespn**: [Fix provider-locked content extraction](https://github.com/yt-dlp/yt-dlp/commit/b094747e93cfb0a2c53007120e37d0d84d41f030) ([#13131](https://github.com/yt-dlp/yt-dlp/issues/13131)) by [maxbin123](https://github.com/maxbin123)
+- **weverse**: [Support login with oauth refresh tokens](https://github.com/yt-dlp/yt-dlp/commit/3fe72e9eea38d9a58211cde42cfaa577ce020e2c) ([#13284](https://github.com/yt-dlp/yt-dlp/issues/13284)) by [bashonly](https://github.com/bashonly)
+- **youtube**
+    - [Fix `--mark-watched` support](https://github.com/yt-dlp/yt-dlp/commit/b5be29fa58ec98226e11621fd9c58585bcff6879) ([#13222](https://github.com/yt-dlp/yt-dlp/issues/13222)) by [brian6932](https://github.com/brian6932), [iednod55](https://github.com/iednod55)
+    - [Fix automatic captions for some client combinations](https://github.com/yt-dlp/yt-dlp/commit/53ea743a9c158f8ca2d75a09ca44ba68606042d8) ([#13268](https://github.com/yt-dlp/yt-dlp/issues/13268)) by [bashonly](https://github.com/bashonly)
+    - [Improve signature extraction debug output](https://github.com/yt-dlp/yt-dlp/commit/d30a49742cfa22e61c47df4ac0e7334d648fb85d) ([#13327](https://github.com/yt-dlp/yt-dlp/issues/13327)) by [bashonly](https://github.com/bashonly)
+    - [nsig code improvements and cleanup](https://github.com/yt-dlp/yt-dlp/commit/f7bbf5a617f9ab54ef51eaef99be36e175b5e9c3) ([#13280](https://github.com/yt-dlp/yt-dlp/issues/13280)) by [bashonly](https://github.com/bashonly)
+
+#### Misc. changes
+- **build**
+    - [Exclude `pkg_resources` from being collected](https://github.com/yt-dlp/yt-dlp/commit/cc749a8a3b8b6e5c05318868c72a403f376a1b38) ([#13320](https://github.com/yt-dlp/yt-dlp/issues/13320)) by [bashonly](https://github.com/bashonly)
+    - [Fix macOS requirements caching](https://github.com/yt-dlp/yt-dlp/commit/201812100f315c6727a4418698d5b4e8a79863d4) ([#13328](https://github.com/yt-dlp/yt-dlp/issues/13328)) by [bashonly](https://github.com/bashonly)
+- **test**: postprocessors: [Remove binary thumbnail test data](https://github.com/yt-dlp/yt-dlp/commit/a9b370069838e84d44ac7ad095d657003665885a) ([#13341](https://github.com/yt-dlp/yt-dlp/issues/13341)) by [bashonly](https://github.com/bashonly)
+
 ### 2025.05.22
 
 #### Core changes

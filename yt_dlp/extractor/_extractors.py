@@ -875,9 +875,7 @@ from .holodex import HolodexIE
 from .hotnewhiphop import HotNewHipHopIE
 from .hotstar import (
     HotStarIE,
-    HotStarPlaylistIE,
     HotStarPrefixIE,
-    HotStarSeasonIE,
     HotStarSeriesIE,
 )
 from .hqporner import HqpornerIE
@@ -996,10 +994,6 @@ from .japandiet import (
     ShugiinItvVodIE,
 )
 from .jeuxvideo import JeuxVideoIE
-from .jiocinema import (
-    JioCinemaIE,
-    JioCinemaSeriesIE,
-)
 from .jiosaavn import (
     JioSaavnAlbumIE,
     JioSaavnArtistIE,
@@ -1189,6 +1183,7 @@ from .markiza import (
 from .massengeschmacktv import MassengeschmackTVIE
 from .masters import MastersIE
 from .matchtv import MatchTVIE
+from .mave import MaveIE
 from .mbn import MBNIE
 from .mdr import MDRIE
 from .medaltv import MedalTVIE

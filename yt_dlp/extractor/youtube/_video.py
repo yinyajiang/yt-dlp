@@ -2823,6 +2823,10 @@ class YoutubeIE(YoutubeBaseInfoExtractor):
             context['signatureTimestamp'] = sts
         return {
             'playbackContext': {
+                'adPlaybackContext': {
+                    'pyv': True,
+                    'adType': 'AD_TYPE_INSTREAM',
+                },
                 'contentPlaybackContext': context,
             },
             **cls._get_checkok_params(),
@@ -3558,6 +3562,11 @@ class YoutubeIE(YoutubeBaseInfoExtractor):
                     return False
                 f['format_note'] = join_nonempty(f.get('format_note'), 'MISSING POT', delim=' ')
                 f['source_preference'] -= 20
+
+            # XXX: Check if IOS HLS formats are affected by player PO token enforcement; temporary
+            # See https://github.com/yt-dlp/yt-dlp/issues/13511
+            if proto == 'hls' and client_name == 'ios':
+                f['__needs_testing'] = True
 
             itags[itag].add(key)
 
@@ -4386,6 +4395,7 @@ class YoutubeIE(YoutubeBaseInfoExtractor):
 
         if upload_date and live_status not in ('is_live', 'post_live', 'is_upcoming'):
             # Newly uploaded videos' HLS formats are potentially problematic and need to be checked
+            # XXX: This is redundant for as long as we are already checking all IOS HLS formats
             upload_datetime = datetime_from_str(upload_date).replace(tzinfo=dt.timezone.utc)
             if upload_datetime >= datetime_from_str('today-2days'):
                 for fmt in info['formats']:

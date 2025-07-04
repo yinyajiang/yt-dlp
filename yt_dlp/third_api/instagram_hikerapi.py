@@ -124,6 +124,7 @@ class InstagramHikerApi:
             js = self._call_api('/v2/media/info/by/id', {'id': id})
         if js.get('status', '').lower() != 'ok':
             raise ExtractorError('[hikerapi] ' + json.dumps(js))
+
         return self._parse_media_info(js.get('media_or_ad'))
 
     def extract_story_info(self, story_id=''):
@@ -237,6 +238,7 @@ class InstagramHikerApi:
 
         elif media_type == 8:  # Carousel
             entry['_playlist_media_type'] = 'CAROUSEL'
+            entry['_type'] = 'playlist'
             if entry.get('entries') is None:
                 entry['entries'] = []
             for sub_item in traverse_obj(item, ('carousel_media', ...), default=[]):

@@ -38,7 +38,7 @@ class InstagramHikerApi:
             raise ExtractorError('[hikerapi]: ' + json.dumps(js))
 
         info = {
-            'id': user.get('pk_id'),
+            'id': str(user.get('pk_id')),
             '_type': 'playlist',
             'title': f'{user.get("username")} Story',
             'url': f'https://www.instagram.com/stories/{user.get("username")}',
@@ -68,7 +68,7 @@ class InstagramHikerApi:
             raise ExtractorError('[hikerapi]: ' + json.dumps(js))
 
         info = {
-            'id': user.get('pk_id'),
+            'id': str(user.get('pk_id')),
             '_type': 'playlist',
             'title': f'{user.get("username")} Story',
             'url': f'https://www.instagram.com/stories/{user.get("username")}',
@@ -94,7 +94,7 @@ class InstagramHikerApi:
             user_id = user.get('id')
         else:
             user = {
-                'id': user_id,
+                'id': str(user_id),
                 'title': 'post by ' + username or user_id,
             }
 
@@ -136,7 +136,7 @@ class InstagramHikerApi:
         user = traverse_obj(reel, 'user', default={})
 
         info = {
-            'id': user.get('pk_id'),
+            'id': str(user.get('pk_id')),
             '_type': 'playlist',
             'title': f'{user.get("username")} Story',
             'url': f'https://www.instagram.com/stories/{story_id}',
@@ -192,7 +192,7 @@ class InstagramHikerApi:
         title = traverse_obj(item, ('caption', 'text'), default='') or f'Post by {user_name}'
 
         entry = {
-            'id': media_id,
+            'id': str(media_id),
             'title': title,
             'thumbnails': [{'url': thumbnail}] if thumbnail else None,
             # 'upload_date': datetime.fromtimestamp(
@@ -261,7 +261,7 @@ class InstagramHikerApi:
 
         user = traverse_obj(js, 'user', default={})
         info = {
-            'id': user.get('pk_id'),
+            'id': str(user.get('pk_id')),
             'title': user.get('username'),
             'url': f'https://www.instagram.com/{user.get("username")}',
             'description': user.get('biography'),

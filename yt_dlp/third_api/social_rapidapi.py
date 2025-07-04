@@ -61,7 +61,7 @@ class SocialRapidApi:
             video_id = md5((info.get('title') or video_url).encode('utf-8')).hexdigest()
 
         ytb_info = {
-            'id': video_id,
+            'id': str(video_id),
             'title': info.get('title'),
             'duration': int(info.get('duration') / 1000),
             'channel': info.get('author'),

@@ -38,7 +38,7 @@ class YoutubeRapidApi:
         info = self._get_video_info(video_id)
 
         ytb_info = {
-            'id': info.get('id'),
+            'id': str(info.get('id')),
             'title': info.get('title'),
             'description': info.get('description'),
             'duration': info.get('lengthSeconds'),

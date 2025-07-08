@@ -4630,13 +4630,13 @@ class YoutubeIE(YoutubeBaseInfoExtractor):
         return any(e in s for e in [
             'Private video',
             'Video unavailable',
-            'Premieres in'
+            'Premieres in',
             'Join this channel',
             'not available',
             'DRM protected',
             'Sign in to confirm your age',
             'in your region',
-            'in your country'
+            'in your country',
             'Payment Required',
             "channel's members",
             'has been removed',

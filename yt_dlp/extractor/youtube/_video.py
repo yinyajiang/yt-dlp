@@ -3793,7 +3793,7 @@ class YoutubeIE(YoutubeBaseInfoExtractor):
             or 'premium' in (self._get_text(tlr, 'tooltipText') or '').lower()
         )
 
-    def _initial_extract(self, url, smuggled_data, webpage_url, webpage_client, video_id):
+    def _initial_extract(self, url, smuggled_data, webpage_url, webpage_client, video_id, in_out_additional_info=None):
         # This function is also used by live-from-start refresh
         webpage = self._download_initial_webpage(webpage_url, webpage_client, video_id)
         webpage_ytcfg = self.extract_ytcfg(video_id, webpage) or self._get_default_ytcfg(webpage_client)
@@ -3804,9 +3804,25 @@ class YoutubeIE(YoutubeBaseInfoExtractor):
         if is_premium_subscriber:
             self.write_debug('Detected YouTube Premium subscription')
 
+        requested_clients = self._get_requested_clients(url, smuggled_data, is_premium_subscriber)
         player_responses, player_url = self._extract_player_responses(
-            self._get_requested_clients(url, smuggled_data, is_premium_subscriber),
+            requested_clients,
             video_id, webpage, webpage_client, webpage_ytcfg, is_premium_subscriber)
+
+        vr_client = self._get_vr_client_name()
+        if vr_client and (vr_client not in requested_clients) and self._is_vr_video(player_responses):
+            self.report_warning('this is a vr video, try to use android_vr client')
+            try:
+                player_responses_vr, player_url_vr = self._extract_player_responses([vr_client], video_id, webpage, webpage_client, webpage_ytcfg, is_premium_subscriber)
+                if player_responses_vr:
+                    _, is_invalid = self._maybe_is_invalid_client_response(player_responses_vr)
+                    if not is_invalid:
+                        player_responses = player_responses_vr
+                        player_url = player_url_vr
+            except Exception as e:
+                self.report_warning(f'Failed to extract player responses for android_vr: {e}')
+
+        self._report_invalid_clients(player_responses, in_out_additional_info)
 
         return webpage, webpage_ytcfg, initial_data, is_premium_subscriber, player_responses, player_url
 
@@ -3819,7 +3835,7 @@ class YoutubeIE(YoutubeBaseInfoExtractor):
         webpage_client = 'web'
 
         webpage, webpage_ytcfg, initial_data, is_premium_subscriber, player_responses, player_url = self._initial_extract(
-            url, smuggled_data, webpage_url, webpage_client, video_id)
+            url, smuggled_data, webpage_url, webpage_client, video_id, in_out_additional_info)
 
         playability_statuses = traverse_obj(
             player_responses, (..., 'playabilityStatus'), expected_type=dict)
@@ -4667,3 +4683,78 @@ class YoutubeIE(YoutubeBaseInfoExtractor):
         if webpage:
             video_title = self._html_search_meta(['og:title', 'twitter:title', 'title'], webpage, default=None)
         return webpage, video_title
+
+    def _report_invalid_clients(self, player_responses, in_out_additional_info=None):
+        try:
+            if in_out_additional_info is None:
+                in_out_additional_info = {}
+            invalid_client = []
+            valid_client = []
+            in_out_additional_info['has_invalid_potoken_client'] = False
+            if player_responses and isinstance(player_responses, list):
+                for resp in player_responses:
+                    client, is_invalid = self._maybe_is_invalid_client_response(resp)
+                    if not client:
+                        continue
+                    if is_invalid:
+                        is_potoken, potoken_type = self._is_potoken_client(client)
+                        if is_potoken:
+                            client += f'(potoken={potoken_type})'
+                            in_out_additional_info['has_invalid_potoken_client'] = True
+                        invalid_client.append(client)
+                    else:
+                        valid_client.append(client)
+            if invalid_client:
+                self.report_warning(f'Invalid youtube clients: {", ".join(invalid_client)}')
+            if valid_client:
+                self.report_msg(f'Valid youtube clients: {", ".join(valid_client)}')
+        except Exception:
+            pass
+
+    def _is_potoken_client(self, client):
+        if client not in INNERTUBE_CLIENTS or not INNERTUBE_CLIENTS[client].get('PO_TOKEN_REQUIRED_CONTEXTS', None):
+            return False, ''
+        context = INNERTUBE_CLIENTS[client].get('PO_TOKEN_REQUIRED_CONTEXTS')
+        if _PoTokenContext.GVS in context and _PoTokenContext.PLAYER in context:
+            return True, 'gvs,player'
+        if _PoTokenContext.GVS in context:
+            return True, 'gvs'
+        if _PoTokenContext.PLAYER in context:
+            return True, 'player'
+        return False, ''
+
+    def _maybe_is_invalid_client_response(self, resp):
+        try:
+            if not resp or 'playabilityStatus' not in resp:
+                return '', False
+            status = resp['playabilityStatus']
+            if not status or not isinstance(status, dict):
+                return '', False
+            if 'status' not in status:
+                return '', False
+            client = resp.get(STREAMING_DATA_CLIENT_NAME, '')
+            if not client:
+                return '', False
+            return client, str(status['status']).lower() != 'ok'
+        except Exception:
+            return '', False
+
+    def _get_vr_client_name(self):
+        if 'android_vr' in INNERTUBE_CLIENTS:
+            return 'android_vr'
+        for name in INNERTUBE_CLIENTS:
+            if name.lower().endswith('_vr'):
+                return name
+        return None
+
+    def _is_vr_video(self, player_responses):
+        try:
+            response_str = json.dumps(player_responses)
+            vr_warings_list = [
+                '360\\u00b0 video playback is not supported on this',
+                '180\\u00b0 video playback is not supported on this',
+                'To view this video in VR',
+            ]
+            return any(vr_warning in response_str for vr_warning in vr_warings_list)
+        except Exception:
+            return False

@@ -769,11 +769,10 @@ class InstagramUserIE(InstagramPlaylistBaseIE):
             return self.__real_extract(url)
         except Exception as e:
             first_exception = e
-
         try:
             hikerApi = InstagramHikerApi(self)
             username = self._match_id(url)
-            return hikerApi.extract_user_posts_info(username=username, prefer_video=True)
+            return hikerApi.extract_user_posts_info(username=username)
         except Exception:
             raise first_exception
 

@@ -346,7 +346,7 @@ def _extract_chrome_cookies(browser_name, profile, keyring, logger):
             return jar
         except PermissionError as error:
             if os.name == 'nt' and error.errno == 13:
-                message = 'Could not copy Chrome cookie database. See  https://github.com/yt-dlp/yt-dlp/issues/7271  for more info'
+                message = 'Could not copy Chrome cookie database. See  issues/7271  for more info'
                 logger.error(message)
                 raise DownloadError(message)  # force exit
             raise
@@ -1082,7 +1082,7 @@ def _decrypt_windows_dpapi(ciphertext, logger):
         ctypes.byref(blob_out),  # pDataOut
     )
     if not ret:
-        message = 'Failed to decrypt with DPAPI. See  https://github.com/yt-dlp/yt-dlp/issues/10927  for more info'
+        message = 'Failed to decrypt with DPAPI. See  issues/10927  for more info'
         logger.error(message)
         raise DownloadError(message)  # force exit
 

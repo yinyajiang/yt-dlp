@@ -3411,7 +3411,7 @@ class YoutubeIE(YoutubeBaseInfoExtractor):
                     msg += (
                         f'{"Your account" if self.is_authenticated else "The current session"} may have '
                         f'an experiment that applies DRM to all videos on the tv client. '
-                        f'See  https://github.com/yt-dlp/yt-dlp/issues/12563  for more details.'
+                        f'See  issues/12563  for more details.'
                     )
                 self.report_warning(msg, video_id, only_once=True)
 
@@ -3429,7 +3429,7 @@ class YoutubeIE(YoutubeBaseInfoExtractor):
                             f'YouTube may have enabled the SABR-only or Server-Side Ad Placement experiment for '
                             f'{"your account" if self.is_authenticated else "the current session"}. '
                         )
-                    msg += 'See  https://github.com/yt-dlp/yt-dlp/issues/12482  for more details'
+                    msg += 'See  issues/12482  for more details'
                     self.report_warning(msg, video_id, only_once=True)
                     continue
                 try:

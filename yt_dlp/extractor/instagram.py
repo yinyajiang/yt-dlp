@@ -773,7 +773,8 @@ class InstagramUserIE(InstagramPlaylistBaseIE):
             hikerApi = InstagramHikerApi(self)
             username = self._match_id(url)
             return hikerApi.extract_user_posts_info(username=username)
-        except Exception:
+        except Exception as e:
+            self.report_warning(f'[hikerapi] extract_user_posts_info failed: {e}')
             raise first_exception
 
 

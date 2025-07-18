@@ -4110,7 +4110,7 @@ class InfoExtractor:
             else 'public' if all_known
             else None)
 
-    def _configuration_arg(self, key, default=NO_DEFAULT, *, ie_key=None, casesense=False):
+    def _configuration_arg(self, key, default=NO_DEFAULT, *, ie_key=None, casesense=False, enable_env=False):
         '''
         @returns            A list of values for the extractor argument given by "key"
                             or "default" if no such key is present
@@ -4120,6 +4120,13 @@ class InfoExtractor:
         ie_key = ie_key if isinstance(ie_key, str) else (ie_key or self).ie_key()
         val = traverse_obj(self._downloader.params, ('extractor_args', ie_key.lower(), key))
         if val is None:
+            if enable_env:
+                val = os.getenv(key)
+                if val is not None:
+                    if default is NO_DEFAULT or default is None or isinstance(default, list):
+                        return [val]
+                    else:
+                        return val
             return [] if default is NO_DEFAULT else default
         return list(val) if casesense else [x.lower() for x in val]
 

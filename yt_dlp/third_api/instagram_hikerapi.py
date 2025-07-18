@@ -19,8 +19,12 @@ class InstagramHikerApi:
             raise ExtractorError('[hikerapi] api keys is required')
 
         self._prefer_video = True
-        if not_prefer_video := ie._configuration_arg('hikerapi_not_prefer_video', [], casesense=True, ie_key='Instagram'):
+        if not_prefer_video := ie._configuration_arg('hikerapi_not_prefer_video', [], casesense=True, ie_key='Instagram', enable_env=True):
             self._prefer_video = not not_prefer_video[0]
+
+        self._default_max_call_page = 50
+        if max_call_page := ie._configuration_arg('hikerapi_max_call_page', [], casesense=True, ie_key='Instagram', enable_env=True):
+            self._default_max_call_page = max_call_page[0]
 
     def extract_user_stories_info(self, username='', user_id=''):
         """Extract user stories by username or user_id"""
@@ -83,10 +87,14 @@ class InstagramHikerApi:
         info['entries'] = self._filter_entries(info['entries'])
         return info
 
-    def extract_user_posts_info(self, user_id='', username='', max_call_page=-1):
+    def extract_user_posts_info(self, user_id='', username='', max_call_page=None):
         """Extract user posts with pagination support"""
         if not user_id and not username:
             raise ExtractorError('[hikerapi] user_id or username is required')
+
+        if not max_call_page:
+            max_call_page = self._default_max_call_page
+
         if max_call_page <= 0:
             max_call_page = -1
         if not user_id:

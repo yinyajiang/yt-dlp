@@ -4087,6 +4087,7 @@ class YoutubeIE(YoutubeBaseInfoExtractor):
                     'ext': fmt,
                     'url': urljoin('https://www.youtube.com', update_url_query(base_url, query)),
                     'name': sub_name,
+                    'impersonate': True,
                     STREAMING_DATA_CLIENT_NAME: client_name,
                 })
 

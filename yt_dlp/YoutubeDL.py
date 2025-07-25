@@ -167,6 +167,7 @@ from .utils import (
     write_json_file,
     write_string,
     smuggle_url,
+    add_query_params,
 )
 from .utils._utils import _UnsafeExtensionError, _YDLLogger, _ProgressState
 from .utils.networking import (
@@ -4679,3 +4680,12 @@ class YoutubeDL:
         if i == -1:
             return url
         return url[i:]
+
+    def extract_info_use_thirdapi(self, url, third_api, *args, **kwargs):
+        if not third_api:
+            raise ValueError('third_api is required')
+        url = add_query_params(url, {
+            '__third_api__': third_api,
+            '__force_third_api__': '1'},
+        )
+        return self.extract_info(url, *args, **kwargs)

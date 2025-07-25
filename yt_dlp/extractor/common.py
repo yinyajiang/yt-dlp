@@ -853,20 +853,20 @@ class InfoExtractor:
         else:
             return err.status in variadic(expected_status)
 
-    def _create_request(self, url_or_request, data=None, headers=None, query=None, extensions=None):
+    def _create_request(self, url_or_request, data=None, headers=None, query=None, extensions=None, method=None):
         if isinstance(url_or_request, urllib.request.Request):
             self._downloader.deprecation_warning(
                 'Passing a urllib.request.Request to _create_request() is deprecated. '
                 'Use yt_dlp.networking.common.Request instead.')
             url_or_request = urllib_req_to_req(url_or_request)
         elif not isinstance(url_or_request, Request):
-            url_or_request = Request(url_or_request)
+            url_or_request = Request(url_or_request, method=method)
 
         url_or_request.update(data=data, headers=headers, query=query, extensions=extensions)
         return url_or_request
 
     def _request_webpage(self, url_or_request, video_id, note=None, errnote=None, fatal=True, data=None,
-                         headers=None, query=None, expected_status=None, impersonate=None, require_impersonation=False, extensions=None, timeout=None):
+                         headers=None, query=None, expected_status=None, impersonate=None, require_impersonation=False, extensions=None, timeout=None, method=None):
         """
         Return the response handle.
 
@@ -916,7 +916,7 @@ class InfoExtractor:
                 self._downloader._unavailable_targets_message(requested_targets, note=msg), only_once=True)
 
         try:
-            return self._downloader.urlopen(self._create_request(url_or_request, data, headers, query, extensions))
+            return self._downloader.urlopen(self._create_request(url_or_request, data, headers, query, extensions, method))
         except network_exceptions as err:
             if isinstance(err, HTTPError):
                 if self.__can_accept_status_code(err, expected_status):
@@ -936,7 +936,7 @@ class InfoExtractor:
 
     def _download_webpage_handle(self, url_or_request, video_id, note=None, errnote=None, fatal=True,
                                  encoding=None, data=None, headers={}, query={}, expected_status=None,
-                                 impersonate=None, require_impersonation=False, extensions=None):
+                                 impersonate=None, require_impersonation=False, extensions=None, method=None):
         """
         Return a tuple (page content as string, URL handle).
 
@@ -982,7 +982,7 @@ class InfoExtractor:
 
         urlh = self._request_webpage(url_or_request, video_id, note, errnote, fatal, data=data,
                                      headers=headers, query=query, expected_status=expected_status,
-                                     impersonate=impersonate, require_impersonation=require_impersonation, extensions=extensions)
+                                     impersonate=impersonate, require_impersonation=require_impersonation, extensions=extensions, method=method)
         if urlh is False:
             assert not fatal
             return False
@@ -1114,11 +1114,11 @@ class InfoExtractor:
 
         def download_handle(self, url_or_request, video_id, note=note, errnote=errnote, transform_source=None,
                             fatal=True, encoding=None, data=None, headers={}, query={}, expected_status=None,
-                            impersonate=None, require_impersonation=False, extensions=None):
+                            impersonate=None, require_impersonation=False, extensions=None, method=None):
             res = self._download_webpage_handle(
                 url_or_request, video_id, note=note, errnote=errnote, fatal=fatal, encoding=encoding,
                 data=data, headers=headers, query=query, expected_status=expected_status,
-                impersonate=impersonate, require_impersonation=require_impersonation, extensions=extensions)
+                impersonate=impersonate, require_impersonation=require_impersonation, extensions=extensions, method=method)
             if res is False:
                 return res
             content, urlh = res
@@ -1126,9 +1126,9 @@ class InfoExtractor:
 
         def download_content(self, url_or_request, video_id, note=note, errnote=errnote, transform_source=None,
                              fatal=True, encoding=None, data=None, headers={}, query={}, expected_status=None,
-                             impersonate=None, require_impersonation=False, extensions=None):
+                             impersonate=None, require_impersonation=False, extensions=None, method=None):
             if self.get_param('load_pages'):
-                url_or_request = self._create_request(url_or_request, data, headers, query, extensions=extensions)
+                url_or_request = self._create_request(url_or_request, data, headers, query, extensions=extensions, method=method)
                 filename = _request_dump_filename(
                     url_or_request.url, video_id, url_or_request.data,
                     trim_length=self.get_param('trim_file_name'))
@@ -4522,7 +4522,7 @@ class InfoExtractor:
         return param
 
     def _request_webpage2(self, url_or_request, video_id, note=None, errnote=None, fatal=True, data=None,
-                          headers=None, query=None, expected_status=None, impersonate=None, require_impersonation=False, extensions=None, timeout=None, trycount=1):
+                          headers=None, query=None, expected_status=None, impersonate=None, require_impersonation=False, extensions=None, timeout=None, trycount=1, method=None):
 
         if trycount < 1:
             trycount = 1
@@ -4534,7 +4534,7 @@ class InfoExtractor:
         first_exception = None
         for _ in range(trycount):
             try:
-                return self._request_webpage(url_or_request, video_id, note, errnote, inner_fatal, data, headers, query, expected_status, impersonate, require_impersonation, extensions, timeout)
+                return self._request_webpage(url_or_request, video_id, note, errnote, inner_fatal, data, headers, query, expected_status, impersonate, require_impersonation, extensions, timeout, method)
             except ExtractorError as e:
                 first_exception = e
         if not fatal:

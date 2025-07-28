@@ -4504,14 +4504,14 @@ class YoutubeIE(YoutubeBaseInfoExtractor):
         except Exception:
             return False
 
-    def _extract_by_rapidapi(self, url):
+    def _extract_by_thirdapi(self, url):
         try:
             rapidApi = YoutubeThirdIE(self)
             video_id = self._match_id(url)
             if not video_id:
                 return None
             info = rapidApi.extract_video_info(video_id)
-            self.report_msg('use rapidapi')
+            self.report_msg('use thirdapi')
             return info
         except Exception:
             return None
@@ -4557,12 +4557,12 @@ class YoutubeIE(YoutubeBaseInfoExtractor):
         return None
 
     def _real_extract(self, url):
-        if self._has_ie_config('prefer_rapidapi') or self._has_ie_config('only_rapidapi'):
-            rapidapi_info = self._extract_by_rapidapi(url)
-            if rapidapi_info:
-                return rapidapi_info
-            elif self._has_ie_config('only_rapidapi'):
-                raise ExtractorError('only_rapidapi is set, but rapidapi failed')
+        if self._has_ie_config('prefer_thirdapi') or self._has_ie_config('only_thirdapi'):
+            thirdapi_info = self._extract_by_thirdapi(url)
+            if thirdapi_info:
+                return thirdapi_info
+            elif self._has_ie_config('only_thirdapi'):
+                raise ExtractorError('only_thirdapi is set, but rapidapi failed')
 
         out_additional_info = {}
         first_execption = None
@@ -4584,9 +4584,9 @@ class YoutubeIE(YoutubeBaseInfoExtractor):
         if all_clients_info:
             return all_clients_info
 
-        rapidapi_info = self._extract_by_rapidapi(url)
-        if rapidapi_info:
-            return rapidapi_info
+        thirdapi_info = self._extract_by_thirdapi(url)
+        if thirdapi_info:
+            return thirdapi_info
         raise first_execption
 
         auto_pot_result = self._extract_by_auto_potoken(url, last_exception=first_execption, last_out_additional_info=out_additional_info)

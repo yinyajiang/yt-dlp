@@ -164,7 +164,7 @@ class ZMMutilRapidApi:
         if info.get('error'):
             if info.get('message'):
                 raise ExtractorError(f'{info.get("message")}, status: {info.get("status")}')
-            raise ExtractorError(f'{info.get('error')}')
+            raise ExtractorError(f'{info.get("error")}')
 
         if empty_medias:
             raise ExtractorError(str(info))

@@ -1,4 +1,5 @@
 from .extractor import SnapMutilRapidApi, AllInOneMutilRapidApi, ZMMutilRapidApi
+from ..utils import ExtractorError
 
 
 class MutilThirdIE:
@@ -19,7 +20,7 @@ class MutilThirdIE:
     def extract_video_info(self, video_url, video_id=None):
         ies = [ie_cls(self.ie) for ie_cls in self.cls_ies if ie_cls.is_supported_site(video_url)]
         if not ies:
-            ies = [ie_cls(self.ie) for ie_cls in self.cls_ies]
+            raise ExtractorError('MutilThirdIE: No supported')
         first_exception = None
         for ie in ies:
             try:

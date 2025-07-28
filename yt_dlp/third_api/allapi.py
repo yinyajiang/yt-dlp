@@ -25,6 +25,6 @@ def extract_video_info(ie, url, api=None):
         return SnapMutilRapidApi(ie).extract_video_info(url)
     elif api == 'allinone_mutil_rapidapi':
         return AllInOneMutilRapidApi(ie).extract_video_info(url)
-    elif api == 'mutil_api':
+    elif api == 'mutil_api' or api == 'mutil_rapidapi':
         return MutilThirdIE(ie).extract_video_info(url)
     raise ExtractorError(f'unknown api: {api}')

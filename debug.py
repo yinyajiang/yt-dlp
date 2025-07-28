@@ -104,9 +104,7 @@ ydl = YoutubeDL({
             'prefer_rapidapi': [False],
             'only_rapidapi': [False],
             'rapidapi_key': [
-                # '04ce9a4844mshd1578c7feea684ep1eab36jsndf9a6b522f3c',
-                # 'rapidapi_host': ['youtube-rapidapi.p.rapidapi.com'],
-                # 'rapidapi_endpoint': ['https://youtube-rapidapi.p.rapidapi.com/video/info'
+                # '',
             ],
         },
     },

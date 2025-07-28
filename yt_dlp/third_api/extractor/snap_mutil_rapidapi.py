@@ -4,7 +4,7 @@ import time
 import os
 from hashlib import md5
 from ...utils import ExtractorError, parse_duration, urlencode_postdata
-from ._common import is_retry_rsp, is_over_per_second_rsp, RetryError, OverPerSecondError, is_supported_site, remove_third_api_params
+from .common import is_retry_rsp, is_over_per_second_rsp, RetryError, OverPerSecondError, is_supported_site, remove_third_api_params
 
 
 #  https://rapidapi.com/tuan2308/api/snap-video3

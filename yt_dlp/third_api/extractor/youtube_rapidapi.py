@@ -9,7 +9,7 @@ from ...cookies import YoutubeDLCookieJar
 import random
 import time
 import os
-from ._common import is_retry_rsp, is_over_per_second_rsp, RetryError, OverPerSecondError
+from .common import is_retry_rsp, is_over_per_second_rsp, RetryError, OverPerSecondError
 
 
 def _date_convert(date_str):

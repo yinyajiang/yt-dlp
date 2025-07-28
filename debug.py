@@ -5,11 +5,11 @@ current_dir = os.path.dirname(os.path.realpath(__file__))
 debug_dir = os.path.join(current_dir, 'debug')
 os.makedirs(debug_dir, exist_ok=True)
 
-os.environ['hikerapi_key'] = 'ZXMO9mnHA1MOSD56TSKzrWJPNrNnw23D'
-os.environ['rapidapi_key'] = '04ce9a4844mshd1578c7feea684ep1eab36jsndf9a6b522f3c'
-os.environ['webview_location'] = '/Users/new/Documents/GitHub/webviewloader/webinterceptor/dist/WebVideoDownloader.app'
+os.environ['hikerapi_key'] = ''
+os.environ['rapidapi_key'] = ''
+os.environ['webview_location'] = ''
 # os.environ['webview_params'] = ''
-os.environ['webview_downpage_params'] = 'downpage --url {url} --path {file}'
+os.environ['webview_downpage_params'] = ''
 os.environ['mp4decrypt_location'] = os.path.join(debug_dir, 'mp4decrypt')
 
 

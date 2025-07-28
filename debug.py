@@ -120,14 +120,14 @@ ydl = YoutubeDL({
 #
 # 'https://www.msn.com/en-us/video/news/lafd-chief-slams-budget-cuts-says-department-was-let-down/vi-BB1rfd5y?ocid=winp2fptaskbarhover#details'
 
-info = ydl.extract_info_use_thirdapi('https://www.instagram.com/kleinzheng/',
-                        third_api='allinone_mutil_rapidapi',
+# info = ydl.extract_info_use_thirdapi('https://www.youtube.com/watch?v=OJ_W4R0WBdU',
+#                                      third_api='allinone_mutil_rapidapi',
+#                                      download=False,
+#                                      force_generic_extractor=False)
+
+info = ydl.extract_info('https://www.facebook.com/watch?v=957463283129708',
                         download=False,
                         force_generic_extractor=False)
-
-# info = ydl.extract_info('https://www.youtube.com/watch?v=xSsFtDY-nOw',
-#                         download=False,
-#                         force_generic_extractor=False)
 
 s = json.dumps(ydl.sanitize_info(info))
 print(s)

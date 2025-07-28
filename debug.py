@@ -1,22 +1,15 @@
 import json
 import os
-# from yt_dlp.third_api.youtube_rapidapi import YoutubeRapidApi
-
-
-# ytb_api = YoutubeRapidApi()
-# info = ytb_api.get_video_info('dQw4w9WgXcQ')
-# print(json.dumps(info))
-
 
 current_dir = os.path.dirname(os.path.realpath(__file__))
 debug_dir = os.path.join(current_dir, 'debug')
 os.makedirs(debug_dir, exist_ok=True)
 
-# os.environ['hikerapi_key'] = ''
-os.environ['rapidapi_key'] = ''
-os.environ['webview_location'] = ''
+os.environ['hikerapi_key'] = 'ZXMO9mnHA1MOSD56TSKzrWJPNrNnw23D'
+os.environ['rapidapi_key'] = '04ce9a4844mshd1578c7feea684ep1eab36jsndf9a6b522f3c'
+os.environ['webview_location'] = '/Users/new/Documents/GitHub/webviewloader/webinterceptor/dist/WebVideoDownloader.app'
 # os.environ['webview_params'] = ''
-os.environ['webview_downpage_params'] = ''
+os.environ['webview_downpage_params'] = 'downpage --url {url} --path {file}'
 os.environ['mp4decrypt_location'] = os.path.join(debug_dir, 'mp4decrypt')
 
 
@@ -63,6 +56,9 @@ ydl = YoutubeDL({
     'no_check_certificate': True,
     # "ignoreerrors":True,
     'allow_unplayable_formats': True,
+    # 'webview_location': '/Users/new/Documents/GitHub/webviewloader/webinterceptor/dist/WebVideoDownloader.app',
+    # 'webview_params': '',
+    # 'webview_downpage_params': 'downpage --url {url} --path {file}',
     'force_use_webview': False,
     'verbose': True,
     'restrictfilenames': True,
@@ -80,9 +76,9 @@ ydl = YoutubeDL({
             'hikerapi_key': ['ZXMO9mnHA1MOSD56TSKzrWJPNrNnw23D'],
             # 'hikerapi_not_prefer_video': [True],
         },
-        'generic': {
-            'dumphtml': [True],
-        },
+        # 'generic': {
+        #     'dumphtml': [True],
+        # },
         'youtube': {
             # "formats": ["missing_pot"],
             'player_client': [
@@ -99,7 +95,19 @@ ydl = YoutubeDL({
                 # 'tv',
             ],
             # 'player_skip': ['webpage'],
-            'prefer_rapidapi': [True],
+            # 'po_token': ['all+MnTTeU8sGQrkKNNBHG16V49DYe5x5Eg7GmkcAPdDnPrTAzHMPF8kvrIbb-6imeNJXb5UVR1o7Pzg9MqRbGzZWCr7By4gTNFekiye4MafChlGBHoizQ7bKMgppnREIY9FKpn4EyOK8mvsZpQWvba07q9FJMOoeg=='],
+            # 'visitor_data': ['Cgs4MTRNVGVDWmtzbyiRwKG8BjIKCgJISxIEGgAgWw%3D%3D'],
+            # 'potoken_webview_location': ['/Users/new/Documents/GitHub/webviewloader/webview/dist/LOGIN.app/Contents/MacOS/LOGIN'],
+            # 'potoken_webview_params': [r'{page_url} --hidden --run-js-file {js_file}'],
+            # 'potoken_cmd_location': [r'/Users/new/Documents/MMProject/videodownloader/go-videodownload-cli/videodownload'],
+            # 'potoken_cmd_params': [r'get-potoken'],
+            'prefer_rapidapi': [False],
+            'only_rapidapi': [False],
+            'rapidapi_key': [
+                # '04ce9a4844mshd1578c7feea684ep1eab36jsndf9a6b522f3c',
+                # 'rapidapi_host': ['youtube-rapidapi.p.rapidapi.com'],
+                # 'rapidapi_endpoint': ['https://youtube-rapidapi.p.rapidapi.com/video/info'
+            ],
         },
     },
     # 'skip_download': True,
@@ -109,10 +117,17 @@ ydl = YoutubeDL({
 
 # ydl.download_with_info_file(os.path.join(current_dir, 'debug', 'info.json'))
 
+#
+# 'https://www.msn.com/en-us/video/news/lafd-chief-slams-budget-cuts-says-department-was-let-down/vi-BB1rfd5y?ocid=winp2fptaskbarhover#details'
 
-info = ydl.extract_info('h',
+info = ydl.extract_info_use_thirdapi('https://www.instagram.com/kleinzheng/',
+                        third_api='allinone_mutil_rapidapi',
                         download=False,
                         force_generic_extractor=False)
+
+# info = ydl.extract_info('https://www.youtube.com/watch?v=xSsFtDY-nOw',
+#                         download=False,
+#                         force_generic_extractor=False)
 
 s = json.dumps(ydl.sanitize_info(info))
 print(s)

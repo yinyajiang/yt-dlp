@@ -49,6 +49,7 @@ class InstagramHikerApi:
             'description': user.get('full_name'),
             'thumbnails': [{'url': user.get('profile_pic_url')}],
             'entries': [],
+            '_third_api': 'instagram_hikerapi',
         }
 
         for item in traverse_obj(reel, ('items', ...), default=[]):
@@ -79,6 +80,7 @@ class InstagramHikerApi:
             'description': user.get('full_name'),
             'thumbnails': [{'url': user.get('profile_pic_url')}],
             'entries': [],
+            '_third_api': 'instagram_hikerapi',
         }
 
         for item in traverse_obj(reel, ('items', ...), default=[]):
@@ -120,6 +122,7 @@ class InstagramHikerApi:
             **user,
             '_type': 'playlist',
             'entries': self._filter_entries(entries),
+            '_third_api': 'instagram_hikerapi',
         }
 
     def extract_post_info(self, code='', id=''):
@@ -151,6 +154,7 @@ class InstagramHikerApi:
             'description': user.get('full_name'),
             'thumbnails': [{'url': user.get('profile_pic_url')}],
             'entries': [],
+            '_third_api': 'instagram_hikerapi',
         }
 
         for item in traverse_obj(reel, ('items', ...), default=[]):
@@ -203,6 +207,7 @@ class InstagramHikerApi:
             'id': str(media_id),
             'title': title,
             'thumbnails': [{'url': thumbnail}] if thumbnail else None,
+            '_third_api': 'instagram_hikerapi',
             # 'upload_date': datetime.fromtimestamp(
             #     traverse_obj(item, 'taken_at', default=0)),
         }
@@ -276,6 +281,7 @@ class InstagramHikerApi:
             'thumbnail': user.get('profile_pic_url'),
             'media_count': user.get('media_count'),
             '_is_private': user.get('is_private'),
+            '_third_api': 'instagram_hikerapi',
         }
         if info.get('_is_private'):
             self._ie.report_msg(f'[hikerapi] user {username or user_id} is private')

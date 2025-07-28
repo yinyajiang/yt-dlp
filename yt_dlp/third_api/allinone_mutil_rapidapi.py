@@ -1,35 +1,24 @@
 from ..cookies import YoutubeDLCookieJar
 import random
 import time
-import os
-import json
 from hashlib import md5
-from ..utils import ExtractorError, remove_query_params
+from ..utils import ExtractorError, remove_query_params, mimetype2codecs
+import json
 from ._common import is_retry_rsp, is_over_per_second_rsp, RetryError, OverPerSecondError, is_supported_site
 
 
-class SocialRapidApi:
-    API_ENDPOINT = 'https://auto-download-all-in-one-big.p.rapidapi.com/v1/social/autolink'
-    API_HOST = 'auto-download-all-in-one-big.p.rapidapi.com'
-    SUPPORT_SITES = [
-        # 'Tiktok', 'Douyin', 'Capcut', 'Threads', 'Instagram', 'Facebook', 'Kuaishou', 'Espn',
-        # 'Pinterest', 'imdb', 'imgur', 'ifunny', 'Izlesene', 'Reddit', 'Youtube', 'Twitter', 'Vimeo',
-        # 'Snapchat', 'Bilibili', 'Dailymotion', 'Sharechat', 'Likee', 'Linkedin', 'Tumblr', 'Hipi',
-        # 'Telegram', 'Getstickerpack', 'Bitchute', 'Febspot', '9GAG', 'okeru', 'Rumble', 'Streamable',
-        # 'Ted', 'SohuTv', 'Pornbox', 'Xvideos', 'Xnxx', 'Kuaishou', 'Xiaohongshu', 'Ixigua', 'Weibo',
-        # 'Miaopai', 'Meipai', 'Xiaoying', 'Yingke', 'Sina', 'Bluesky', 'Soundcloud', 'Mixcloud', 'Spotify',
-        # 'Zingmp3', 'Bandcamp',
-    ]
+#  https://rapidapi.com/manhgdev/api/download-all-in-one-lite
+class AllInOneMutilRapidApi:
+    API_ENDPOINT = 'https://download-all-in-one-lite.p.rapidapi.com/autolink'
+    API_HOST = 'download-all-in-one-lite.p.rapidapi.com'
+    SUPPORT_SITES = []
 
     @classmethod
     def is_supported_site(cls, hint):
         return is_supported_site(hint, cls.SUPPORT_SITES)
 
     def __init__(self, ie):
-        self._api_keys = ie._configuration_arg('rapidapi_key', [], casesense=True)
-        if not self._api_keys and os.getenv('rapidapi_key'):
-            self._api_keys = [os.getenv('rapidapi_key')]
-
+        self._api_keys = ie._configuration_arg('rapidapi_key', [], casesense=True, enable_env=True)
         self._ie = ie
         if not ie:
             raise ExtractorError('[rapidapi] ie is required')
@@ -47,26 +36,40 @@ class SocialRapidApi:
         ytb_info = {
             'id': str(video_id),
             'title': info.get('title'),
-            'duration': int(info.get('duration') / 1000),
-            'channel': info.get('author'),
-            'uploader': info.get('author'),
+            'duration': int(info.get('duration')),
             'thumbnails': [
                 {
                     'url': info.get('thumbnail'),
                 },
             ],
             'formats': [],
-            '_third_api': 'rapidapi',
+            '_third_api': 'allinone_mutil_rapidapi',
         }
 
         no_video = True
         for media in info.get('medias', []):
-            if media.get('type') == 'video':
+            if media.get('type') == 'video' and media.get('is_audio'):
                 no_video = False
                 ytb_info['formats'].append({
                     'url': media.get('url'),
                     'ext': media.get('extension'),
                     'format_note': media.get('quality'),
+                    'width': media.get('width'),
+                    'height': media.get('height'),
+                    'fps': media.get('fps'),
+                    **mimetype2codecs(media.get('mimeType'), assign_only_one_codec=None),
+                })
+            elif media.get('type') == 'video' and not media.get('is_audio'):
+                no_video = False
+                ytb_info['formats'].append({
+                    'url': media.get('url'),
+                    'ext': media.get('extension'),
+                    'format_note': f'{media.get("quality")}(video only)',
+                    'width': media.get('width'),
+                    'height': media.get('height'),
+                    'fps': media.get('fps'),
+                    **mimetype2codecs(media.get('mimeType'), assign_only_one_codec='vcodec'),
+                    'acodec': 'none',
                 })
             elif media.get('type') == 'audio':
                 no_video = False
@@ -74,8 +77,8 @@ class SocialRapidApi:
                     'url': media.get('url'),
                     'ext': media.get('extension'),
                     'format_note': 'audio only',
+                    **mimetype2codecs(media.get('mimeType'), assign_only_one_codec='acodec'),
                     'vcodec': 'none',
-                    'acodec': media.get('extension'),
                 })
             elif media.get('type') == 'image':
                 ytb_info['formats'].append({
@@ -121,7 +124,9 @@ class SocialRapidApi:
                                  'cookiejar': YoutubeDLCookieJar(),
                              },
                              expected_status=lambda _: True,
+                             method='POST',
                              )
+
         empty_medias = False
         if info and not info.get('medias', None):
             if is_retry_rsp(info):

@@ -9,7 +9,7 @@ from ..cookies import YoutubeDLCookieJar
 import random
 import time
 import os
-from .common import is_retry_rsp, is_over_per_second_rsp, RetryError, OverPerSecondError
+from ._common import is_retry_rsp, is_over_per_second_rsp, RetryError, OverPerSecondError
 
 
 def _date_convert(date_str):
@@ -17,6 +17,8 @@ def _date_convert(date_str):
         return datetime.fromisoformat(date_str).strftime('%Y%m%d')
     except Exception:
         return None
+
+# https://rapidapi.com/DataFanatic/api/youtube-media-downloader
 
 
 class YoutubeRapidApi:
@@ -60,7 +62,7 @@ class YoutubeRapidApi:
             '_params': {
                 'proxy': '__noproxy__',
             },
-            '_third_api': 'rapidapi',
+            '_third_api': 'youtube_rapidapi',
         }
 
         if subtitles_ := traverse_obj(info, ('subtitles', 'items'), default=None):

@@ -1,3 +1,6 @@
 from .youtube_rapidapi import YoutubeRapidApi  # noqa: F401
 from .instagram_hikerapi import InstagramHikerApi  # noqa: F401
 from .social_rapidapi import SocialRapidApi  # noqa: F401
+from .snap_mutil_rapidapi import SnapMutilRapidApi  # noqa: F401
+from .allinone_mutil_rapidapi import AllInOneMutilRapidApi  # noqa: F401
+from ._allapi import extract_video_info  # noqa: F401

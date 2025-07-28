@@ -75,7 +75,7 @@ def exe(onedir, n):
         platform_name,
         machine,
     )))
-	if n:
+    if n:
         name = n
 
     return name, ''.join(filter(None, (

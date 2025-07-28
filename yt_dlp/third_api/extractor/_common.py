@@ -1,4 +1,5 @@
 import urllib.parse
+from ...utils import remove_query_params
 
 
 class RetryError(Exception):
@@ -40,3 +41,7 @@ def is_supported_site(hint, support_sites):
         if s:
             return s in [site.lower() for site in support_sites]
     return False
+
+
+def remove_third_api_params(video_url):
+    return remove_query_params(video_url, ['__force_third_api__', '__third_api__'])

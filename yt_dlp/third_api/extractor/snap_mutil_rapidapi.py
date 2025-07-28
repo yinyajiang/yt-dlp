@@ -3,15 +3,23 @@ import random
 import time
 import os
 from hashlib import md5
-from ...utils import ExtractorError, remove_query_params, parse_duration, urlencode_postdata
-from ._common import is_retry_rsp, is_over_per_second_rsp, RetryError, OverPerSecondError, is_supported_site
+from ...utils import ExtractorError, parse_duration, urlencode_postdata
+from ._common import is_retry_rsp, is_over_per_second_rsp, RetryError, OverPerSecondError, is_supported_site, remove_third_api_params
 
 
 #  https://rapidapi.com/tuan2308/api/snap-video3
 class SnapMutilRapidApi:
     API_ENDPOINT = 'https://snap-video3.p.rapidapi.com/download'
     API_HOST = 'snap-video3.p.rapidapi.com'
-    SUPPORT_SITES = []
+    SUPPORT_SITES = [
+        'Tiktok', 'Douyin', 'Capcut', 'Threads', 'Instagram', 'Facebook', 'Kuaishou', 'Espn',
+        'Pinterest', 'imdb', 'imgur', 'ifunny', 'Izlesene', 'Reddit', 'Youtube', 'Twitter', 'Vimeo',
+        'Snapchat', 'Bilibili', 'Dailymotion', 'Sharechat', 'Likee', 'Linkedin', 'Tumblr', 'Hipi',
+        'Telegram', 'Getstickerpack', 'Bitchute', 'Febspot', '9GAG', 'okeru', 'Rumble', 'Streamable',
+        'Ted', 'SohuTv', 'Pornbox', 'Xvideos', 'Xnxx', 'Kuaishou', 'Xiaohongshu', 'Ixigua', 'Weibo',
+        'Miaopai', 'Meipai', 'Xiaoying', 'Yingke', 'Sina', 'Bluesky', 'Soundcloud', 'Mixcloud', 'Spotify',
+        'Zingmp3', 'Bandcamp', 'X', 'akillitv',
+    ]
 
     @classmethod
     def is_supported_site(cls, hint):
@@ -29,7 +37,7 @@ class SnapMutilRapidApi:
             raise ExtractorError('[rapidapi] api keys is required')
 
     def extract_video_info(self, video_url, video_id=None):
-        video_url = remove_query_params(video_url, ['__force_third_api__', '__third_api__'])
+        video_url = remove_third_api_params(video_url)
 
         info = self._get_video_info(video_url)
 

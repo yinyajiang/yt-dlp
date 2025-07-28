@@ -1,4 +1,4 @@
-from .extractor import SnapMutilRapidApi, AllInOneMutilRapidApi
+from .extractor import SnapMutilRapidApi, AllInOneMutilRapidApi, ZMMutilRapidApi
 
 
 class MutilThirdIE:
@@ -6,6 +6,7 @@ class MutilThirdIE:
     cls_ies = [
         AllInOneMutilRapidApi,
         SnapMutilRapidApi,
+        ZMMutilRapidApi,
     ]
 
     def __init__(self, ie):

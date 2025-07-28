@@ -133,3 +133,4 @@ yt-dlp-plugins
 pull_requests.json
 debug/
 pr_evd.sh
+debug.py

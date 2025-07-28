@@ -1,7 +1,8 @@
 import urllib.parse
 
-from . import SnapMutilRapidApi, SocialRapidApi, YoutubeRapidApi, AllInOneMutilRapidApi
+from .extractor import SnapMutilRapidApi, SocialRapidApi, AllInOneMutilRapidApi
 from ..utils import unsmuggle_url, ExtractorError
+from .mutil import MutilThirdIE
 
 
 def extract_video_info(ie, url, api=None):
@@ -17,11 +18,13 @@ def extract_video_info(ie, url, api=None):
     if api == 'social_rapidapi':
         return SocialRapidApi(ie).extract_video_info(url)
     elif api == 'youtube_rapidapi':
-        return YoutubeRapidApi(ie).extract_video_info(url)
+        raise ExtractorError('youtube_rapidapi use video_id')
     elif api == 'instagram_hikerapi':
         raise ExtractorError('instagram_hikerapi not <extract_video_info> implemented')
     elif api == 'snap_mutil_rapidapi':
         return SnapMutilRapidApi(ie).extract_video_info(url)
     elif api == 'allinone_mutil_rapidapi':
         return AllInOneMutilRapidApi(ie).extract_video_info(url)
+    elif api == 'mutil_api':
+        return MutilThirdIE(ie).extract_video_info(url)
     raise ExtractorError(f'unknown api: {api}')

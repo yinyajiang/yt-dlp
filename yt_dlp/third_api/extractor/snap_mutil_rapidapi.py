@@ -1,16 +1,16 @@
-from ..cookies import YoutubeDLCookieJar
+from ...cookies import YoutubeDLCookieJar
 import random
 import time
+import os
 from hashlib import md5
-from ..utils import ExtractorError, remove_query_params, mimetype2codecs
-import json
+from ...utils import ExtractorError, remove_query_params, parse_duration, urlencode_postdata
 from ._common import is_retry_rsp, is_over_per_second_rsp, RetryError, OverPerSecondError, is_supported_site
 
 
-#  https://rapidapi.com/manhgdev/api/download-all-in-one-lite
-class AllInOneMutilRapidApi:
-    API_ENDPOINT = 'https://download-all-in-one-lite.p.rapidapi.com/autolink'
-    API_HOST = 'download-all-in-one-lite.p.rapidapi.com'
+#  https://rapidapi.com/tuan2308/api/snap-video3
+class SnapMutilRapidApi:
+    API_ENDPOINT = 'https://snap-video3.p.rapidapi.com/download'
+    API_HOST = 'snap-video3.p.rapidapi.com'
     SUPPORT_SITES = []
 
     @classmethod
@@ -18,7 +18,10 @@ class AllInOneMutilRapidApi:
         return is_supported_site(hint, cls.SUPPORT_SITES)
 
     def __init__(self, ie):
-        self._api_keys = ie._configuration_arg('rapidapi_key', [], casesense=True, enable_env=True)
+        self._api_keys = ie._configuration_arg('rapidapi_key', [], casesense=True)
+        if not self._api_keys and os.getenv('rapidapi_key'):
+            self._api_keys = [os.getenv('rapidapi_key')]
+
         self._ie = ie
         if not ie:
             raise ExtractorError('[rapidapi] ie is required')
@@ -36,51 +39,43 @@ class AllInOneMutilRapidApi:
         ytb_info = {
             'id': str(video_id),
             'title': info.get('title'),
-            'duration': int(info.get('duration')),
+            'duration': int(parse_duration(info.get('duration'))),
             'thumbnails': [
                 {
                     'url': info.get('thumbnail'),
                 },
             ],
             'formats': [],
-            '_third_api': 'allinone_mutil_rapidapi',
+            '_third_api': 'snap_mutil_rapidapi',
         }
 
         no_video = True
         for media in info.get('medias', []):
-            if media.get('type') == 'video' and media.get('is_audio'):
+            if media.get('videoAvailable') and media.get('audioAvailable'):
                 no_video = False
                 ytb_info['formats'].append({
                     'url': media.get('url'),
                     'ext': media.get('extension'),
                     'format_note': media.get('quality'),
-                    'width': media.get('width'),
-                    'height': media.get('height'),
-                    'fps': media.get('fps'),
-                    **mimetype2codecs(media.get('mimeType'), assign_only_one_codec=None),
                 })
-            elif media.get('type') == 'video' and not media.get('is_audio'):
+            elif media.get('videoAvailable') and not media.get('audioAvailable'):
                 no_video = False
                 ytb_info['formats'].append({
                     'url': media.get('url'),
                     'ext': media.get('extension'),
-                    'format_note': f'{media.get("quality")}(video only)',
-                    'width': media.get('width'),
-                    'height': media.get('height'),
-                    'fps': media.get('fps'),
-                    **mimetype2codecs(media.get('mimeType'), assign_only_one_codec='vcodec'),
                     'acodec': 'none',
+                    'format_note': f'{media.get("quality")}(video only)',
                 })
-            elif media.get('type') == 'audio':
+            elif media.get('audioAvailable'):
                 no_video = False
                 ytb_info['formats'].append({
                     'url': media.get('url'),
                     'ext': media.get('extension'),
                     'format_note': 'audio only',
-                    **mimetype2codecs(media.get('mimeType'), assign_only_one_codec='acodec'),
                     'vcodec': 'none',
+                    'acodec': media.get('extension'),
                 })
-            elif media.get('type') == 'image':
+            elif not media.get('videoAvailable') and not media.get('audioAvailable'):
                 ytb_info['formats'].append({
                     'url': media.get('url'),
                     'ext': media.get('extension'),
@@ -114,11 +109,11 @@ class AllInOneMutilRapidApi:
         download_json = lambda url, **kwargs: self._ie._download_json(url, 'call-rapidapi', **kwargs)
 
         info = download_json(self.API_ENDPOINT,
-                             data=json.dumps({'url': video_url}).encode('utf-8'),
+                             data=urlencode_postdata({'url': video_url}),
                              headers={
                                  'x-rapidapi-key': self._api_keys[0],
                                  'x-rapidapi-host': self.API_HOST,
-                                 'Content-Type': 'application/json',
+                                 'Content-Type': 'application/x-www-form-urlencoded',
                              },
                              extensions={
                                  'cookiejar': YoutubeDLCookieJar(),

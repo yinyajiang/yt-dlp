@@ -1,11 +1,11 @@
 from datetime import datetime
-from ..utils import (
+from ...utils import (
     traverse_obj,
     int_or_none,
     mimetype2codecs,
     ExtractorError,
 )
-from ..cookies import YoutubeDLCookieJar
+from ...cookies import YoutubeDLCookieJar
 import random
 import time
 import os

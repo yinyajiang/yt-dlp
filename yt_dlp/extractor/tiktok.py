@@ -914,7 +914,7 @@ class TikTokIE(TikTokBaseIE):
         try:
             return self.__real_extract(url)
         except Exception as e:
-            info = self._extract_use_social_rapidapi(url)
+            info = self._extract_use_third_mutil_api(url)
             if info:
                 return info
             raise e
@@ -1415,7 +1415,7 @@ class DouyinIE(TikTokBaseIE):
         try:
             return self.__real_extract(url)
         except Exception as e:
-            info = self._extract_use_social_rapidapi(url)
+            info = self._extract_use_third_mutil_api(url)
             if info:
                 return info
             raise e

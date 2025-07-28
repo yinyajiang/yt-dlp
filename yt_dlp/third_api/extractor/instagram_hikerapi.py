@@ -1,6 +1,6 @@
 import urllib.parse
-from ..utils import traverse_obj, ExtractorError
-from ..cookies import YoutubeDLCookieJar
+from ...utils import traverse_obj, ExtractorError
+from ...cookies import YoutubeDLCookieJar
 import json
 import os
 

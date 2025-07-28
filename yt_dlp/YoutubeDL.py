@@ -176,7 +176,7 @@ from .utils.networking import (
     clean_proxies,
     std_headers,
 )
-from .third_api import SocialRapidApi
+from .third_api import MutilThirdIE
 from .version import CHANNEL, ORIGIN, RELEASE_GIT_HEAD, VARIANT, __version__
 
 if os.name == 'nt':
@@ -1683,9 +1683,9 @@ class YoutubeDL:
             try:
                 return self.__extract_info(url, self.get_info_extractor(key), download, extra_info, process)
             except Exception as e:
-                if self._try_social_rapidapi(key):
+                if self._try_third_api(key):
                     with contextlib.suppress(Exception):
-                        return self.__extract_info(smuggle_url(url, {'__third_api__': 'social_rapidapi'}), self.get_info_extractor('ThirdApi'), download, extra_info, process)
+                        return self.__extract_info(smuggle_url(url, {'__third_api__': 'mutil_api'}), self.get_info_extractor('ThirdApi'), download, extra_info, process)
 
                 if not self._try_generic(key):
                     raise e
@@ -4638,16 +4638,16 @@ class YoutubeDL:
         except Exception:
             return False
 
-    def _try_social_rapidapi(self, ie_key):
+    def _try_third_api(self, ie_key):
         try:
             ie = self.get_info_extractor(ie_key)
             if not ie or hasattr(ie, '_INNER_TRY_THIRD_API'):
                 return False
-            if not ie or not hasattr(ie, '_TRY_SOCIAL_RAPIDAPI'):
-                return SocialRapidApi.is_supported_site(ie_key)
+            if not ie or not hasattr(ie, '_TRY_THIRD_API'):
+                return MutilThirdIE.is_supported_site(ie_key)
             if ie.IE_NAME.lower() == 'generic':
                 return False
-            return ie._TRY_SOCIAL_RAPIDAPI
+            return ie._TRY_THIRD_API
         except Exception:
             return False
 

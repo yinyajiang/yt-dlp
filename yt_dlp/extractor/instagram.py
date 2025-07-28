@@ -5,7 +5,7 @@ import re
 
 from .common import InfoExtractor
 from ..networking.exceptions import HTTPError
-from ..third_api.instagram_hikerapi import InstagramHikerApi
+from ..third_api import InstagramThirdIE
 from ..utils import (
     ExtractorError,
     bug_reports_message,
@@ -572,7 +572,7 @@ class InstagramIE(InstagramBaseIE):
             first_exception = e
 
         try:
-            hikerApi = InstagramHikerApi(self)
+            hikerApi = InstagramThirdIE(self)
             video_id = self._match_id(url)
             pk = int_or_none(video_id)
             if not pk:
@@ -770,7 +770,7 @@ class InstagramUserIE(InstagramPlaylistBaseIE):
         except Exception as e:
             first_exception = e
         try:
-            hikerApi = InstagramHikerApi(self)
+            hikerApi = InstagramThirdIE(self)
             username = self._match_id(url)
             return hikerApi.extract_user_posts_info(username=username)
         except Exception as e:
@@ -885,7 +885,7 @@ class InstagramStoryIE(InstagramBaseIE):
             first_exception = e
 
         try:
-            hikerApi = InstagramHikerApi(self)
+            hikerApi = InstagramThirdIE(self)
             username, story_id = self._match_valid_url(url).group('user', 'id')
             if username == 'highlights' and not story_id:
                 self.report_warning(r'[hikerapi] highlights not found story_id')

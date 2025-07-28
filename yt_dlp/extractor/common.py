@@ -39,7 +39,7 @@ from ..networking.exceptions import (
     TransportError,
     network_exceptions,
 )
-from ..third_api import SocialRapidApi
+from ..third_api import MutilThirdIE
 from ..utils import (
     IDENTITY,
     JSON_LD_RE,
@@ -4541,9 +4541,9 @@ class InfoExtractor:
             return None
         raise first_exception
 
-    def _extract_use_social_rapidapi(self, url, video_id=None):
+    def _extract_use_third_mutil_api(self, url, video_id=None):
         try:
-            return SocialRapidApi(self).extract_video_info(url, video_id)
+            return MutilThirdIE(self).extract_video_info(url, video_id)
         except Exception as e:
             self.report_warning(f'use social rapidapi failed: {e}')
             return None

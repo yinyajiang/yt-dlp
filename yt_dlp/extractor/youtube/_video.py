@@ -32,7 +32,7 @@ from ..openload import PhantomJSwrapper
 from ...jsinterp import JSInterpreter, LocalNameSpace
 from ...networking.exceptions import HTTPError
 from ...potoken import gen_po_token_run_params
-from ...third_api.youtube_rapidapi import YoutubeRapidApi
+from ...third_api import YoutubeThirdIE
 from ...utils import (
     NO_DEFAULT,
     ExtractorError,
@@ -4506,7 +4506,7 @@ class YoutubeIE(YoutubeBaseInfoExtractor):
 
     def _extract_by_rapidapi(self, url):
         try:
-            rapidApi = YoutubeRapidApi(self)
+            rapidApi = YoutubeThirdIE(self)
             video_id = self._match_id(url)
             if not video_id:
                 return None

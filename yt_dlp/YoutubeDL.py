@@ -1657,7 +1657,7 @@ class YoutubeDL:
         if not ie_key and force_generic_extractor:
             ie_key = 'Generic'
 
-        if not ie_key and self._use_third_api(url):
+        if not ie_key and self._is_use_third_api(url):
             ie_key = 'ThirdApi'
 
         if ie_key:
@@ -4651,7 +4651,7 @@ class YoutubeDL:
         except Exception:
             return False
 
-    def _use_third_api(self, url):
+    def _is_use_third_api(self, url):
         if not url:
             return False
         _, data = unsmuggle_url(url, {})

@@ -3326,7 +3326,7 @@ class YoutubeIE(YoutubeBaseInfoExtractor):
         else:
             self.report_warning(msg, only_once=True)
 
-    def _extract_formats_and_subtitles(self, streaming_data, video_id, player_url, live_status, duration):
+    def _extract_formats_and_subtitles(self, streaming_data, video_id, player_url, live_status, duration, out_additional_info=None):
         CHUNK_SIZE = 10 << 20
         PREFERRED_LANG_VALUE = 10
         original_language = None
@@ -3363,6 +3363,9 @@ class YoutubeIE(YoutubeBaseInfoExtractor):
         # save pots per client to avoid fetching again
         gvs_pots = {}
 
+        if not isinstance(out_additional_info, dict):
+            out_additional_info = {}
+        out_additional_info['has_sabr_only'] = False
         for fmt in streaming_formats:
             client_name = fmt[STREAMING_DATA_CLIENT_NAME]
             if fmt.get('targetDurationSec'):
@@ -3431,6 +3434,7 @@ class YoutubeIE(YoutubeBaseInfoExtractor):
                         )
                     msg += 'See  issues/12482  for more details'
                     self.report_warning(msg, video_id, only_once=True)
+                    out_additional_info['has_sabr_only'] = True
                     continue
                 try:
                     fmt_url += '&{}={}'.format(
@@ -3743,7 +3747,7 @@ class YoutubeIE(YoutubeBaseInfoExtractor):
                 }))
         return webpage
 
-    def _list_formats(self, video_id, microformats, video_details, player_responses, player_url, duration=None):
+    def _list_formats(self, video_id, microformats, video_details, player_responses, player_url, duration=None, out_additional_info=None):
         live_broadcast_details = traverse_obj(microformats, (..., 'liveBroadcastDetails'))
         is_live = get_first(video_details, 'isLive')
         if is_live is None:
@@ -3758,7 +3762,7 @@ class YoutubeIE(YoutubeBaseInfoExtractor):
                        else 'not_live' if False in (is_live, live_content)
                        else None)
         streaming_data = traverse_obj(player_responses, (..., 'streamingData'))
-        *formats, subtitles = self._extract_formats_and_subtitles(streaming_data, video_id, player_url, live_status, duration)
+        *formats, subtitles = self._extract_formats_and_subtitles(streaming_data, video_id, player_url, live_status, duration, out_additional_info=out_additional_info)
         if all(f.get('has_drm') for f in formats):
             # If there are no formats that definitely don't have DRM, all have DRM
             for f in formats:
@@ -3925,7 +3929,7 @@ class YoutubeIE(YoutubeBaseInfoExtractor):
                     or parse_duration(search_meta('duration')) or None)
 
         live_broadcast_details, live_status, streaming_data, formats, automatic_captions = \
-            self._list_formats(video_id, microformats, video_details, player_responses, player_url, duration)
+            self._list_formats(video_id, microformats, video_details, player_responses, player_url, duration, out_additional_info=in_out_additional_info)
         if live_status == 'post_live':
             self.write_debug(f'{video_id}: Video is in Post-Live Manifestless mode')
 
@@ -4516,10 +4520,19 @@ class YoutubeIE(YoutubeBaseInfoExtractor):
         except Exception:
             return None
 
-    def _extract_by_not_default_clients(self, url):
-        exclude = ['web_music', 'android_vr']
-        all_clients = [name for name, cfg in INNERTUBE_CLIENTS.items() if (not cfg.get('REQUIRE_AUTH', False)) and (name not in self._DEFAULT_CLIENTS) and (name not in exclude)]
-        if not all_clients:
+    def _extract_by_not_default_clients(self, url, exclude=None):
+        if not exclude:
+            exclude = ['web_music', 'android_vr']
+        else:
+            exclude.extend(['web_music', 'android_vr'])
+        return self._extract_by_clients(url, clients=None, exclude=exclude)
+
+    def _extract_by_clients(self, url, clients, exclude=None):
+        if not exclude:
+            exclude = []
+        if not clients:
+            clients = [name for name, cfg in INNERTUBE_CLIENTS.items() if (not cfg.get('REQUIRE_AUTH', False)) and (name not in self._DEFAULT_CLIENTS) and (name not in exclude)]
+        if not clients:
             return None
         if not self._downloader.params:
             self._downloader.params = {}
@@ -4528,7 +4541,7 @@ class YoutubeIE(YoutubeBaseInfoExtractor):
         extractor_args = params.setdefault('extractor_args', {})
         youtube_args = extractor_args.setdefault('youtube', {})
         old_clients = youtube_args.get('player_client', None)
-        youtube_args['player_client'] = all_clients
+        youtube_args['player_client'] = clients
         try:
             return self._real_extract_with_additional_info(url, {})
         except Exception:
@@ -4572,6 +4585,12 @@ class YoutubeIE(YoutubeBaseInfoExtractor):
             if result_type == 'video' and not self._downloader._has_formats_to_download(result) and not self._has_config_potoken():
                 # try to use potoken
                 out_additional_info['has_invalid_potoken_client'] = True
+            elif not self._downloader._has_above_wh_formats_to_download(result, 640, 370) and out_additional_info.get('has_sabr_only', False):
+                all_clients_info = self._extract_by_not_default_clients(url)
+                if all_clients_info:
+                    return all_clients_info
+                else:
+                    return result
             else:
                 return result
         except Exception as e:

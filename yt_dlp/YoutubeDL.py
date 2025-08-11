@@ -4608,15 +4608,29 @@ class YoutubeDL:
             return False
 
     def _has_formats_to_download(self, info_dict):
+        return len(self._formats_to_download(info_dict)) > 0
+
+    def _has_above_wh_formats_to_download(self, info_dict, iw, ih):
+        formats = self._formats_to_download(info_dict)
+        haswh = False
+        for fmt in formats:
+            w = fmt.get('width')
+            h = fmt.get('height')
+            if w and h:
+                haswh = True
+                if w * h >= iw * ih:
+                    return True
+        return not haswh
+
+    def _formats_to_download(self, info_dict):
         try:
             format_selector = self.format_selector
             if format_selector is None:
                 req_format = self._default_format_spec(info_dict)
                 format_selector = self.build_format_selector(req_format)
-            formats_to_download = self._select_formats(info_dict['formats'], format_selector)
-            return len(formats_to_download) > 0
+            return self._select_formats(info_dict['formats'], format_selector)
         except Exception:
-            return False
+            return []
 
     def has_suitable_ie(self, url):
         return any(ie.suitable(url) and key.lower() != 'generic' for key, ie in self._ies.items())
@@ -4687,11 +4701,13 @@ class YoutubeDL:
             return url
         return url[i:]
 
-    def extract_info_use_thirdapi(self, url, third_api, *args, **kwargs):
+    def extract_info_use_thirdapi(self, url, third_api, video_id=None, *args, **kwargs):
         if not third_api:
             raise ValueError('third_api is required')
         url = smuggle_url(url, {
             '__third_api__': third_api,
-            '__force_third_api__': '1'},
+            '__force_third_api__': '1',
+            '__video_id__': video_id,
+        },
         )
         return self.extract_info(url, *args, **kwargs)

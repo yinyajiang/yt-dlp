@@ -993,11 +993,19 @@ class TikTokUserIE(TikTokBaseIE):
         seen_ids = set()
 
         cursor = int(time.time() * 1E3)
+
         for page in itertools.count(1):
             for retry in self.RetryManager():
-                response = self._download_json(
-                    self._API_BASE_URL, display_id, f'Downloading page {page}',
-                    query=self._build_web_query(sec_uid, cursor))
+                try:
+                    response = self._download_json(
+                        self._API_BASE_URL, display_id, f'Downloading page {page}',
+                        query=self._build_web_query(sec_uid, cursor))
+                except Exception as e:
+                    if page != 1:
+                        self.report_warning(f'Downloading page {page} error: {e}, ignore the remaining')
+                        return
+                    else:
+                        raise e
 
                 # Avoid infinite loop caused by bad device_id
                 # See: https://github.com/yt-dlp/yt-dlp/issues/14031

@@ -4625,7 +4625,7 @@ class YoutubeIE(YoutubeBaseInfoExtractor):
             if thirdapi_info:
                 return thirdapi_info
             elif self._has_ie_config('only_thirdapi'):
-                raise ExtractorError('only_thirdapi is set, but rapidapi failed')
+                raise ExtractorError('only_thirdapi is set, but thirdapi failed')
 
         out_additional_info = {}
         first_execption = None

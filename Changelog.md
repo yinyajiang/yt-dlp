@@ -4,6 +4,21 @@
 # To create a release, dispatch the https://github.com/yt-dlp/yt-dlp/actions/workflows/release.yml workflow on master
 -->
 
+### 2025.08.25.022436
+
+#### Core changes
+- [Merge remote-tracking branch 'upstream'](https://github.com/yt-dlp/yt-dlp/commit/aa69adc368a14afdf4b5159c9dd8fefe1ab6bbf5) by [pukkandan](https://github.com/pukkandan)
+- [Update _video.py](https://github.com/yt-dlp/yt-dlp/commit/3b82301b2123a8be2434edbc5b0a26d8229900c9) by [pukkandan](https://github.com/pukkandan)
+- [Update _video.py](https://github.com/yt-dlp/yt-dlp/commit/9ec1d60b3b17ddcd0a46530beb3831d155d08622) by [pukkandan](https://github.com/pukkandan)
+- [Update build.yml](https://github.com/yt-dlp/yt-dlp/commit/f1f8d25b206a018cffde0d07c06b0e3b99435914) by [pukkandan](https://github.com/pukkandan)
+- [Update build.yml](https://github.com/yt-dlp/yt-dlp/commit/0efd53a192db19b7cc11a348f3747e3d2447aad6) by [pukkandan](https://github.com/pukkandan)
+- [Update build.yml](https://github.com/yt-dlp/yt-dlp/commit/8d45fb99c425e45f6b4a4210bb43c97fc1fd0928) by [pukkandan](https://github.com/pukkandan)
+
+#### Extractor changes
+- **youtube**
+    - [Add `tcc` player JS variant](https://github.com/yt-dlp/yt-dlp/commit/8f4a908300f55054bc96814bceeaa1034fdf4110) ([#14134](https://github.com/yt-dlp/yt-dlp/issues/14134)) by [bashonly](https://github.com/bashonly)
+    - [Player client maintenance](https://github.com/yt-dlp/yt-dlp/commit/3bd91544122142a87863d79e54e995c26cfd7f92) ([#14135](https://github.com/yt-dlp/yt-dlp/issues/14135)) by [bashonly](https://github.com/bashonly)
+
 ### 2025.08.22
 
 #### Core changes

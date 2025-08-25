@@ -2073,6 +2073,7 @@ from .startrek import StarTrekIE
 from .startv import StarTVIE
 from .steam import (
     SteamCommunityBroadcastIE,
+    SteamCommunityIE,
     SteamIE,
 )
 from .stitcher import (

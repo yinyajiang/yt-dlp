@@ -3381,7 +3381,7 @@ class YoutubeIE(YoutubeBaseInfoExtractor):
 
         # save pots per client to avoid fetching again
         gvs_pots = {}
-		
+
         if not isinstance(out_additional_info, dict):
             out_additional_info = {}
         out_additional_info['has_sabr_only'] = False

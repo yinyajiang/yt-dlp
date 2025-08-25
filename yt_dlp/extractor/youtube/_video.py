@@ -4649,13 +4649,22 @@ class YoutubeIE(YoutubeBaseInfoExtractor):
         if self._is_expected_exception(first_execption):
             raise first_execption
 
-        all_clients_info = self._extract_by_not_default_clients(url)
-        if all_clients_info:
-            return all_clients_info
+        is_bot = 'Sign in to confirm you’re not a bot.' in str(first_execption)
+
+        if not is_bot:
+            all_clients_info = self._extract_by_not_default_clients(url)
+            if all_clients_info:
+                return all_clients_info
 
         thirdapi_info = self._extract_by_thirdapi(url)
         if thirdapi_info:
             return thirdapi_info
+
+        if is_bot:
+            all_clients_info = self._extract_by_not_default_clients(url)
+            if all_clients_info:
+                return all_clients_info
+
         raise first_execption
 
         auto_pot_result = self._extract_by_auto_potoken(url, last_exception=first_execption, last_out_additional_info=out_additional_info)

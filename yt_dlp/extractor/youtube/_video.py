@@ -4683,7 +4683,6 @@ class YoutubeIE(YoutubeBaseInfoExtractor):
             'Video unavailable',
             'Premieres in',
             'Join this channel',
-            'not available',
             'DRM protected',
             'Sign in to confirm your age',
             'in your region',

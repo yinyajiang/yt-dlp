@@ -446,7 +446,7 @@ jobs:
           python -m bundle.pyinstaller
           python -m bundle.pyinstaller --onedir
           if ('${{ matrix.suffix }}' -ne '') {
-            Rename-Item ./dist/yt-dlp${{ matrix.suffix }}/yt-dlp${{ matrix.suffix }}.exe ./dist/yt-dlp${{ matrix.suffix }}/yt-dlp.exe
+            Rename-Item -Path "./dist/yt-dlp${{ matrix.suffix }}/yt-dlp${{ matrix.suffix }}.exe" -NewName "yt-dlp.exe"
           }
           Compress-Archive -Path ./dist/yt-dlp${{ matrix.suffix }}/* -DestinationPath ./dist/yt-dlp_win${{ matrix.suffix }}.zip
 

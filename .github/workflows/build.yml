@@ -403,10 +403,10 @@ jobs:
           runner: windows-2025
           python_version: '3.10'
           suffix: '_x86'
-        - arch: 'arm64'
-          runner: windows-11-arm
-          python_version: '3.13'  # arm64 only has Python >= 3.11 available
-          suffix: '_arm64'
+        # - arch: 'arm64'
+        #   runner: windows-11-arm
+        #   python_version: '3.13'  # arm64 only has Python >= 3.11 available
+        #   suffix: '_arm64'
 
     steps:
       - uses: actions/checkout@v4
@@ -445,6 +445,9 @@ jobs:
           /yt-dlp-build-venv/Scripts/Activate.ps1
           python -m bundle.pyinstaller
           python -m bundle.pyinstaller --onedir
+          if (${matrix.suffix} -ne '') {
+            Rename-Item ./dist/yt-dlp${{ matrix.suffix }}/yt-dlp${{ matrix.suffix }}.exe ./dist/yt-dlp${{ matrix.suffix }}/yt-dlp.exe
+          }
           Compress-Archive -Path ./dist/yt-dlp${{ matrix.suffix }}/* -DestinationPath ./dist/yt-dlp_win${{ matrix.suffix }}.zip
 
       - name: Verify --update-to

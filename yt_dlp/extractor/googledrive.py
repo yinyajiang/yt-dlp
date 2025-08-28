@@ -13,9 +13,9 @@ from ..utils import (
     get_element_html_by_id,
     int_or_none,
     lowercase_escape,
+    parse_qs,
     traverse_obj,
     try_get,
-	parse_qs,
     update_url_query,
 )
 

@@ -192,7 +192,7 @@ class GoogleDriveIE(InfoExtractor):
                 if e.cause.status in (401, 403):
                     self.raise_login_required('Access Denied')
                 raise
-        if webpage_urlh.url != url:
+        if webpage_urlh and webpage_urlh.url != url:
             url = webpage_urlh.url
             video_id = self._match_id(url)
 

@@ -24,8 +24,10 @@ class MutilThirdIE:
         first_exception = None
         for ie in ies:
             try:
+                self.ie.report_msg(f'try to use {ie.__class__.__name__} to extract video info.')
                 return ie.extract_video_info(video_url, video_id)
             except Exception as e:
+                self.ie.report_msg(f'use {ie.__class__.__name__} failed: {e}.')
                 first_exception = e
                 continue
         raise first_exception

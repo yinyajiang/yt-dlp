@@ -4,6 +4,26 @@
 # To create a release, dispatch the https://github.com/yt-dlp/yt-dlp/actions/workflows/release.yml workflow on master
 -->
 
+### 2025.09.05.023002
+
+#### Core changes
+- [Fix `--id` deprecation warning](https://github.com/yt-dlp/yt-dlp/commit/76bb46002c9a9655f2b1d29d4840e75e79037cfa) ([#14190](https://github.com/yt-dlp/yt-dlp/issues/14190)) by [seproDev](https://github.com/seproDev)
+- [Merge remote-tracking branch 'upstream'](https://github.com/yt-dlp/yt-dlp/commit/d3413826ec29b9914e0270cd96d3a44ba67c5ac0) by [pukkandan](https://github.com/pukkandan)
+- [Merge remote-tracking branch 'upstream'](https://github.com/yt-dlp/yt-dlp/commit/0faddffd410ef4d22d00d6a98bf7dc497760d50c) by [pukkandan](https://github.com/pukkandan)
+- [Update facebook.py](https://github.com/yt-dlp/yt-dlp/commit/08dbf3144692941e6c81f640b1fb593090e793f8) by [pukkandan](https://github.com/pukkandan)
+- [Update facebook.py](https://github.com/yt-dlp/yt-dlp/commit/4ef1105b99e1f82ca7c8c967e16348b6cb1bb263) by [pukkandan](https://github.com/pukkandan)
+- [Update googledrive.py](https://github.com/yt-dlp/yt-dlp/commit/7d8b797d3391df552f07af4be8cd1378d525141b) by [pukkandan](https://github.com/pukkandan)
+- [Update googledrive.py](https://github.com/yt-dlp/yt-dlp/commit/d6fe69db66ec711d72387d1e55d043314d2251b5) by [pukkandan](https://github.com/pukkandan)
+- [Update mutil.py](https://github.com/yt-dlp/yt-dlp/commit/25023daec2b558b8537d43fc9ce1463f1391fab7) by [pukkandan](https://github.com/pukkandan)
+
+#### Extractor changes
+- **googledrive**: [Fix subtitles extraction](https://github.com/yt-dlp/yt-dlp/commit/18fe696df9d60804a8f5cb8cd74f38111d6eb711) ([#14139](https://github.com/yt-dlp/yt-dlp/issues/14139)) by [zakaryan2004](https://github.com/zakaryan2004)
+- **itvbtcc**: [Fix extractor](https://github.com/yt-dlp/yt-dlp/commit/0b51005b4819e7cea222fcbaf8e60391db4f732c) ([#14161](https://github.com/yt-dlp/yt-dlp/issues/14161)) by [garret1317](https://github.com/garret1317)
+- **kick**: vod: [Support ongoing livestream VODs](https://github.com/yt-dlp/yt-dlp/commit/1e28f6bf743627b909135bb9a88537ad2deccaf0) ([#14154](https://github.com/yt-dlp/yt-dlp/issues/14154)) by [InvalidUsernameException](https://github.com/InvalidUsernameException)
+- **lrt**: [Fix extractors](https://github.com/yt-dlp/yt-dlp/commit/ed24640943872c4cf30d7cc4601bec87b50ba03c) ([#14193](https://github.com/yt-dlp/yt-dlp/issues/14193)) by [seproDev](https://github.com/seproDev)
+- **tver**: [Extract more metadata](https://github.com/yt-dlp/yt-dlp/commit/223baa81f6637dcdef108f817180d8d1ae9fa213) ([#14165](https://github.com/yt-dlp/yt-dlp/issues/14165)) by [arabcoders](https://github.com/arabcoders)
+- **vevo**: [Restore extractors](https://github.com/yt-dlp/yt-dlp/commit/d925e92b710153d0d51d030f115b3c87226bc0f0) ([#14203](https://github.com/yt-dlp/yt-dlp/issues/14203)) by [seproDev](https://github.com/seproDev)
+
 ### 2025.08.27
 
 #### Extractor changes

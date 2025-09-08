@@ -11,7 +11,7 @@ on:
         type: string
       origin:
         required: false
-	default: ''
+        default: ''
         type: string
       unix:
         default: false
@@ -550,7 +550,7 @@ jobs:
           /yt-dlp-build-venv/Scripts/Activate.ps1
           # python -m bundle.pyinstaller
           python -m bundle.pyinstaller --onedir
-	  if ('${Env:SUFFIX}' -ne '') {
+          if ('${Env:SUFFIX}' -ne '') {
             Rename-Item -Path "./dist/yt-dlp${Env:SUFFIX}/yt-dlp${Env:SUFFIX}.exe" -NewName "yt-dlp.exe"
           }
           Compress-Archive -Path ./dist/yt-dlp${Env:SUFFIX}/* -DestinationPath ./dist/yt-dlp_win${Env:SUFFIX}.zip

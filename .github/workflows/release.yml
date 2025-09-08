@@ -60,7 +60,7 @@ on:
         type: string
       linux_armv7l:
         description: Include linux_armv7l
-        default: true
+        default: false
         type: boolean
       prerelease:
         description: Pre-release

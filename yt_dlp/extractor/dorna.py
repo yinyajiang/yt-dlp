@@ -221,7 +221,7 @@ class WorldSBKIE(DornaBaseIE):
     _NETRC_MACHINE = 'worldsbk'
 
     def _real_extract(self, url):
-        self._LANG, year, display_id = self._match_valid_url(url).groups()
+        self._LANG, _, display_id = self._match_valid_url(url).groups()
         display_id = urllib.parse.unquote(display_id)
 
         page = self._download_webpage(url, display_id)

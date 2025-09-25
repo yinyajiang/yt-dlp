@@ -4,6 +4,13 @@
 # To create a release, dispatch the https://github.com/yt-dlp/yt-dlp/actions/workflows/release.yml workflow on master
 -->
 
+### 2025.09.25.023151
+
+#### Core changes
+- [Merge remote-tracking branch 'upstream'](https://github.com/yt-dlp/yt-dlp/commit/f62c16bb175f6e539108de15c865fddb8ac17fa3) by [pukkandan](https://github.com/pukkandan)
+- [Update dorna.py](https://github.com/yt-dlp/yt-dlp/commit/2771763da127267ec370f2d60722e29a105ec8ac) by [pukkandan](https://github.com/pukkandan)
+- [up](https://github.com/yt-dlp/yt-dlp/commit/8501d4bc9ac2c47b9882bb79710a2ab93b42433e) by [pukkandan](https://github.com/pukkandan)
+
 ### 2025.09.23
 
 #### Important changes

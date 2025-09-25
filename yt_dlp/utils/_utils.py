@@ -2957,6 +2957,7 @@ def mimetype2ext(mt, default=NO_DEFAULT):
         'x-ms-asf': 'asf',
         'x-ms-wmv': 'wmv',
         'x-msvideo': 'avi',
+        'vnd.dlna.mpeg-tts': 'mpeg',
 
         # application (streaming playlists)
         'dash+xml': 'mpd',
@@ -4819,7 +4820,7 @@ def jwt_encode(payload_data, key, *, alg='HS256', headers=None):
 
 # can be extended in future to verify the signature and parse header and return the algorithm used if it's not HS256
 def jwt_decode_hs256(jwt):
-    header_b64, payload_b64, signature_b64 = jwt.split('.')
+    _header_b64, payload_b64, _signature_b64 = jwt.split('.')
     # add trailing ='s that may have been stripped, superfluous ='s are ignored
     return json.loads(base64.urlsafe_b64decode(f'{payload_b64}==='))
 

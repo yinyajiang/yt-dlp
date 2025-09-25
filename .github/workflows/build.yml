@@ -352,8 +352,6 @@ jobs:
           source ~/yt-dlp-build-venv/bin/activate
           python3 devscripts/install_deps.py -o --include build
           python3 devscripts/install_deps.py --print --include pyinstaller > requirements.txt
-          # replace pyinstaller>=6.7.0 with pyinstaller>=6.8.0
-          # sed -i '' 's/pyinstaller>=6\.7\.0/pyinstaller>=6\.8\.0/' requirements.txt
           # We need to ignore wheels otherwise we break universal2 builds
           python3 -m pip install -U --no-binary :all: -r requirements.txt
           # We need to fuse our own universal2 wheels for curl_cffi

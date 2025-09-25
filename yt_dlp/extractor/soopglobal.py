@@ -1,9 +1,8 @@
 import functools
 import uuid
 
-from yt_dlp import int_or_none, traverse_obj
-from yt_dlp.extractor.common import InfoExtractor
-from yt_dlp.utils import UserNotLive, bool_or_none, parse_iso8601
+from .common import InfoExtractor
+from ..utils import UserNotLive, bool_or_none, int_or_none, parse_iso8601, traverse_obj
 
 
 class SoopGlobalLiveIE(InfoExtractor):

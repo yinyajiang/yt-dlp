@@ -368,6 +368,7 @@ from .cbc import (
     CBCGemIE,
     CBCGemLiveIE,
     CBCGemPlaylistIE,
+    CBCListenIE,
     CBCPlayerIE,
     CBCPlayerPlaylistIE,
 )

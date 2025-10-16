@@ -58,9 +58,9 @@ class XFileShareIE(InfoExtractor):
         (r'xvideosharing\.com', 'XVideoSharing'),
     )
 
-    IE_DESC = 'XFileShare based sites: {}'.format(', '.join(list(zip(*_SITES))[1]))
-    _VALID_URL = (r'https?://(?:www\.)?(?P<host>{})/(?:embed-)?(?P<id>[0-9a-zA-Z]+)'.format('|'.join(site for site in next(zip(*_SITES)))))
-    _EMBED_REGEX = [r'<iframe\b[^>]+\bsrc=(["\'])(?P<url>(?:https?:)?//(?:{})/embed-[0-9a-zA-Z]+.*?)\1'.format('|'.join(site for site in next(zip(*_SITES))))]
+    IE_DESC = 'XFileShare based sites: {}'.format(', '.join(list(zip(*_SITES, strict=False))[1]))
+    _VALID_URL = (r'https?://(?:www\.)?(?P<host>{})/(?:embed-)?(?P<id>[0-9a-zA-Z]+)'.format('|'.join(site for site in next(zip(*_SITES, strict=False)))))
+    _EMBED_REGEX = [r'<iframe\b[^>]+\bsrc=(["\'])(?P<url>(?:https?:)?//(?:{})/embed-[0-9a-zA-Z]+.*?)\1'.format('|'.join(site for site in next(zip(*_SITES, strict=False))))]
 
     _FILE_NOT_FOUND_REGEXES = (
         r'>(?:404 - )?File Not Found<',

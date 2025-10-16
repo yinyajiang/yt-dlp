@@ -32,6 +32,10 @@ on:
         required: false
       APPLE_CERTIFICATE_NAME:
         required: false
+      ARCHIVE_REPO_TOKEN:
+        required: false
+      GPG_SIGNING_KEY:
+        required: false
 
   workflow_dispatch:
     inputs:

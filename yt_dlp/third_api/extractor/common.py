@@ -37,9 +37,14 @@ def is_supported_site(hint, support_sites):
     if hint.startswith('www.'):
         hint = hint[4:]
     hint = hint.split(':')[0]
-    for s in hint.split('.'):
-        if s:
-            return s in [site.lower() for site in support_sites]
+    hints = hint.split('.')
+    if len(hints) >= 2:
+        hints = hints[0:2]
+    for s in hints:
+        if not s:
+            continue
+        if s in [site.lower() for site in support_sites]:
+            return True
     return False
 
 

@@ -5,7 +5,7 @@ from ..utils import unsmuggle_url, ExtractorError
 from .mutil import MutilThirdIE
 
 
-def extract_video_info(ie, url, api=None):
+def parse_api(url, api=None):
     url, data = unsmuggle_url(url, {})
     if not api and data:
         api = data.get('__third_api__')
@@ -13,12 +13,17 @@ def extract_video_info(ie, url, api=None):
         parsed = urllib.parse.urlparse(url)
         if parsed.query:
             api = urllib.parse.parse_qs(parsed.query).get('__third_api__', [None])[0]
+    return url, api, data
+
+
+def extract_video_info(ie, url, api=None, video_id=None):
+    url, api, data = parse_api(url, api)
     if not api:
         raise ExtractorError('must specify api')
     if api == 'zm_rapidapi':
         return ZMMutilRapidApi(ie).extract_video_info(url)
     elif api == 'youtube_rapidapi':
-        video_id = data.get('__video_id__')
+        video_id = video_id or data.get('__video_id__')
         if not video_id:
             raise ExtractorError('youtube_rapidapi use video_id')
         return YoutubeRapidApi(ie).extract_video_info(video_id=video_id)

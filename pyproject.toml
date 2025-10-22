@@ -189,6 +189,7 @@ ignore = [
     "E741",    # ambiguous-variable-name
     "UP031",   # printf-string-formatting
     "UP036",   # outdated-version-block
+    "UP038",   # non-pep604-isinstance
     "B006",    # mutable-argument-default
     "B008",    # function-call-in-default-argument
     "B011",    # assert-false

@@ -4548,6 +4548,17 @@ class InfoExtractor:
             self.report_warning(f'use social rapidapi failed: {e}')
             return None
 
+    @staticmethod
+    def _static_match_valid_url(url, valid_url):
+        if not valid_url:
+            return None
+        valid_url_re = tuple(map(re.compile, variadic(valid_url)))
+        return next(filter(None, (regex.match(url) for regex in valid_url_re)), None)
+
+    @staticmethod
+    def _static_match_id(url, valid_url):
+        return InfoExtractor._static_match_valid_url(url, valid_url).group('id')
+
 
 class SearchInfoExtractor(InfoExtractor):
     """

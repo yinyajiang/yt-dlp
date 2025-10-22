@@ -9,6 +9,7 @@ class ThirdApiIE(InfoExtractor):
 
     def _real_extract(self, url):
         _, api, data = parse_api(url)
+        video_id = None
         if api == 'youtube_rapidapi':
             video_id = data.get('__video_id__')
             if not video_id:

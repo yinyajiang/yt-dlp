@@ -23,6 +23,7 @@ def _date_convert(date_str):
 class YoutubeRapidApi:
     API_ENDPOINT = 'https://youtube-media-downloader.p.rapidapi.com/v2/video/details'
     API_HOST = 'youtube-media-downloader.p.rapidapi.com'
+    API_NAME = 'youtube_rapidapi'
 
     def __init__(self, ie):
         self._api_keys = ie._configuration_arg('rapidapi_key', [], casesense=True, enable_env=True)

@@ -10,6 +10,7 @@ from .common import is_retry_rsp, is_over_per_second_rsp, RetryError, OverPerSec
 class SnapMutilRapidApi:
     API_ENDPOINT = 'https://snap-video3.p.rapidapi.com/download'
     API_HOST = 'snap-video3.p.rapidapi.com'
+    API_NAME = 'snap_mutil_rapidapi'
     SUPPORT_SITES = [
         'Tiktok', 'Douyin', 'Capcut', 'Threads', 'Instagram', 'Facebook', 'Kuaishou', 'Espn',
         'Pinterest', 'imdb', 'imgur', 'ifunny', 'Izlesene', 'Reddit', 'Youtube', 'Twitter', 'Vimeo',

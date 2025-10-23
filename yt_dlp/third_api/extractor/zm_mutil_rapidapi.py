@@ -11,6 +11,7 @@ from .common import is_retry_rsp, is_over_per_second_rsp, RetryError, OverPerSec
 class ZMMutilRapidApi:
     API_ENDPOINT = 'https://zm-api.p.rapidapi.com/v1/social/autolink'
     API_HOST = 'zm-api.p.rapidapi.com'
+    API_NAME = 'zm_rapidapi'
     SUPPORT_SITES = [
         'Tiktok', 'Douyin', 'Capcut', 'Threads', 'Instagram', 'Facebook', 'Kuaishou', 'Espn',
         'Pinterest', 'imdb', 'imgur', 'ifunny', 'Izlesene', 'Reddit', 'Youtube', 'Twitter', 'Vimeo',

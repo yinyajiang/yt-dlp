@@ -3,6 +3,7 @@ from ..utils import ExtractorError
 
 
 class MutilThirdIE:
+    API_NAME = 'mutil_api'
 
     cls_ies = [
         AllInOneMutilRapidApi,

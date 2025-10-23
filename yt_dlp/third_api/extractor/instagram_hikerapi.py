@@ -7,6 +7,7 @@ import os
 
 class InstagramHikerApi:
     API_HOST = 'https://api.hikerapi.com'
+    API_NAME = 'instagram_hikerapi'
 
     def __init__(self, ie):
         self._ie = ie

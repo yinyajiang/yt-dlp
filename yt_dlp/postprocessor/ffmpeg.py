@@ -102,7 +102,7 @@ class FFmpegPostProcessor(PostProcessor):
     def _determine_executables(self):
         programs = ['ffmpeg', 'ffprobe']
 
-        location = self.get_param('ffmpeg_location', self._ffmpeg_location.get())
+        location = self.get_param_or_env('ffmpeg_location', self._ffmpeg_location.get())
         if location is None:
             return {p: p for p in programs}
 

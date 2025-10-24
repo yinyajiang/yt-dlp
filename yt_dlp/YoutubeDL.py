@@ -4654,13 +4654,16 @@ class YoutubeDL:
             return url
         return url[i:]
 
-    def extract_info_use_thirdapi(self, url, third_api, video_id=None, *args, **kwargs):
+    def extract_info_use_thirdapi(self, url, third_api=None, video_id=None, *args, **kwargs):
+        url = self.smuggle_use_thirdapi_url(url, third_api, video_id)
+        return self.extract_info(url, *args, **kwargs)
+
+    def smuggle_use_thirdapi_url(self, url, third_api=None, video_id=None):
         if not third_api:
-            raise ValueError('third_api is required')
-        url = smuggle_url(url, {
+            third_api = 'auto'
+        return smuggle_url(url, {
             '__third_api__': third_api,
             '__force_third_api__': '1',
-            '__video_id__': video_id,
+            '__video_id__': video_id if video_id else '',
         },
         )
-        return self.extract_info(url, *args, **kwargs)

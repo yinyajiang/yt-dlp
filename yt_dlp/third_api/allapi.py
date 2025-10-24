@@ -18,7 +18,7 @@ def parse_api(url, api=None):
 
 def extract_video_info(ie, url, api=None, video_id=None):
     url, api, data = parse_api(url, api)
-    if not api:
+    if not api or api == 'auto':
         api = AllInOneMutilRapidApi.API_NAME
     if api == ZMMutilRapidApi.API_NAME:
         return ZMMutilRapidApi(ie).extract_video_info(url)

@@ -1,8 +1,10 @@
 import re
+import urllib.parse
 
 from .common import InfoExtractor
 from ..networking.exceptions import HTTPError
 from ..utils import (
+    ExtractorError,
     determine_ext,
     extract_attributes,
     get_element_by_class,
@@ -123,13 +125,12 @@ class GoogleDriveIE(InfoExtractor):
             } for sub_fmt in subtitle_formats])
         return subtitles
 
-    def _real_extract(self, url):
+    def __real_extract(self, url):
         video_id = self._match_id(url)
         video_info = self._download_json(
             f'https://content-workspacevideo-pa.googleapis.com/v1/drive/media/{video_id}/playback',
             video_id, 'Downloading video webpage', query={'key': 'AIzaSyDVQw45DwoYh632gvsP5vPDqEKvb-Ywnb8'},
             headers={'Referer': 'https://drive.google.com/'})
-
         formats = []
         for fmt in traverse_obj(video_info, (
                 'mediaStreamingData', 'formatStreamingData', ('adaptiveTranscodes', 'progressiveTranscodes'),
@@ -219,6 +220,27 @@ class GoogleDriveIE(InfoExtractor):
             'formats': formats,
             'subtitles': self.extract_subtitles(video_id, video_info),
         }
+
+    def _check_login_required_error(self, http_error):
+        if isinstance(http_error, HTTPError):
+            if http_error.status in (401, 403):
+                self.raise_login_required('Access Denied')
+
+    def _real_extract(self, url):
+        exception = None
+        try:
+            return self.__real_extract(url)
+        except ExtractorError as e:
+            self._check_login_required_error(e.cause)
+            exception = e
+
+        try:
+            _, webpage_urlh = self._download_webpage_handle(url, self._match_id(url))
+        except ExtractorError as e:
+            self._check_login_required_error(e.cause)
+            if webpage_urlh and webpage_urlh.url != url:
+                return self.__real_extract(webpage_urlh.url)
+        raise exception
 
 
 class GoogleDriveFolderIE(InfoExtractor):

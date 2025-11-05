@@ -4,7 +4,9 @@ import collections
 import datetime as dt
 import functools
 import itertools
+import json
 import math
+import os
 import random
 import re
 import sys
@@ -3231,7 +3233,7 @@ class YoutubeIE(YoutubeBaseInfoExtractor):
                                 )
                             msg += 'See  https://github.com/yt-dlp/yt-dlp/issues/12482  for more details'
                             self.report_warning(msg, video_id, only_once=True)
-                            out_additional_info['has_sabr_only']							
+                            out_additional_info['has_sabr_only']
                             continue
 
                     fmt = process_format_stream(fmt_stream, proto, missing_pot=require_po_token and not po_token)

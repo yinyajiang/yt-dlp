@@ -481,7 +481,7 @@ def create_parser():
         callback=_list_from_options_callback,
         type='str',
         callback_kwargs={'delim': None},
-        default=[],
+        default=['ejs:github'],
         help=(
             'Remote components to allow yt-dlp to fetch when required. '
             'You can use this option multiple times to allow multiple components. '

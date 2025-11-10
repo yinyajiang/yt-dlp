@@ -1718,12 +1718,13 @@ class YoutubeDL:
             try:
                 return self.__extract_info(url, self.get_info_extractor(key), download, extra_info, process)
             except Exception as e:
-                if self._try_third_api(key):
+                if not self.params.get('skip_download'):
+                    raise e
+                if self._is_try_third_api(key):
                     with contextlib.suppress(Exception):
                         return self.__extract_info(smuggle_url(url, {'__third_api__': 'mutil_api'}), self.get_info_extractor('ThirdApi'), download, extra_info, process)
 
-                if not self._try_generic(key):
-                    self.report_msg('did not try generic extractor')
+                if not self._is_try_generic(key):
                     raise e
                 self.report_msg('trying Generic extractor')
                 try:
@@ -1758,9 +1759,11 @@ class YoutubeDL:
                             map(ISO3166Utils.short2full, e.countries)))
                     msg += '\nYou might want to use a VPN or a proxy server (with --proxy) to workaround.'
                     self.report_error(msg)
+                    raise
                 except ExtractorError as e:  # An error we somewhat expected
                     self.report_error(str(e), e.format_traceback())
-                except Exception as e:
+                    raise
+                except Exception:
                     if self.params.get('ignoreerrors'):
                         self.report_error(str(e), tb=encode_compat_str(traceback.format_exc()))
                     else:
@@ -4656,7 +4659,7 @@ class YoutubeDL:
     def has_suitable_ie(self, url):
         return any(ie.suitable(url) and key.lower() != 'generic' for key, ie in self._ies.items())
 
-    def _try_generic(self, ie_key):
+    def _is_try_generic(self, ie_key):
         try:
             ie = self.get_info_extractor(ie_key)
 
@@ -4674,7 +4677,7 @@ class YoutubeDL:
             self.report_msg(f'_try_generic exception: {e}')
             return False
 
-    def _try_third_api(self, ie_key):
+    def _is_try_third_api(self, ie_key):
         try:
             ie = self.get_info_extractor(ie_key)
             if not ie or hasattr(ie, '_INNER_TRY_THIRD_API'):

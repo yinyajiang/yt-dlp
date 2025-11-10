@@ -14,7 +14,7 @@ class ZMMutilRapidApi:
     API_NAME = 'zm_rapidapi'
     SUPPORT_SITES = [
         'Tiktok', 'Douyin', 'Capcut', 'Threads', 'Instagram', 'Facebook', 'Kuaishou', 'Espn',
-        'Pinterest', 'imdb', 'imgur', 'ifunny', 'Izlesene', 'Reddit', 'Youtube', 'Twitter', 'Vimeo',
+        'Pinterest', 'imdb', 'imgur', 'ifunny', 'Izlesene', 'Reddit', 'Youtube', 'Twitter',
         'Snapchat', 'Bilibili', 'Dailymotion', 'Sharechat', 'Likee', 'Linkedin', 'Tumblr', 'Hipi',
         'Telegram', 'Getstickerpack', 'Bitchute', 'Febspot', '9GAG', 'okeru', 'Rumble', 'Streamable',
         'Ted', 'SohuTv', 'Pornbox', 'Xvideos', 'Xnxx', 'Kuaishou', 'Xiaohongshu', 'Ixigua', 'Weibo',

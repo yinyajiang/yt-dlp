@@ -1723,6 +1723,7 @@ class YoutubeDL:
                         return self.__extract_info(smuggle_url(url, {'__third_api__': 'mutil_api'}), self.get_info_extractor('ThirdApi'), download, extra_info, process)
 
                 if not self._try_generic(key):
+                    self.report_msg('did not try generic extractor')
                     raise e
                 self.report_msg('trying Generic extractor')
                 try:
@@ -4669,7 +4670,8 @@ class YoutubeDL:
             if ie.IE_NAME.lower() == 'generic':
                 return False
             return ie._TRY_GENERIC
-        except Exception:
+        except Exception as e:
+            self.report_msg(f'_try_generic exception: {e}')
             return False
 
     def _try_third_api(self, ie_key):

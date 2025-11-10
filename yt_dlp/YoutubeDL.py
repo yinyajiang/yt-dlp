@@ -1717,19 +1717,21 @@ class YoutubeDL:
                 break
             try:
                 return self.__extract_info(url, self.get_info_extractor(key), download, extra_info, process, raise_all_error=True)
-            except Exception:
+            except Exception as e:
                 if self._is_try_third_api(key):
                     with contextlib.suppress(Exception):
                         return self.__extract_info(smuggle_url(url, {'__third_api__': 'mutil_api'}), self.get_info_extractor('ThirdApi'), download, extra_info, process)
 
                 if not self._is_try_generic(key):
                     if self.params.get('ignoreerrors'):
+                        self.report_error(f'{e}')
                         return None
                     raise
                 self.report_msg('trying Generic extractor')
                 try:
                     return self.__extract_info(url, self.get_info_extractor('Generic'), download, extra_info, process)
-                except Exception:
+                except Exception as e:
+                    self.report_error(f'{e}')
                     raise
 
         else:
@@ -1762,13 +1764,13 @@ class YoutubeDL:
                         msg += '\nThis video is available in {}.'.format(', '.join(
                             map(ISO3166Utils.short2full, e.countries)))
                     msg += '\nYou might want to use a VPN or a proxy server (with --proxy) to workaround.'
+                    if raise_all_error:
+                        raise GeoRestrictedError(msg)
                     self.report_error(msg)
-                    if raise_all_error:
-                        raise
                 except ExtractorError as e:  # An error we somewhat expected
-                    self.report_error(str(e), e.format_traceback())
                     if raise_all_error:
                         raise
+                    self.report_error(str(e), e.format_traceback())
                 except Exception as e:
                     if raise_all_error:
                         raise

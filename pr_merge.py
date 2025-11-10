@@ -28,16 +28,25 @@ def main():
     args = parser.parse_args()
     if args.pr:
         args.git, args.branch = get_pr_info('yt-dlp', 'yt-dlp', args.pr)
+    remote_name = f'pr-{args.pr}'
 
     subprocess.run(['git', 'remote', '-v']).check_returncode()
-    subprocess.run(['git', 'remote', 'add', args.branch, args.git]).check_returncode()
-    subprocess.run(['git', 'fetch', args.branch]).check_returncode()
+    subprocess.run(['git', 'remote', 'add', remote_name, args.git]).check_returncode()
+    try:
+        subprocess.run(['git', 'fetch', remote_name]).check_returncode()
+    except subprocess.CalledProcessError as e:
+        subprocess.run(['git', 'remote', 'rm', remote_name])
+        raise e
+
     if args.commitid:
         subprocess.run(['git', 'cherry-pick', args.commitid]).check_returncode()
     else:
-        subprocess.run(['git', 'merge', args.branch + '/' + args.branch]).check_returncode()
-    subprocess.run(['git', 'remote', 'rm', args.branch]).check_returncode()
-    subprocess.run(['git', 'remote', '-v']).check_returncode()
+        try:
+            subprocess.run(['git', 'merge', remote_name + '/' + args.branch]).check_returncode()
+        except subprocess.CalledProcessError as e:
+            subprocess.run(['git', 'remote', 'rm', remote_name])
+            raise e
+    subprocess.run(['git', 'remote', 'rm', remote_name]).check_returncode()
 
     subprocess.run(['ruff', 'check', './yt_dlp', '--fix', '--unsafe-fixes']).check_returncode()
     subprocess.run(['autopep8', '-i', './yt_dlp']).check_returncode()

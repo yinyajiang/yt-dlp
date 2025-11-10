@@ -118,6 +118,8 @@ ignore_prs = [
     'https://github.com/yt-dlp/yt-dlp/pull/10801',
     'https://github.com/yt-dlp/yt-dlp/pull/12805',
     'https://github.com/yt-dlp/yt-dlp/pull/11027',
+    'https://github.com/yt-dlp/yt-dlp/pull/13377',
+    'https://github.com/yt-dlp/yt-dlp/pull/4734',
 ]
 
 black_domain = [

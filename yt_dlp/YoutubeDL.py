@@ -1717,18 +1717,22 @@ class YoutubeDL:
                 break
             try:
                 return self.__extract_info(url, self.get_info_extractor(key), download, extra_info, process)
-            except Exception as e:
+            except Exception:
                 if self._is_try_third_api(key):
                     with contextlib.suppress(Exception):
                         return self.__extract_info(smuggle_url(url, {'__third_api__': 'mutil_api'}), self.get_info_extractor('ThirdApi'), download, extra_info, process)
 
                 if not self._is_try_generic(key):
-                    raise e
+                    if self.params.get('ignoreerrors'):
+                        return None
+                    raise
                 self.report_msg('trying Generic extractor')
                 try:
                     return self.__extract_info(url, self.get_info_extractor('Generic'), download, extra_info, process)
-                except Exception:
-                    raise e
+                except Exception :
+                    if self.params.get('ignoreerrors'):
+                        return None
+                    raise
 
         else:
             extractors_restricted = self.params.get('allowed_extractors') not in (None, ['default'])

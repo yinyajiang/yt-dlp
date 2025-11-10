@@ -1718,8 +1718,6 @@ class YoutubeDL:
             try:
                 return self.__extract_info(url, self.get_info_extractor(key), download, extra_info, process)
             except Exception as e:
-                if not self.params.get('skip_download'):
-                    raise e
                 if self._is_try_third_api(key):
                     with contextlib.suppress(Exception):
                         return self.__extract_info(smuggle_url(url, {'__third_api__': 'mutil_api'}), self.get_info_extractor('ThirdApi'), download, extra_info, process)
@@ -1763,7 +1761,7 @@ class YoutubeDL:
                 except ExtractorError as e:  # An error we somewhat expected
                     self.report_error(str(e), e.format_traceback())
                     raise
-                except Exception:
+                except Exception as e:
                     if self.params.get('ignoreerrors'):
                         self.report_error(str(e), tb=encode_compat_str(traceback.format_exc()))
                     else:

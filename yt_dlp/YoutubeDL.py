@@ -1716,7 +1716,7 @@ class YoutubeDL:
                     raise ExistingVideoReached
                 break
             try:
-                return self.__extract_info(url, self.get_info_extractor(key), download, extra_info, process)
+                return self.__extract_info(url, self.get_info_extractor(key), download, extra_info, process, raise_all_error=True)
             except Exception:
                 if self._is_try_third_api(key):
                     with contextlib.suppress(Exception):
@@ -1729,9 +1729,7 @@ class YoutubeDL:
                 self.report_msg('trying Generic extractor')
                 try:
                     return self.__extract_info(url, self.get_info_extractor('Generic'), download, extra_info, process)
-                except Exception :
-                    if self.params.get('ignoreerrors'):
-                        return None
+                except Exception:
                     raise
 
         else:
@@ -1744,6 +1742,10 @@ class YoutubeDL:
         def wrapper(self, *args, **kwargs):
             while True:
                 try:
+                    raise_all_error = False
+                    if 'raise_all_error' in kwargs:
+                        raise_all_error = kwargs.get('raise_all_error', False)
+                        kwargs.pop('raise_all_error', None)
                     return func(self, *args, **kwargs)
                 except (CookieLoadError, DownloadCancelled, LazyList.IndexError, PagedList.IndexError):
                     raise
@@ -1761,11 +1763,15 @@ class YoutubeDL:
                             map(ISO3166Utils.short2full, e.countries)))
                     msg += '\nYou might want to use a VPN or a proxy server (with --proxy) to workaround.'
                     self.report_error(msg)
-                    raise
+                    if raise_all_error:
+                        raise
                 except ExtractorError as e:  # An error we somewhat expected
                     self.report_error(str(e), e.format_traceback())
-                    raise
+                    if raise_all_error:
+                        raise
                 except Exception as e:
+                    if raise_all_error:
+                        raise
                     if self.params.get('ignoreerrors'):
                         self.report_error(str(e), tb=encode_compat_str(traceback.format_exc()))
                     else:

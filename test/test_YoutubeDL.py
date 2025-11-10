@@ -1142,75 +1142,75 @@ class TestYoutubeDL(unittest.TestCase):
         self.assertEqual(downloaded['extractor_key'], 'TestEx')
 
     # Test case for https://github.com/ytdl-org/youtube-dl/issues/27064
-    # def test_ignoreerrors_for_playlist_with_url_transparent_iterable_entries(self):
+    def test_ignoreerrors_for_playlist_with_url_transparent_iterable_entries(self):
 
-    #     class _YDL(YDL):
-    #         def __init__(self, *args, **kwargs):
-    #             super().__init__(*args, **kwargs)
+        class _YDL(YDL):
+            def __init__(self, *args, **kwargs):
+                super().__init__(*args, **kwargs)
 
-    #         def trouble(self, s, tb=None):
-    #             pass
+            def trouble(self, s, tb=None):
+                pass
 
-    #     ydl = _YDL({
-    #         'format': 'extra',
-    #         'ignoreerrors': True,
-    #     })
+        ydl = _YDL({
+            'format': 'extra',
+            'ignoreerrors': True,
+        })
 
-    #     class VideoIE(InfoExtractor):
-    #         _VALID_URL = r'video:(?P<id>\d+)'
+        class VideoIE(InfoExtractor):
+            _VALID_URL = r'video:(?P<id>\d+)'
 
-    #         def _real_extract(self, url):
-    #             video_id = self._match_id(url)
-    #             formats = [{
-    #                 'format_id': 'default',
-    #                 'url': 'url:',
-    #             }]
-    #             if video_id == '0':
-    #                 raise ExtractorError('foo')
-    #             if video_id == '2':
-    #                 formats.append({
-    #                     'format_id': 'extra',
-    #                     'url': TEST_URL,
-    #                 })
-    #             return {
-    #                 'id': video_id,
-    #                 'title': f'Video {video_id}',
-    #                 'formats': formats,
-    #             }
+            def _real_extract(self, url):
+                video_id = self._match_id(url)
+                formats = [{
+                    'format_id': 'default',
+                    'url': 'url:',
+                }]
+                if video_id == '0':
+                    raise ExtractorError('foo')
+                if video_id == '2':
+                    formats.append({
+                        'format_id': 'extra',
+                        'url': TEST_URL,
+                    })
+                return {
+                    'id': video_id,
+                    'title': f'Video {video_id}',
+                    'formats': formats,
+                }
 
-    #     class PlaylistIE(InfoExtractor):
-    #         _VALID_URL = r'playlist:'
+        class PlaylistIE(InfoExtractor):
+            _VALID_URL = r'playlist:'
 
-    #         def _entries(self):
-    #             for n in range(3):
-    #                 video_id = str(n)
-    #                 yield {
-    #                     '_type': 'url_transparent',
-    #                     'ie_key': VideoIE.ie_key(),
-    #                     'id': video_id,
-    #                     'url': f'video:{video_id}',
-    #                     'title': f'Video Transparent {video_id}',
-    #                 }
+            def _entries(self):
+                for n in range(3):
+                    video_id = str(n)
+                    yield {
+                        '_type': 'url_transparent',
+                        'ie_key': VideoIE.ie_key(),
+                        'id': video_id,
+                        'url': f'video:{video_id}',
+                        'title': f'Video Transparent {video_id}',
+                    }
 
-    #         def _real_extract(self, url):
-    #             return self.playlist_result(self._entries())
+            def _real_extract(self, url):
+                return self.playlist_result(self._entries())
 
-    #     ydl.add_info_extractor(VideoIE(ydl))
-    #     ydl.add_info_extractor(PlaylistIE(ydl))
-    #     info = ydl.extract_info('playlist:')
-    #     entries = info['entries']
-    #     self.assertEqual(len(entries), 3)
-    #     self.assertTrue(entries[0] is None)
-    #     self.assertTrue(entries[1] is None)
-    #     self.assertEqual(len(ydl.downloaded_info_dicts), 1)
-    #     downloaded = ydl.downloaded_info_dicts[0]
-    #     entries[2].pop('requested_downloads', None)
-    #     self.assertEqual(entries[2], downloaded)
-    #     self.assertEqual(downloaded['url'], TEST_URL)
-    #     self.assertEqual(downloaded['title'], 'Video Transparent 2')
-    #     self.assertEqual(downloaded['id'], '2')
-    #     self.assertEqual(downloaded['extractor'], 'Video')
-    #     self.assertEqual(downloaded['extractor_key'], 'Video')
+        ydl.add_info_extractor(VideoIE(ydl))
+        ydl.add_info_extractor(PlaylistIE(ydl))
+        info = ydl.extract_info('playlist:')
+        entries = info['entries']
+        self.assertEqual(len(entries), 3)
+        self.assertTrue(entries[0] is None)
+        self.assertTrue(entries[1] is None)
+        self.assertEqual(len(ydl.downloaded_info_dicts), 1)
+        downloaded = ydl.downloaded_info_dicts[0]
+        entries[2].pop('requested_downloads', None)
+        self.assertEqual(entries[2], downloaded)
+        self.assertEqual(downloaded['url'], TEST_URL)
+        self.assertEqual(downloaded['title'], 'Video Transparent 2')
+        self.assertEqual(downloaded['id'], '2')
+        self.assertEqual(downloaded['extractor'], 'Video')
+        self.assertEqual(downloaded['extractor_key'], 'Video')
 
     def test_header_cookies(self):
         from http.cookiejar import Cookie

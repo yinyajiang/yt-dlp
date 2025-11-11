@@ -45,6 +45,7 @@ class VimeoBaseInfoExtractor(InfoExtractor):
     _NETRC_MACHINE = 'vimeo'
     _LOGIN_REQUIRED = False
     _LOGIN_URL = 'https://vimeo.com/log_in'
+    _TRY_GENERIC = True
     _REFERER_HINT = (
         'Cannot download embed-only video without embedding URL. Please call yt-dlp '
         'with the URL of the page that embeds this video.')

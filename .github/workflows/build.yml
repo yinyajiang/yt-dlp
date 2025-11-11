@@ -29,7 +29,7 @@ on:
         default: true
         type: boolean
       windows:
-        default: false
+        default: true
         type: boolean
     secrets:
       GPG_SIGNING_KEY:
@@ -417,7 +417,7 @@ jobs:
         run: |
           source ~/yt-dlp-build-venv/bin/activate
           python3 -m bundle.pyinstaller --target-architecture universal2 --onedir -n yt-dlp
-          bundle/codesign_script.sh -i "${{ secrets.APPLE_CERTIFICATE_NAME }}" -d ./dist/yt-dlp -e ./bundle/entitlements.plist
+          # bundle/codesign_script.sh -i "${{ secrets.APPLE_CERTIFICATE_NAME }}" -d ./dist/yt-dlp -e ./bundle/entitlements.plist
 
           (cd ./dist/yt-dlp && zip -r ../yt-dlp_macos.zip .)
           # python3 -m bundle.pyinstaller --target-architecture universal2 --codesign-identity "${{ secrets.APPLE_CERTIFICATE_NAME }}" --osx-entitlements-file ./bundle/entitlements.plist

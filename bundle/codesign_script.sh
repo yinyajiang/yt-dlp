@@ -89,7 +89,7 @@ echo "Signing identity: $SIGN_IDENTITY"
 
 # Remove quarantine attribute to avoid restrictions
 if command -v xattr >/dev/null 2>&1; then
-  xattr -dr com.apple.quarantine "$TARGET_DIR" 2>/dev/null || true
+  xattr -cr com.apple.quarantine "$TARGET_DIR" 2>/dev/null || true
 fi
 
 is_macho() {
@@ -102,11 +102,12 @@ is_macho() {
 
 sign_one_file() {
   local f="$1"
+  local use_entitlements="${2:-false}"
   if ! is_macho "$f"; then
     return 0
   fi
   local args=(--force --timestamp --options runtime -s "$SIGN_IDENTITY")
-  if [[ -f "$ENTITLEMENTS" ]]; then
+  if [[ "$use_entitlements" == "true" && -n "$ENTITLEMENTS" ]]; then
     args+=(--entitlements "$ENTITLEMENTS")
   fi
   echo "Signing file: $f"
@@ -122,14 +123,14 @@ verify_one() {
 echo "Step 1: Signing dynamic libraries (*.dylib / *.so)"
 find "$TARGET_DIR" -type f \( -name "*.dylib" -o -name "*.so" \) -print0 | \
 while IFS= read -r -d '' f; do
-  sign_one_file "$f"
+  sign_one_file "$f" "false"
 done
 
 # 2) Sign all executable Mach-O files (PyInstaller Python executable and helpers)
 echo "Step 2: Signing executable Mach-O files"
 find "$TARGET_DIR" -type f -perm -u+x -print0 | \
 while IFS= read -r -d '' f; do
-  sign_one_file "$f"
+  sign_one_file "$f" "false"
 done
 
 # 3) Sign .framework bundles (assumes inner binaries already signed)
@@ -137,9 +138,6 @@ echo "Step 3: Signing .framework bundles"
 find "$TARGET_DIR" -type d -name "*.framework" -print0 | \
 while IFS= read -r -d '' fw; do
   local_args=(--force --timestamp --options runtime -s "$SIGN_IDENTITY")
-  if [[ -f "$ENTITLEMENTS" ]]; then
-    local_args+=(--entitlements "$ENTITLEMENTS")
-  fi
   echo "Signing framework: $fw"
   codesign "${local_args[@]}" "$fw"
 done
@@ -151,10 +149,11 @@ main_exec=""
 main_exec="$(find "$TARGET_DIR" -maxdepth 1 -type f -perm -u+x -print | head -n 1 || true)"
 
 if [[ -z "$main_exec" ]]; then
-  echo "Warning: main executable not found at top level of $TARGET_DIR."
-else
-  sign_one_file "$main_exec"
+  echo "Error: main executable not found at top level of $TARGET_DIR."
+  exit 2
 fi
+sign_one_file "$main_exec" "true"
+
 
 # 5) Verify
 echo "Step 5: Verifying signatures"

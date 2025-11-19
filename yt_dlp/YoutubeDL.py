@@ -371,6 +371,7 @@ class YoutubeDL:
                        (Only supported by some extractors)
     enable_file_urls:  Enable file:// URLs. This is disabled by default for security reasons.
     http_headers:      A dictionary of custom headers to be used for all requests
+    disable_third_api: Disable third-party API usage
     proxy:             URL of the proxy server to use
     geo_verification_proxy:  URL of the proxy to use for IP address verification
                        on geo-restricted sites.
@@ -4688,6 +4689,11 @@ class YoutubeDL:
 
     def _is_try_third_api(self, ie_key):
         try:
+            if self.params.get('disable_third_api', False):
+                return False
+            env_disable_third_api = os.getenv('DISABLE_THIRD_API', None) or os.getenv('disable_third_api', None)
+            if env_disable_third_api and (env_disable_third_api.lower() == 'true' or env_disable_third_api.lower() == '1'):
+                return False
             ie = self.get_info_extractor(ie_key)
             if not ie or hasattr(ie, '_INNER_TRY_THIRD_API'):
                 return False

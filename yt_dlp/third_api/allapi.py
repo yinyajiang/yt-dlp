@@ -1,6 +1,6 @@
 import urllib.parse
 
-from .extractor import SnapMutilRapidApi, ZMMutilRapidApi, AllInOneMutilRapidApi, YoutubeRapidApi, InstagramHikerApi
+from .extractor import SnapMutilRapidApi, ZMMutilRapidApi, AllInOneMutilRapidApi, YoutubeRapidApi, InstagramHikerApi, ThirdApiGuard
 from ..utils import unsmuggle_url, ExtractorError
 from .mutil import MutilThirdIE
 
@@ -27,6 +27,7 @@ def call_ie_func(ie, func_name, default_value, *args, **kwargs):
 
 
 def extract_video_info(ie, url, api=None, video_id=None):
+    ThirdApiGuard.guard(ie, f'allapi-{url}')
     url, api, data = parse_api(url, api)
 
     if not api or api == 'auto':

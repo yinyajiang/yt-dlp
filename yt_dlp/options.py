@@ -601,6 +601,10 @@ def create_parser():
             f'The following presets are available: {", ".join(_PRESET_ALIASES)}. '
             'See the "Preset Aliases" section at the end for more info. '
             'This option can be used multiple times'))
+    general.add_option(
+        '--disable-third-api',
+        action='store_true', dest='disable_third_api', default=False,
+        help='Disable third-party API usage')
 
     network = optparse.OptionGroup(parser, 'Network Options')
     network.add_option(

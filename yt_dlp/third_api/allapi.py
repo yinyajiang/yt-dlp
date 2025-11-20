@@ -27,9 +27,8 @@ def call_ie_func(ie, func_name, default_value, *args, **kwargs):
 
 
 def extract_video_info(ie, url, api=None, video_id=None):
-    ThirdApiGuard.guard(ie, f'allapi-{url}')
     url, api, data = parse_api(url, api)
-
+    ThirdApiGuard.guard(ie, f'allapi-{api}-{url}')
     if not api or api == 'auto':
         api = YoutubeRapidApi.API_NAME if call_ie_func(ie, '_is_youtube_url', False, url) else ''
 

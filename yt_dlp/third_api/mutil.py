@@ -20,10 +20,10 @@ class MutilThirdIE:
         return any(ie_cls.is_supported_site(hint) for ie_cls in cls.cls_ies)
 
     def extract_video_info(self, video_url, video_id=None):
-        ThirdApiGuard.guard(self.ie, f'mutil-{video_url}')
         ies = [ie_cls(self.ie) for ie_cls in self.cls_ies if ie_cls.is_supported_site(video_url)]
         if not ies:
             raise ExtractorError('MutilThirdIE: No supported')
+        ThirdApiGuard.guard(self.ie, f'mutil-{video_id}-{video_url}')
         first_exception = None
         for ie in ies:
             try:

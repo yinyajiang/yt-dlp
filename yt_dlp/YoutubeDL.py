@@ -749,6 +749,10 @@ class YoutubeDL:
                 self.write_debug(f"Using DENO_PATH environment variable: {os.getenv('DENO_PATH')}")
                 self.params['js_runtimes'] = {'deno': {}}
                 self.params['js_runtimes']['deno'] = {'path': os.getenv('DENO_PATH')}
+
+        if sys.platform.lower() == 'darwin':
+            self.params['js_runtimes'] = {'deno': {}}
+
         self._clean_js_runtimes(self.params['js_runtimes'])
 
         self.params['remote_components'] = set(self.params.get('remote_components', ()))

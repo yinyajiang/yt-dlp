@@ -743,13 +743,17 @@ class YoutubeDL:
 
         # Note: this must be after plugins are loaded
         self.params['js_runtimes'] = self.params.get('js_runtimes', {'deno': {}})
-        self.params['js_runtimes'] =  {}
-        # cfg_deno = traverse_obj(self.params, ('js_runtimes', 'deno', 'path'), default=None)
-        # if not cfg_deno:
-        #     if os.getenv('DENO_PATH'):
-        #         self.write_debug(f"Using DENO_PATH environment variable: {os.getenv('DENO_PATH')}")
-        #         self.params['js_runtimes'] = {'deno': {}}
-        #         self.params['js_runtimes']['deno'] = {'path': os.getenv('DENO_PATH')}
+        cfg_deno = traverse_obj(self.params, ('js_runtimes', 'deno', 'path'), default=None)
+        if not cfg_deno:
+            if os.getenv('DENO_PATH'):
+                self.write_debug(f"Using DENO_PATH environment variable: {os.getenv('DENO_PATH')}")
+                self.params['js_runtimes'] = {'deno': {}}
+                self.params['js_runtimes']['deno'] = {'path': os.getenv('DENO_PATH')}
+
+        if sys.platform.lower() == 'darwin':
+            # TODO: Temporarily disable js_runtimes on Mac
+            self.report_msg('Mac detected, disabling js_runtimes')
+            self.params['js_runtimes'] = {}
 
         self._clean_js_runtimes(self.params['js_runtimes'])
 

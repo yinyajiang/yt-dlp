@@ -112,7 +112,7 @@ class ThirdApiGuard:
             last_time = existing_data.get(key)
             if last_time:
                 time_diff = now_time - last_time
-                if time_diff < 60 * 60:
+                if time_diff < 60 * 10:
                     return False
 
             if not existing_data or len(existing_data) >= 30:

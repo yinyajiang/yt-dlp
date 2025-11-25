@@ -139,3 +139,4 @@ pull_requests.json
 debug/
 pr_evd.sh
 debug.py
+deno_damage.sh

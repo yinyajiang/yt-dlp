@@ -1,6 +1,7 @@
 import base64
 import binascii
 import collections
+import contextlib
 import datetime as dt
 import functools
 import itertools
@@ -3431,6 +3432,7 @@ class YoutubeIE(YoutubeBaseInfoExtractor):
                         video_id=video_id,
                         input=SigChallengeInput(challenges=[''.join(map(chr, range(spec_id))) for spec_id in s_challenges], player_url=player_url)))
 
+                challenges_len = len(n_challenges) + len(s_challenges)
                 if challenge_requests:
                     for _challenge_request, challenge_response in self._jsc_director.bulk_solve(challenge_requests):
                         if challenge_response.type == JsChallengeType.SIG:
@@ -3473,10 +3475,12 @@ class YoutubeIE(YoutubeBaseInfoExtractor):
                         self.report_warning(
                             f'n challenge solving failed: Some formats may be missing. {help_message}',
                             video_id=video_id, only_once=True)
-
+                    all_challenges_failed = challenges_len and (challenges_len == len(s_challenges) + len(n_challenges))
                     for cfmts in list(s_challenges.values()) + list(n_challenges.values()):
                         for fmt in cfmts:
                             if fmt in https_fmts:
+                                if all_challenges_failed:
+                                    out_additional_info['all_challenges_failed'] = True
                                 https_fmts.remove(fmt)
 
                 for fmt in https_fmts:
@@ -4526,6 +4530,17 @@ class YoutubeIE(YoutubeBaseInfoExtractor):
         first_execption = None
         try:
             result = self._real_extract_with_additional_info(url, out_additional_info)
+            if out_additional_info.get('all_challenges_failed', False):
+                with contextlib.suppress(Exception):
+                    self.report_warning('[js_runtimes] all challenges failed, try to not use js_runtimes')
+                    out_additional_info = {}
+                    self._downloader.clear_js_runtimes()
+                    # Reinitialize _jsc_director to reflect the disabled js_runtimes
+                    self._jsc_director = initialize_jsc_director(self)
+                    no_jsc_result = self._real_extract_with_additional_info(url, out_additional_info)
+                    if no_jsc_result:
+                        result = no_jsc_result
+
             result_type = result.get('_type', 'video')
             if result_type == 'video' and not self._downloader._has_formats_to_download(result) and not self._has_config_potoken():
                 # try to use potoken

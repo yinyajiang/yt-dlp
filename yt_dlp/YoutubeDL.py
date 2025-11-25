@@ -894,6 +894,11 @@ class YoutubeDL:
             for rt in unsupported_remote_components:
                 remote_components.remove(rt)
 
+    def clear_js_runtimes(self):
+        self.params['js_runtimes'] = {}
+        if '_js_runtimes' in self.__dict__:
+            delattr(self, '_js_runtimes')
+
     @functools.cached_property
     def _js_runtimes(self):
         runtimes = {}

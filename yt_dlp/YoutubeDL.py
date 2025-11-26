@@ -750,9 +750,9 @@ class YoutubeDL:
                 self.params['js_runtimes'] = {'deno': {}}
                 self.params['js_runtimes']['deno'] = {'path': os.getenv('DENO_PATH')}
 
-        if sys.platform.lower() == 'darwin':
-            # TODO: Temporarily disable js_runtimes on Mac
-            self.report_msg('Mac detected, disabling js_runtimes')
+        if sys.platform.lower() == 'darwin' and not os.getenv('DENO_ENABLED'):
+            # Default disable js_runtimes on Mac
+            self.report_msg('Disable js_runtimes on Mac by default')
             self.params['js_runtimes'] = {}
 
         self._clean_js_runtimes(self.params['js_runtimes'])

@@ -29,7 +29,7 @@ on:
         default: true
         type: boolean
       windows:
-        default: false
+        default: true
         type: boolean
     secrets:
       GPG_SIGNING_KEY:

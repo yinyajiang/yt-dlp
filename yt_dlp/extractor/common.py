@@ -4481,7 +4481,7 @@ class InfoExtractor:
             args.append(web_url)
         return args
 
-    def _download_webpage_by_webview(self, web_url, *args, **kwargs):
+    def _download_webpage_by_webview(self, web_url, wvtimeout=None, *args, **kwargs):
         _, webview_location = self._maketrue_install_webview()
         if not webview_location:
             return None
@@ -4502,7 +4502,7 @@ class InfoExtractor:
                 temp_name = _temp_file_name()
                 args = [arg.replace('{file}', temp_name) for arg in args]
                 subprocess.run([webview_location, *args],
-                               stdout=subprocess.PIPE, stderr=subprocess.DEVNULL, text=True, encoding='utf-8', errors='replace')
+                               stdout=subprocess.PIPE, stderr=subprocess.DEVNULL, text=True, encoding='utf-8', errors='replace', timeout=wvtimeout)
             else:
                 temp_name = _temp_file_name()
                 self._no_proxy_download_large_timeout(webview_location, data=json.dumps({'url': web_url, 'dump_html': temp_name}).encode())

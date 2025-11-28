@@ -1941,6 +1941,7 @@ from .scte import (
     SCTEIE,
     SCTECourseIE,
 )
+from .searchalter import SearchForAlternativeIE
 from .sejmpl import SejmIE
 from .sen import SenIE
 from .senalcolombia import SenalColombiaLiveIE

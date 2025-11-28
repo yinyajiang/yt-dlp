@@ -5991,6 +5991,57 @@ def add_query_params(url, params: dict[str, str]):
     return parsed_url.geturl()
 
 
+class ApiFrequencyGuard:
+
+    @staticmethod
+    def is_ok(name, url=None):
+        if not url:
+            return False
+        guard_instance = ApiFrequencyGuard(name, url)
+        return guard_instance.check_and_save_frequency_safely(url)
+
+    def __init__(self, name, key=None):
+        self.data_file = os.path.join(tempfile.gettempdir(), f'api_frequency_guard_{name}.json')
+        self.key = key
+        self.name = name
+        self.always_allow = os.getenv('API_FREQUENCY_GUARD_ALWAYS_ALLOW', '0').lower() in ['true', '1']
+
+    def check_and_save_frequency_safely(self, key=None):
+        try:
+            if self.always_allow:
+                return True
+            if not key:
+                key = self.key
+            if not key:
+                return False
+
+            existing_data = {}
+            try:
+                os.makedirs(os.path.dirname(self.data_file), exist_ok=True)
+                with locked_file(self.data_file, 'r', encoding='utf-8') as f:
+                    content = f.read()
+                    if content:
+                        existing_data = json.loads(content)
+            except Exception:
+                pass
+
+            now_time = int(time.time())
+            last_time = existing_data.get(key)
+            if last_time:
+                time_diff = now_time - last_time
+                if time_diff < 60 * 10:
+                    return False
+
+            if not existing_data or len(existing_data) >= 30:
+                existing_data = {}
+            existing_data[key] = now_time
+            with locked_file(self.data_file, 'w', encoding='utf-8') as f:
+                f.write(json.dumps(existing_data))
+            return True
+        except Exception:
+            return True
+
+
 class _ProgressState(enum.Enum):
     """
     Represents a state for a progress bar.

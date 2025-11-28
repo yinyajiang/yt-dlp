@@ -4,7 +4,7 @@ from ..third_api import extract_video_info
 
 
 class ThirdApiIE(InfoExtractor):
-    _VALID_URL = r'https?://justtocallthridapi2abcdefghijklmnopqrstuvwxyz\.com.*'
+    _VALID_URL = r'https?://7383abbe948a410fb1b42ae8ca7660d4\.com.*'
     IE_NAME = 'thirdapi'
 
     def _real_extract(self, url):

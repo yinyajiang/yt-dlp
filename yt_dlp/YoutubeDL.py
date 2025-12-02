@@ -4741,7 +4741,7 @@ class YoutubeDL:
             'youtu.be',
             'instagram',
             'facebook',
-            "onlyfans",
+            'onlyfans',
         ]):
             return False
 

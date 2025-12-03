@@ -3531,6 +3531,12 @@ class YoutubeDL:
             info_dict['__write_download_archive'] = self.params.get('force_write_download_archive')
         else:
             # Download
+            enable_download_searchalter = os.environ.get('ENABLE_DOWNLOAD_SEARCHALTER', '0').lower()
+            is_searchalter_url = info_dict.get('searchalter_source_url') or info_dict.get('_searchalter_url')
+            if enable_download_searchalter not in ('1', 'true') and is_searchalter_url:
+                self.report_error('Searchalter Downloader is disabled')
+                return
+
             info_dict.setdefault('__postprocessors', [])
             try:
 
@@ -4739,9 +4745,6 @@ class YoutubeDL:
         if any(site in url.lower() for site in [
             'youtube',
             'youtu.be',
-            'instagram',
-            'facebook',
-            'onlyfans',
         ]):
             return False
 

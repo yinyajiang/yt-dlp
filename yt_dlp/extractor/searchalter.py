@@ -17,7 +17,12 @@ class SearchForAlternativeIE(InfoExtractor):
         u = self._search_video(search_title)
         if not u:
             raise ExtractorError('No video urls searched')
-        return self.url_result(u)
+        return self.url_result(
+            u,
+            url_transparent=True,
+            _searchalter_url=url,
+            _searchalter_title=search_title,
+        )
 
     def _search_video(self, title):
         if not title:
@@ -48,6 +53,19 @@ class SearchForAlternativeIE(InfoExtractor):
             url = video_urls[0]
             if '/watch?v=' in url or '/shorts/' in url:
                 return url
+
+        video_urls = self._search_webpage_support_url(
+            webpage,
+            prefers=('https://www.facebook.com/groups/'),
+            attrs='href',
+            origin_url=search_url,
+            only_one=True,
+        )
+        if video_urls:
+            url = video_urls[0]
+            if 'facebook.com/' in url:
+                return url
+            return url
         return None
 
     def _fetch_video_title(self, url):
@@ -59,8 +77,8 @@ class SearchForAlternativeIE(InfoExtractor):
 
         title = None
         if res := self._download_webpage_handle(url, 'fetch_video_title', fatal=False):
-            webpage, urlh = res
-            if webpage and urlh.status == 200:
+            webpage, _ = res
+            if webpage:
                 title = _fetch_webpage_title(webpage)
         if title:
             return title

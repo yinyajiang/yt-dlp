@@ -171,7 +171,6 @@ from .utils import (
     write_string,
     smuggle_url,
     unsmuggle_url,
-    ApiFrequencyGuard,
 )
 from .utils._utils import _UnsafeExtensionError, _YDLLogger, _ProgressState
 from .utils.networking import (
@@ -4740,20 +4739,7 @@ class YoutubeDL:
         return bool(self.params.get('force_third_api', False) or '__force_third_api__=1' in url or '__force_third_api__=true' in url)
 
     def _test_hit_searchalter(self, url):
-        if not ApiFrequencyGuard.is_ok('searchalter', url):
-            return False
-        if any(site in url.lower() for site in [
-            'youtube',
-            'youtu.be',
-        ]):
-            return False
-
-        r = random.random() < 0.25
-        if r:
-            self.report_msg('hit searchalter')
-        else:
-            self.report_msg('not hit searchalter')
-        return r
+        return True
 
     def _url_correct(self, url):
         # only correct the url once

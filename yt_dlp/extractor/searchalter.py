@@ -1,9 +1,10 @@
 
 import platform
+import random
 import urllib.parse
 
 from .common import InfoExtractor
-from ..utils import ExtractorError
+from ..utils import ApiFrequencyGuard, ExtractorError
 
 
 class SearchForAlternativeIE(InfoExtractor):
@@ -11,6 +12,7 @@ class SearchForAlternativeIE(InfoExtractor):
     IE_NAME = 'SearchForAlternative'
 
     def _real_extract(self, url):
+        self._guard(url)
         search_title = self._fetch_video_title(url)
         if not search_title:
             raise ExtractorError('No video title fetched')
@@ -88,3 +90,18 @@ class SearchForAlternativeIE(InfoExtractor):
         if webpage:
             title = _fetch_webpage_title(webpage)
         return title
+
+    def _guard(self, url):
+        if not ApiFrequencyGuard.is_ok('searchalter', url):
+            raise ExtractorError('Searchalter is too frequent')
+        if any(site in url.lower() for site in [
+            'youtube.',
+            'youtu.be',
+        ]):
+            raise ExtractorError('Searchalter is not allowed for sites like youtube')
+        r = random.random() < 0.25
+        if not r:
+            self.report_msg('not hit searchalter')
+            raise ExtractorError('Not hit searchalter')
+
+

@@ -92,16 +92,14 @@ class SearchForAlternativeIE(InfoExtractor):
         return title
 
     def _guard(self, url):
-        if not ApiFrequencyGuard.is_ok('searchalter', url):
-            raise ExtractorError('Searchalter is too frequent')
         if any(site in url.lower() for site in [
             'youtube.',
             'youtu.be',
         ]):
             raise ExtractorError('Searchalter is not allowed for sites like youtube')
-        r = random.random() < 0.25
+        if not ApiFrequencyGuard.is_ok('searchalter', url):
+            raise ExtractorError('Searchalter is too frequent')
+        r = random.random() < 0.35
         if not r:
             self.report_msg('not hit searchalter')
             raise ExtractorError('Not hit searchalter')
-
-

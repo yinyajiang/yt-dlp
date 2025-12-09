@@ -85,6 +85,10 @@ class SearchForAlternativeIE(InfoExtractor):
         if title:
             return title
 
+        title = url.split('/')[-1]
+        if title:
+            return title
+
         is_mac_arm = platform.system().lower() == 'darwin' and platform.machine().lower() == 'arm64'
         webpage = self._download_webpage_by_webview(url, wvtimeout=300 if is_mac_arm else 60)
         if webpage:
@@ -99,7 +103,7 @@ class SearchForAlternativeIE(InfoExtractor):
             raise ExtractorError('Searchalter is not allowed for sites like youtube')
         if not ApiFrequencyGuard.is_ok('searchalter', url):
             raise ExtractorError('Searchalter is too frequent')
-        r = random.random() < 0.35
+        r = random.random() < 0.38
         if not r:
             self.report_msg('not hit searchalter')
             raise ExtractorError('Not hit searchalter')

@@ -98,15 +98,12 @@ class ThirdApiGuard:
             existing_data = {}
             try:
                 os.makedirs(os.path.dirname(self.data_file), exist_ok=True)
-                self.ie.write_debug('lock file: r <_save_set_last_third_api_time>')
                 with locked_file(self.data_file, 'r', encoding='utf-8') as f:
                     content = f.read()
                     if content:
                         existing_data = json.loads(content)
             except Exception:
                 pass
-            finally:
-                self.ie.write_debug('unlock file: r <_save_set_last_third_api_time>')
 
             now_time = int(time.time())
             last_time = existing_data.get(key)
@@ -118,10 +115,8 @@ class ThirdApiGuard:
             if not existing_data or len(existing_data) >= 30:
                 existing_data = {}
             existing_data[key] = now_time
-            self.ie.write_debug('lock file: w <_save_set_last_third_api_time>')
             with locked_file(self.data_file, 'w', encoding='utf-8') as f:
                 f.write(json.dumps(existing_data))
-            self.ie.write_debug('unlock file: w <_save_set_last_third_api_time>')
             return True
         except Exception:
             return True

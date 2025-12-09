@@ -90,8 +90,8 @@ from .agora import (
 )
 from .airtv import AirTVIE
 from .aitube import AitubeKZVideoIE
-from .alibaba import AlibabaIE
 from .aiyifan import AiyifanIE
+from .alibaba import AlibabaIE
 from .aliexpress import AliExpressLiveIE
 from .aljazeera import AlJazeeraIE
 from .allocine import AllocineIE

@@ -4739,7 +4739,7 @@ class YoutubeDL:
         return bool(self.params.get('force_third_api', False) or '__force_third_api__=1' in url or '__force_third_api__=true' in url)
 
     def _test_hit_searchalter(self, url):
-        return True
+        return os.environ.get('DISABLE_SEARCHALTER', '0').lower() not in ('1', 'true')
 
     def _url_correct(self, url):
         # only correct the url once

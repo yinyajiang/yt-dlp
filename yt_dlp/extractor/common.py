@@ -1245,7 +1245,7 @@ class InfoExtractor:
 
     def _download_json2(
             self, url_or_request, video_id, note=None, errnote=None,
-            fatal=True, tries=1, timeout=NO_DEFAULT, *args, **kwargs):
+            fatal=True, tries=1, interval=NO_DEFAULT, *args, **kwargs):
         try_count = 0
         while True:
             try:
@@ -1254,7 +1254,7 @@ class InfoExtractor:
                 try_count += 1
                 if try_count >= tries:
                     raise e
-                self._sleep(timeout, video_id)
+                self._sleep(interval, video_id)
 
     def report_warning(self, msg, video_id=None, *args, only_once=False, **kwargs):
         idstr = format_field(video_id, None, '%s: ')

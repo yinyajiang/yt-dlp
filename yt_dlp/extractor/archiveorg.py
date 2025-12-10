@@ -281,7 +281,7 @@ class ArchiveOrgIE(InfoExtractor):
                 }
 
         try:
-            metadata = self._download_json2(f'https://archive.org/metadata/{identifier}', identifier, tries=10, timeout=1, impersonate=True)
+            metadata = self._download_json2(f'https://archive.org/metadata/{identifier}', identifier, tries=10, interval=1, impersonate=True)
         except Exception:
             r = self._fetch_info_from_webpage_playlist_data(identifier=identifier, entry_id=entry_id, webpage=embed_page, playlist_data=playlist)
             if r:
@@ -947,7 +947,7 @@ class YoutubeWebArchiveIE(InfoExtractor):
         }
         res = self._download_json2(
             'https://web.archive.org/cdx/search/cdx', item_id,
-            note or 'Downloading CDX API JSON', query=query, fatal=fatal, tries=5, timeout=1)
+            note or 'Downloading CDX API JSON', query=query, fatal=fatal, tries=5, interval=1)
         if isinstance(res, list) and len(res) >= 2:
             # format response to make it easier to use
             return [dict(zip(res[0], v)) for v in res[1:]]  # noqa: B905

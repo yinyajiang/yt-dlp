@@ -281,7 +281,7 @@ class ArchiveOrgIE(InfoExtractor):
                 }
 
         try:
-            metadata = self._download_json2('http://archive.org/metadata/' + identifier, identifier, tries=10, timeout=1, impersonate=True)
+            metadata = self._download_json2(f'https://archive.org/metadata/{identifier}', identifier, tries=10, timeout=1, impersonate=True)
         except Exception:
             r = self._fetch_info_from_webpage_playlist_data(identifier=identifier, entry_id=entry_id, webpage=embed_page, playlist_data=playlist)
             if r:

@@ -9,8 +9,8 @@ from .common import is_retry_rsp, is_over_per_second_rsp, RetryError, OverPerSec
 
 #  https://rapidapi.com/manhgdev/api/download-all-in-one-lite
 class AllInOneMutilRapidApi:
-    API_ENDPOINT = 'https://download-all-in-one-lite.p.rapidapi.com/autolink'
-    API_HOST = 'download-all-in-one-lite.p.rapidapi.com'
+    API_ENDPOINT = 'https://download-all-in-one-ultimate.p.rapidapi.com/autolink'
+    API_HOST = 'download-all-in-one-ultimate.p.rapidapi.com'
     API_NAME = 'allinone_mutil_rapidapi'
     SUPPORT_SITES = [
         'Tiktok', 'Douyin', 'Capcut', 'Threads', 'Instagram', 'Facebook', 'Kuaishou', 'Espn',

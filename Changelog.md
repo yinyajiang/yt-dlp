@@ -4,6 +4,26 @@
 # To create a release, dispatch the https://github.com/yt-dlp/yt-dlp/actions/workflows/release.yml workflow on master
 -->
 
+### 2025.12.16.011731
+
+#### Core changes
+- [Merge remote-tracking branch 'upstream'](https://github.com/yt-dlp/yt-dlp/commit/cd6d6740f2040b1203726e7cb9568c4804db674e) by [pukkandan](https://github.com/pukkandan)
+- [Merge remote-tracking branch 'upstream'](https://github.com/yt-dlp/yt-dlp/commit/10b3e48214030857f107b4dfb00450ce76224b73) by [pukkandan](https://github.com/pukkandan)
+- [Merge remote-tracking branch 'upstream'](https://github.com/yt-dlp/yt-dlp/commit/588981d773b70f2de230fb2b5b3732c0b5606d03) by [pukkandan](https://github.com/pukkandan)
+- [Merge remote-tracking branch 'upstream'](https://github.com/yt-dlp/yt-dlp/commit/e1804f6eaa8f05882e573819168ef305d9ddba47) by [pukkandan](https://github.com/pukkandan)
+- [Update YoutubeDL.py](https://github.com/yt-dlp/yt-dlp/commit/828922a3f162e3d70c7077e43e2da0ce44b56e1b) by [pukkandan](https://github.com/pukkandan)
+- [Update _extractors.py](https://github.com/yt-dlp/yt-dlp/commit/67053c4554ee99a7461313ee6e88be5e1e9f752f) by [pukkandan](https://github.com/pukkandan)
+- [Update allinone_mutil_rapidapi.py](https://github.com/yt-dlp/yt-dlp/commit/1f969b71efa217a8002a08796c58145228ee1192) by [pukkandan](https://github.com/pukkandan)
+- [up](https://github.com/yt-dlp/yt-dlp/commit/0e1007f06b7ff8293db07a72d67f4568eef29d40) by [pukkandan](https://github.com/pukkandan)
+- [up](https://github.com/yt-dlp/yt-dlp/commit/8604cacd2ce616797d8cee4c934f2bf6380e53ec) by [pukkandan](https://github.com/pukkandan)
+
+#### Extractor changes
+- **archive.org**: [Fix metadata extraction](https://github.com/yt-dlp/yt-dlp/commit/5f37f67d37b54bf9bd6fe7fa3083492d42f7a20a) ([#15286](https://github.com/yt-dlp/yt-dlp/issues/15286)) by [bashonly](https://github.com/bashonly)
+- **parti**: [Fix extractors](https://github.com/yt-dlp/yt-dlp/commit/04f2ec4b976271e1e7ad3e650a0be2c4fd796ee0) ([#15319](https://github.com/yt-dlp/yt-dlp/issues/15319)) by [seproDev](https://github.com/seproDev)
+- **pornhub**: [Optimize metadata extraction](https://github.com/yt-dlp/yt-dlp/commit/f2ee2a46fc2a4efb6ed58ee9e67c506c6b72b843) ([#15231](https://github.com/yt-dlp/yt-dlp/issues/15231)) by [norepro](https://github.com/norepro)
+- **telecinco**: [Fix extractor](https://github.com/yt-dlp/yt-dlp/commit/b6f24745bfb89ec0eaaa181a68203c2e81e58802) ([#15311](https://github.com/yt-dlp/yt-dlp/issues/15311)) by [0xvd](https://github.com/0xvd), [bashonly](https://github.com/bashonly)
+- **youtube**: tab: [Fix flat thumbnails extraction for shorts](https://github.com/yt-dlp/yt-dlp/commit/ff61bef041d1f69fec1044f783fb938c005128af) ([#15331](https://github.com/yt-dlp/yt-dlp/issues/15331)) by [bashonly](https://github.com/bashonly)
+
 ### 2025.12.08
 
 #### Core changes

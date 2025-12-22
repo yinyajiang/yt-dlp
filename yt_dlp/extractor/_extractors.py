@@ -693,6 +693,7 @@ from .fc2 import (
 from .fczenit import FczenitIE
 from .fifa import FifaIE
 from .filemoon import FileMoonIE
+from .filmarchiv import FilmArchivIE
 from .filmon import (
     FilmOnChannelIE,
     FilmOnIE,
@@ -1365,6 +1366,7 @@ from .nebula import (
     NebulaChannelIE,
     NebulaClassIE,
     NebulaIE,
+    NebulaSeasonIE,
     NebulaSubscriptionsIE,
 )
 from .nekohacker import NekoHackerIE
@@ -1400,12 +1402,6 @@ from .newgrounds import (
 )
 from .newspicks import NewsPicksIE
 from .newsy import NewsyIE
-from .nextmedia import (
-    AppleDailyIE,
-    NextMediaActionNewsIE,
-    NextMediaIE,
-    NextTVIE,
-)
 from .nexx import (
     NexxEmbedIE,
     NexxIE,

@@ -5,6 +5,7 @@ import urllib.parse
 
 from .common import InfoExtractor
 from ..compat import compat_etree_fromstring
+from ..networking import Request
 from ..utils import (
     ExtractorError,
     clean_html,

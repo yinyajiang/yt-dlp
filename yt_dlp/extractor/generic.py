@@ -831,26 +831,26 @@ class GenericIE(InfoExtractor):
                     time.sleep(1)
                     continue
 
-	            if not isinstance(e.cause, HTTPError) or e.cause.status != 403:
-	                raise
-	            res = e.cause.response
-	            already_impersonating = res.extensions.get('impersonate') is not None
-	            if already_impersonating or (
-	                res.get_header('cf-mitigated') != 'challenge'
-	                and b'<title>Attention Required! | Cloudflare</title>' not in res.read()
-	            ):
-	                raise
-	            cf_cookie_domain = traverse_obj(
-	                LenientSimpleCookie(res.get_header('set-cookie')), ('__cf_bm', 'domain'))
-	            if cf_cookie_domain:
-	                self.write_debug(f'Clearing __cf_bm cookie for {cf_cookie_domain}')
-	                self.cookiejar.clear(domain=cf_cookie_domain, path='/', name='__cf_bm')
-	            msg = 'Got HTTP Error 403 caused by Cloudflare anti-bot challenge; '
-	            if not self._downloader._impersonate_target_available(ImpersonateTarget()):
-	                msg += ('see  https://github.com/yt-dlp/yt-dlp#impersonation  for '
-	                        'how to install the required impersonation dependency, and ')
-	            raise ExtractorError(
-	                f'{msg}try again with  --extractor-args "generic:impersonate"', expected=True)
+                if not isinstance(e.cause, HTTPError) or e.cause.status != 403:
+                    raise
+                res = e.cause.response
+                already_impersonating = res.extensions.get('impersonate') is not None
+                if already_impersonating or (
+                    res.get_header('cf-mitigated') != 'challenge'
+                    and b'<title>Attention Required! | Cloudflare</title>' not in res.read()
+                ):
+                    raise
+                cf_cookie_domain = traverse_obj(
+                    LenientSimpleCookie(res.get_header('set-cookie')), ('__cf_bm', 'domain'))
+                if cf_cookie_domain:
+                    self.write_debug(f'Clearing __cf_bm cookie for {cf_cookie_domain}')
+                    self.cookiejar.clear(domain=cf_cookie_domain, path='/', name='__cf_bm')
+                msg = 'Got HTTP Error 403 caused by Cloudflare anti-bot challenge; '
+                if not self._downloader._impersonate_target_available(ImpersonateTarget()):
+                    msg += ('see  https://github.com/yt-dlp/yt-dlp#impersonation  for '
+                            'how to install the required impersonation dependency, and ')
+                raise ExtractorError(
+                    f'{msg}try again with  --extractor-args "generic:impersonate"', expected=True)
 
         new_url = full_response.url
         if new_url != extract_basic_auth(url)[0]:

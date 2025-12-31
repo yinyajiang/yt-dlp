@@ -1170,11 +1170,6 @@ from .mangomolo import (
     MangomoloLiveIE,
     MangomoloVideoIE,
 )
-from .manoto import (
-    ManotoTVIE,
-    ManotoTVLiveIE,
-    ManotoTVShowIE,
-)
 from .manyvids import ManyVidsIE
 from .maoritv import MaoriTVIE
 from .markiza import (
@@ -1934,10 +1929,6 @@ from .scrippsnetworks import (
     ScrippsNetworksWatchIE,
 )
 from .scrolller import ScrolllerIE
-from .scte import (
-    SCTEIE,
-    SCTECourseIE,
-)
 from .searchalter import SearchForAlternativeIE
 from .sejmpl import SejmIE
 from .sen import SenIE

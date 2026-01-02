@@ -2125,6 +2125,11 @@ from .taptap import (
     TapTapMomentIE,
     TapTapPostIntlIE,
 )
+from .tarangplus import (
+    TarangPlusEpisodesIE,
+    TarangPlusPlaylistIE,
+    TarangPlusVideoIE,
+)
 from .tass import TassIE
 from .tbs import TBSIE
 from .tbsjp import (

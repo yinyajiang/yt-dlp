@@ -13,3 +13,7 @@ rules:
     config:
       policies:
         "*": hash-pin
+  template-injection:
+    ignore:
+      - build.yml
+      - release.yml

@@ -3328,7 +3328,7 @@ class YoutubeIE(YoutubeBaseInfoExtractor):
                     self.report_warning(
                         f'n challenge solving failed: Some formats may be missing. {help_message}',
                         video_id=video_id, only_once=True)
-                    
+
                 all_challenges_failed = challenges_len and (challenges_len == len(s_challenges) + len(n_challenges))
                 if all_challenges_failed:
                     out_additional_info['all_challenges_failed'] = True

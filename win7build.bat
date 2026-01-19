@@ -36,9 +36,9 @@ if %isx86% neq 1 (
     echo This is x64 architecture
 	
 	REM Install Requirements
-	mkdir /pyi-wheels
-	python -m pip download -d /pyi-wheels --no-deps --require-hashes "pyinstaller@https://github.com/yt-dlp/Pyinstaller-Builds/releases/download/2025.11.29.054325/pyinstaller-6.17.0-py3-none-win_amd64.whl#sha256=e28cc13e4ad0cc74330d832202806d0c1976e9165da6047309348ca663c0ed3d"
-	python -m pip install --force-reinstall -U "/pyi-wheels/pyinstaller-6.17.0-py3-none-win_amd64.whl"
+	if not exist pyi-wheels mkdir pyi-wheels
+	python -m pip download -d pyi-wheels --no-deps --require-hashes "pyinstaller@https://github.com/yt-dlp/Pyinstaller-Builds/releases/download/2025.11.29.054325/pyinstaller-6.17.0-py3-none-win_amd64.whl#sha256=e28cc13e4ad0cc74330d832202806d0c1976e9165da6047309348ca663c0ed3d"
+	python -m pip install --force-reinstall -U "pyi-wheels/pyinstaller-6.17.0-py3-none-win_amd64.whl"
 	python devscripts/install_deps.py --omit-default --include-extra build
 	python devscripts/install_deps.py --include-extra curl-cffi
 

@@ -3273,7 +3273,6 @@ class YoutubeIE(YoutubeBaseInfoExtractor):
 
         n_challenges = set()
         s_challenges = set()
-
         def solve_js_challenges():
             # Solve all n/sig challenges in bulk and store the results in self._player_cache
             challenge_requests = []
@@ -3296,7 +3295,7 @@ class YoutubeIE(YoutubeBaseInfoExtractor):
                         challenges=[''.join(map(chr, range(spec_id))) for spec_id in s_challenges],
                         player_url=player_url)))
 
-            challenge_len = len(s_challenges) + len(n_challenges)
+            challenges_len = len(n_challenges) + len(s_challenges)
             if challenge_requests:
                 for _challenge_request, challenge_response in self._jsc_director.bulk_solve(challenge_requests):
                     if challenge_response.type == JsChallengeType.SIG:
@@ -3329,8 +3328,10 @@ class YoutubeIE(YoutubeBaseInfoExtractor):
                     self.report_warning(
                         f'n challenge solving failed: Some formats may be missing. {help_message}',
                         video_id=video_id, only_once=True)
-
-                all_challenges_failed = challenge_len > 0
+                    
+                all_challenges_failed = challenges_len and (challenges_len == len(s_challenges) + len(n_challenges))
+                if all_challenges_failed:
+                    out_additional_info['all_challenges_failed'] = True
 
                 # Clear challenge sets so that any subsequent call of this function is a no-op
                 s_challenges.clear()

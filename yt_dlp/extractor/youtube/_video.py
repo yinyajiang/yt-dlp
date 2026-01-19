@@ -3273,6 +3273,7 @@ class YoutubeIE(YoutubeBaseInfoExtractor):
 
         n_challenges = set()
         s_challenges = set()
+
         def solve_js_challenges():
             # Solve all n/sig challenges in bulk and store the results in self._player_cache
             challenge_requests = []

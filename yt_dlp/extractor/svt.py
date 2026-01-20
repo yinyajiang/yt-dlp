@@ -6,6 +6,7 @@ from ..utils import (
     determine_ext,
     dict_get,
     int_or_none,
+    is_none_format,
     try_get,
     unified_timestamp,
 )
@@ -68,6 +69,8 @@ class SVTBaseIE(InfoExtractor):
                         sub['ext'] = 'vtt'
                     subtitles.setdefault(subtitle_lang, []).append(sub)
 
+        formats = self._filter_x_tal_formats(formats)
+
         title = video_info.get('title')
 
         series = video_info.get('programTitle')
@@ -108,6 +111,18 @@ class SVTBaseIE(InfoExtractor):
                 fixed_lang = f'{lang}-forced' if 'text-open' in sub['url'] else lang
                 fixed_subtitles.setdefault(fixed_lang, []).append(sub)
         return fixed_subtitles
+
+    def _filter_x_tal_formats(self, formats):
+        valid_only_audio = [f for f in formats if is_none_format(f.get('vcodec')) and not is_none_format(f.get('acodec')) and f.get('language') != 'sv-x-tal']
+        invalid_only_audio = [f for f in formats if is_none_format(f.get('vcodec')) and not is_none_format(f.get('acodec')) and f.get('language') == 'sv-x-tal']
+        valid_both = [f for f in formats if not is_none_format(f.get('vcodec')) and not is_none_format(f.get('acodec')) and f.get('language') != 'sv-x-tal']
+        invalid_both = [f for f in formats if not is_none_format(f.get('vcodec')) and not is_none_format(f.get('acodec')) and f.get('language') == 'sv-x-tal']
+        if valid_only_audio or valid_both:
+            removeds_id = [f['format_id'] for f in invalid_only_audio + invalid_both]
+            valid_formats = [f for f in formats if f['format_id'] not in removeds_id]
+            if valid_formats:
+                return valid_formats
+        return formats
 
 
 class SVTPlayIE(SVTBaseIE):

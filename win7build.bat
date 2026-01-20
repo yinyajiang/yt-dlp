@@ -66,5 +66,5 @@ if %isx86% neq 1 (
 	python -m bundle.pyinstaller --onedir -n yt-dlp
 	powershell -Command "Compress-Archive -Force -Path ./dist/yt-dlp/* -DestinationPath ./dist/yt-dlp_win7_x86.zip"
 )
-pause
+
 

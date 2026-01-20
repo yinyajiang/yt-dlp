@@ -7,6 +7,8 @@ set "PYTHON_VERSION=3.10.11"
 set "PYTHON_DIR_NAME=Python310"
 set "isX86=0"
 
+cd /d "%~dp0"
+
 if not defined ProgramFiles(x86) (
     echo 32 bit system
 	set "PYTHON_DIR_NAME=%PYTHON_DIR_NAME%-32"

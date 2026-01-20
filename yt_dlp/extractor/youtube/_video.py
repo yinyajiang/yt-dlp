@@ -3519,7 +3519,7 @@ class YoutubeIE(YoutubeBaseInfoExtractor):
                                     f'YouTube may have enabled the SABR-only streaming experiment for '
                                     f'{"your account" if self.is_authenticated else "the current session"}')
                                 self.report_warning(msg_tmpl.format('', client_name, msg), video_id, only_once=True)
-                            out_additional_info['has_sabr_only']
+                            out_additional_info['has_sabr_only'] = True
                             continue
 
                     fmt = process_format_stream(

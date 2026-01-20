@@ -5996,6 +5996,12 @@ def add_query_params(url, params: dict[str, str]):
     return parsed_url.geturl()
 
 
+def is_none_format(format):
+    if not format:
+        return False
+    return format == 'none'
+
+
 class ApiFrequencyGuard:
 
     @staticmethod

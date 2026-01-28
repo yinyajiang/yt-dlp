@@ -431,7 +431,7 @@ class DailymotionIE(DailymotionBaseInfoExtractor):
         is_live = media.get('isOnAir')
         formats = []
         subtitles = {}
-
+        m3u8_exception = None
         for quality, media_list in metadata['qualities'].items():
             for m in media_list:
                 media_url = m.get('url')
@@ -439,11 +439,15 @@ class DailymotionIE(DailymotionBaseInfoExtractor):
                 if not media_url or media_type == 'application/vnd.lumberjack.manifest':
                     continue
                 if media_type == 'application/x-mpegURL':
-                    fmt, subs = self._extract_m3u8_formats_and_subtitles(
-                        media_url, video_id, 'mp4', live=is_live, m3u8_id='hls',
-                        fatal=False, headers=self._generate_blockbuster_headers())
-                    formats.extend(fmt)
-                    self._merge_subtitles(subs, target=subtitles)
+                    try:
+                        fmt, subs = self._extract_m3u8_formats_and_subtitles(
+                            media_url, video_id, 'mp4', live=is_live, m3u8_id='hls',
+                            fatal=False, headers=self._generate_blockbuster_headers())
+                        formats.extend(fmt)
+                        self._merge_subtitles(subs, target=subtitles)
+                    except Exception as e:
+                        m3u8_exception = e
+                        continue
                 else:
                     f = {
                         'url': media_url,
@@ -458,6 +462,10 @@ class DailymotionIE(DailymotionBaseInfoExtractor):
                             'width': width,
                         })
                     formats.append(f)
+
+        if not formats and m3u8_exception:
+            raise m3u8_exception
+
         for f in formats:
             f['url'] = f['url'].split('#')[0]
             if not f.get('fps') and f['format_id'].endswith('@60'):

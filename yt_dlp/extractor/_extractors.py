@@ -610,7 +610,10 @@ from .eroprofile import (
     EroProfileAlbumIE,
     EroProfileIE,
 )
-from .err import ERRJupiterIE
+from .err import (
+    ERRArhiivIE,
+    ERRJupiterIE,
+)
 from .ertgr import (
     ERTFlixCodenameIE,
     ERTFlixIE,
@@ -2489,7 +2492,11 @@ from .voicy import (
     VoicyChannelIE,
     VoicyIE,
 )
-from .volejtv import VolejTVIE
+from .volejtv import (
+    VolejTVCategoryPlaylistIE,
+    VolejTVClubPlaylistIE,
+    VolejTVIE,
+)
 from .voxmedia import (
     VoxMediaIE,
     VoxMediaVolumeIE,

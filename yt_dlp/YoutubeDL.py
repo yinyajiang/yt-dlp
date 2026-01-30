@@ -3158,7 +3158,7 @@ class YoutubeDL:
         remove_temp_before_download = False
         if not formats_to_download:
             self.report_warning('Requested format is not available, trying to reselect formats')
-            _, smug_data = unsmuggle_url(info_dict['original_url'])
+            _, smug_data = unsmuggle_url(info_dict.get('original_url') or info_dict.get('webpage_url'))
             if smug_data:
                 param_format_ids = self.params.get('format', '').split('+')
                 for fmt_id, fmt_type in smug_data.items():

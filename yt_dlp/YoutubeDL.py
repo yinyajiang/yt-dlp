@@ -171,6 +171,9 @@ from .utils import (
     write_string,
     smuggle_url,
     unsmuggle_url,
+    is_video_only_format,
+    is_audio_only_format,
+    is_both_format,
 )
 from .utils._utils import _UnsafeExtensionError, _YDLLogger, _ProgressState
 from .utils.networking import (
@@ -3147,6 +3150,37 @@ class YoutubeDL:
                 continue
             break
 
+        if info_dict.get('_force_format_ids'):
+            formats_to_download = []
+            for fmt_id in info_dict['_force_format_ids']:
+                formats_to_download.extend(self._select_formats(formats, self.build_format_selector(fmt_id)))
+
+        remove_temp_before_download = False
+        if not formats_to_download:
+            self.report_warning('Requested format is not available, trying to reselect formats')
+            _, smug_data = unsmuggle_url(info_dict['original_url'])
+            if smug_data:
+                param_format_ids = self.params.get('format', '').split('+')
+                for fmt_id, fmt_type in smug_data.items():
+                    if fmt_id not in param_format_ids:
+                        continue
+                    new_formats = []
+                    if fmt_type == 'video_only':
+                        new_formats = self._select_formats(formats, self.build_format_selector('bv'))
+                        if not new_formats:
+                            new_formats = self._select_formats(formats, self.build_format_selector('b'))
+                    elif fmt_type == 'audio_only':
+                        new_formats = self._select_formats(formats, self.build_format_selector('ba'))
+                        if not new_formats:
+                            new_formats = self._select_formats(formats, self.build_format_selector('b'))
+                    elif fmt_type == 'both':
+                        new_formats = self._select_formats(formats, self.build_format_selector('b'))
+                    if not new_formats:
+                        self.report_error('Not able to reselect formats')
+                        break
+                    formats_to_download.extend(new_formats)
+                    remove_temp_before_download = True
+
         if not formats_to_download:
             if not self.params.get('ignore_no_formats_error'):
                 raise ExtractorError(
@@ -3173,6 +3207,8 @@ class YoutubeDL:
             for fmt, chapter in itertools.product(formats_to_download, requested_ranges):
                 new_info = self._copy_infodict(info_dict)
                 new_info.update(fmt)
+                if remove_temp_before_download:
+                    new_info['__remove_temp_before_download'] = True
                 offset, duration = info_dict.get('section_start') or 0, info_dict.get('duration') or float('inf')
                 end_time = offset + min(chapter.get('end_time', duration), duration)
                 # duration may not be accurate. So allow deviations <1sec
@@ -3423,6 +3459,8 @@ class YoutubeDL:
         # info_dict['_filename'] needs to be set for backward compatibility
         info_dict['_filename'] = full_filename = self.prepare_filename(info_dict, warn=True)
         temp_filename = self.prepare_filename(info_dict, 'temp')
+        if temp_filename and info_dict.get('__remove_temp_before_download') and os.path.exists(temp_filename):
+            os.remove(temp_filename)
         files_to_move = {}
 
         # Forced printings
@@ -3815,10 +3853,49 @@ class YoutubeDL:
             except (DownloadError, EntryNotInPlaylist, ReExtractInfo) as e:
                 if not isinstance(e, EntryNotInPlaylist):
                     self.to_stderr('\r')
+
+                formats_to_download = self._formats_to_download(info)
+                for fmt in formats_to_download:
+                    if is_video_only_format(fmt):
+                        new_formats = self._select_formats(info['formats'], self.build_format_selector('bv'))
+                        if not new_formats:
+                            new_formats = self._select_formats(info['formats'], self.build_format_selector('b'))
+                    elif is_audio_only_format(fmt):
+                        new_formats = self._select_formats(info['formats'], self.build_format_selector('ba'))
+                        if not new_formats:
+                            new_formats = self._select_formats(info['formats'], self.build_format_selector('b'))
+                    elif is_both_format(fmt):
+                        new_formats = self._select_formats(info['formats'], self.build_format_selector('b'))
+                    if not info.get('_force_format_ids'):
+                        info['_force_format_ids'] = []
+                    if not new_formats:
+                        info['_force_format_ids'] = []
+                        break
+                    for new_fmt in new_formats:
+                        if any(new_fmt['format_id'] == fmt['format_id'] for fmt in formats_to_download):
+                            info['_force_format_ids'] = []
+                            break
+                    info['_force_format_ids'].extend([new_fmt['format_id'] for new_fmt in new_formats])
+
+                if info['_force_format_ids']:
+                    with contextlib.suppress(Exception):
+                        return self.__download_wrapper(self.process_ie_result)(info, download=True)
+                    del info['_force_format_ids']
+
                 webpage_url = info.get('webpage_url')
                 if webpage_url is None:
                     raise
                 self.report_warning(f'The info failed to download: {e}; trying with URL {webpage_url}')
+
+                for fmt in formats_to_download:
+                    if is_video_only_format(fmt):
+                        webpage_url = smuggle_url(webpage_url, {fmt['format_id']: 'video_only'})
+                    elif is_audio_only_format(fmt):
+                        webpage_url = smuggle_url(webpage_url, {fmt['format_id']: 'audio_only'})
+                    elif is_both_format(fmt):
+                        webpage_url = smuggle_url(webpage_url, {fmt['format_id']: 'both'})
+
+                os.environ['DISABLE_SEARCHALTER'] = '1'
                 self.download([webpage_url])
             except ExtractorError as e:
                 self.report_error(e)

@@ -5996,10 +5996,28 @@ def add_query_params(url, params: dict[str, str]):
     return parsed_url.geturl()
 
 
-def is_none_format(format):
+def is_none_codec(codec: str | None):
+    if not codec:
+        return False
+    return codec.lower() == 'none'
+
+
+def is_video_only_format(format: dict):
     if not format:
         return False
-    return format == 'none'
+    return is_none_codec(format.get('acodec')) and not is_none_codec(format.get('vcodec'))
+
+
+def is_audio_only_format(format: dict):
+    if not format:
+        return False
+    return is_none_codec(format.get('vcodec')) and not is_none_codec(format.get('acodec'))
+
+
+def is_both_format(format: dict):
+    if not format:
+        return False
+    return not is_none_codec(format.get('vcodec')) and not is_none_codec(format.get('acodec'))
 
 
 class ApiFrequencyGuard:

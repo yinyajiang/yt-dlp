@@ -73,6 +73,7 @@ class ThirdApiGuard:
     def __init__(self, ie, key=None):
         self.data_file = os.path.join(tempfile.gettempdir(), 'third_api_guard.json')
         self.disable_third_api = ie._downloader.params.get('disable_third_api', False)
+        self.always_allow = os.getenv('API_FREQUENCY_GUARD_ALWAYS_ALLOW', '0').lower() in ['true', '1']
         if not self.disable_third_api:
             env_disable_third_api = os.getenv('DISABLE_THIRD_API', None) or os.getenv('disable_third_api', None)
             if env_disable_third_api and (env_disable_third_api.lower() == 'true' or env_disable_third_api.lower() == '1'):
@@ -81,6 +82,8 @@ class ThirdApiGuard:
         self.ie = ie
 
     def check_and_save_frequency(self, key=None):
+        if self.always_allow:
+            return True
         if self.disable_third_api:
             self.ie.report_warning('third api is disabled')
             raise ExtractorError('third api is disabled')

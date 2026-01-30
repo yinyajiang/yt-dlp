@@ -6,7 +6,7 @@ from ..utils import (
     determine_ext,
     dict_get,
     int_or_none,
-    is_none_format,
+    is_none_codec,
     try_get,
     unified_timestamp,
 )
@@ -113,10 +113,10 @@ class SVTBaseIE(InfoExtractor):
         return fixed_subtitles
 
     def _filter_x_tal_formats(self, formats):
-        valid_only_audio = [f for f in formats if is_none_format(f.get('vcodec')) and not is_none_format(f.get('acodec')) and f.get('language') != 'sv-x-tal']
-        invalid_only_audio = [f for f in formats if is_none_format(f.get('vcodec')) and not is_none_format(f.get('acodec')) and f.get('language') == 'sv-x-tal']
-        valid_both = [f for f in formats if not is_none_format(f.get('vcodec')) and not is_none_format(f.get('acodec')) and f.get('language') != 'sv-x-tal']
-        invalid_both = [f for f in formats if not is_none_format(f.get('vcodec')) and not is_none_format(f.get('acodec')) and f.get('language') == 'sv-x-tal']
+        valid_only_audio = [f for f in formats if is_none_codec(f.get('vcodec')) and not is_none_codec(f.get('acodec')) and f.get('language') != 'sv-x-tal']
+        invalid_only_audio = [f for f in formats if is_none_codec(f.get('vcodec')) and not is_none_codec(f.get('acodec')) and f.get('language') == 'sv-x-tal']
+        valid_both = [f for f in formats if not is_none_codec(f.get('vcodec')) and not is_none_codec(f.get('acodec')) and f.get('language') != 'sv-x-tal']
+        invalid_both = [f for f in formats if not is_none_codec(f.get('vcodec')) and not is_none_codec(f.get('acodec')) and f.get('language') == 'sv-x-tal']
         if valid_only_audio or valid_both:
             removeds_id = [f['format_id'] for f in invalid_only_audio + invalid_both]
             valid_formats = [f for f in formats if f['format_id'] not in removeds_id]

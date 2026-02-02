@@ -4,6 +4,12 @@
 # To create a release, dispatch the https://github.com/yt-dlp/yt-dlp/actions/workflows/release.yml workflow on master
 -->
 
+### 2026.02.02.024714
+
+#### Core changes
+- [Merge remote-tracking branch 'upstream'](https://github.com/yt-dlp/yt-dlp/commit/ad485600c2a76878c5d01c21347d8ca157e6f6f8) by [pukkandan](https://github.com/pukkandan)
+- [Update YoutubeDL.py](https://github.com/yt-dlp/yt-dlp/commit/d0ee52f3b311344d351304026f3fab0c432e16c5) by [pukkandan](https://github.com/pukkandan)
+
 ### 2026.01.31
 
 #### Extractor changes

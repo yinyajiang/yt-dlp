@@ -3160,21 +3160,9 @@ class YoutubeDL:
             self.report_warning('Requested format is not available, trying to reselect formats')
             _, smug_data = unsmuggle_url(info_dict.get('original_url') or info_dict.get('webpage_url'))
             if smug_data:
-                param_format_ids = self.params.get('format', '').split('+')
-                for fmt_id, fmt_type in smug_data.items():
-                    if fmt_id not in param_format_ids:
-                        continue
-                    new_formats = []
-                    if fmt_type == 'video_only':
-                        new_formats = self._select_formats(formats, self.build_format_selector('bv'))
-                        if not new_formats:
-                            new_formats = self._select_formats(formats, self.build_format_selector('b'))
-                    elif fmt_type == 'audio_only':
-                        new_formats = self._select_formats(formats, self.build_format_selector('ba'))
-                        if not new_formats:
-                            new_formats = self._select_formats(formats, self.build_format_selector('b'))
-                    elif fmt_type == 'both':
-                        new_formats = self._select_formats(formats, self.build_format_selector('b'))
+                empty_selectors = smug_data.get('empty_selectors')
+                for s in empty_selectors:
+                    new_formats = self._select_formats(formats, self.build_format_selector(s))
                     if not new_formats:
                         self.report_error('Not able to reselect formats')
                         break
@@ -3855,26 +3843,31 @@ class YoutubeDL:
                     self.to_stderr('\r')
 
                 formats_to_download = self._formats_to_download(info)
+
+                # reselect formats
                 for fmt in formats_to_download:
+                    fmt_id = fmt['format_id']
+                    new_formats = []
+                    height = fmt.get('height')
                     if is_video_only_format(fmt):
-                        new_formats = self._select_formats(info['formats'], self.build_format_selector('bv'))
+                        if height and isinstance(height, int):
+                            new_formats = self._select_formats(info['formats'],
+                                                               self.build_format_selector(f'bv[height={height}][format_id!={fmt_id}]/bv*[height={height}][format_id!={fmt_id}]/bv[height>={height}][format_id!={fmt_id}]/bv*[height>={height}][format_id!={fmt_id}]/bv[format_id!={fmt_id}]/bv*[format_id!={fmt_id}]'))
                         if not new_formats:
-                            new_formats = self._select_formats(info['formats'], self.build_format_selector('b'))
+                            new_formats = self._select_formats(info['formats'], self.build_format_selector(f'bv[format_id!={fmt_id}]/bv*[format_id!={fmt_id}]'))
                     elif is_audio_only_format(fmt):
-                        new_formats = self._select_formats(info['formats'], self.build_format_selector('ba'))
-                        if not new_formats:
-                            new_formats = self._select_formats(info['formats'], self.build_format_selector('b'))
+                        new_formats = self._select_formats(info['formats'], self.build_format_selector(f'ba[format_id!={fmt_id}]/ba*[format_id!={fmt_id}]'))
                     elif is_both_format(fmt):
-                        new_formats = self._select_formats(info['formats'], self.build_format_selector('b'))
+                        if height and isinstance(height, int):
+                            new_formats = self._select_formats(info['formats'], self.build_format_selector(f'b[height={height}][format_id!={fmt_id}]/b[height>={height}][format_id!={fmt_id}]'))
+                        if not new_formats:
+                            new_formats = self._select_formats(info['formats'], self.build_format_selector(f'b[format_id!={fmt_id}]'))
+
                     if not info.get('_force_format_ids'):
                         info['_force_format_ids'] = []
                     if not new_formats:
                         info['_force_format_ids'] = []
                         break
-                    for new_fmt in new_formats:
-                        if any(new_fmt['format_id'] == fmt['format_id'] for fmt in formats_to_download):
-                            info['_force_format_ids'] = []
-                            break
                     info['_force_format_ids'].extend([new_fmt['format_id'] for new_fmt in new_formats])
 
                 if info['_force_format_ids']:
@@ -3887,13 +3880,25 @@ class YoutubeDL:
                     raise
                 self.report_warning(f'The info failed to download: {e}; trying with URL {webpage_url}')
 
+                # record empty_selector
+                empty_selectors = []
                 for fmt in formats_to_download:
+                    height = fmt.get('height')
                     if is_video_only_format(fmt):
-                        webpage_url = smuggle_url(webpage_url, {fmt['format_id']: 'video_only'})
+                        if height and isinstance(height, int):
+                            selector = f'bv[height={height}]/bv*[height={height}]/bv[height>={height}]/bv*[height>={height}]/bv/bv*'
+                        else:
+                            selector = 'bv/bv*'
                     elif is_audio_only_format(fmt):
-                        webpage_url = smuggle_url(webpage_url, {fmt['format_id']: 'audio_only'})
+                        selector = 'ba/ba*'
                     elif is_both_format(fmt):
-                        webpage_url = smuggle_url(webpage_url, {fmt['format_id']: 'both'})
+                        if height and isinstance(height, int):
+                            selector = f'b[height={height}]/b[height>={height}]'
+                        else:
+                            selector = 'b'
+                    empty_selectors.append(selector)
+
+                webpage_url = smuggle_url(webpage_url, {'empty_selectors': empty_selectors})
 
                 os.environ['DISABLE_SEARCHALTER'] = '1'
                 self.download([webpage_url])

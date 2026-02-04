@@ -3166,6 +3166,7 @@ class YoutubeDL:
                     if not new_formats:
                         self.report_error('Not able to reselect formats')
                         break
+                    self.report_warning(f'Rereselected formats: {new_formats}')
                     formats_to_download.extend(new_formats)
                     remove_temp_before_download = True
 

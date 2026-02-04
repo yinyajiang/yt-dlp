@@ -3894,7 +3894,7 @@ class YoutubeDL:
                         selector = 'ba/ba*'
                     elif is_both_format(fmt):
                         if height and isinstance(height, int):
-                            selector = f'b[height={height}]/b[height>={height}]'
+                            selector = f'b[height={height}]/b[height>={height}]/b'
                         else:
                             selector = 'b'
                     empty_selectors.append(selector)

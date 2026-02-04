@@ -4546,7 +4546,7 @@ class InfoExtractor:
         try:
             return MutilThirdIE(self).extract_video_info(url, video_id)
         except Exception as e:
-            self.report_warning(f'use third api failed: {e}')
+            self.report_warning(f'_extract_use_third_mutil_api failed: {e}')
             return None
 
     @staticmethod

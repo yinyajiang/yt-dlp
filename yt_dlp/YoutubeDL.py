@@ -3881,7 +3881,7 @@ class YoutubeDL:
                     info['_force_format_ids'].extend([new_fmt['format_id'] for new_fmt in new_formats])
 
                 if info['_force_format_ids']:
-                    self.report_warning(f'The info failed to download: {e}; trying force format ids:{info['_force_format_ids']}')
+                    self.report_warning(f'The info failed to download: {e}; trying force format ids:{info["_force_format_ids"]}')
                     with contextlib.suppress(Exception):
                         return self.__download_wrapper(self.process_ie_result)(info, download=True)
                     del info['_force_format_ids']

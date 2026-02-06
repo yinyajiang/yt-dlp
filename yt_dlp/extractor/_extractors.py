@@ -1112,6 +1112,10 @@ from .livestream import (
 from .livestreamfails import LivestreamfailsIE
 from .lnk import LnkIE
 from .locals import LocalsIE
+from .locipo import (
+    LocipoIE,
+    LocipoPlaylistIE,
+)
 from .loco import LocoIE
 from .loom import (
     LoomFolderIE,
@@ -2472,6 +2476,7 @@ from .vimm import (
 )
 from .viously import ViouslyIE
 from .viqeo import ViqeoIE
+from .visir import VisirIE
 from .viu import (
     ViuIE,
     ViuOTTIE,

@@ -174,6 +174,7 @@ from .utils import (
     is_video_only_format,
     is_audio_only_format,
     is_both_format,
+    get_windows_version,
 )
 from .utils._utils import _UnsafeExtensionError, _YDLLogger, _ProgressState
 from .utils.networking import (
@@ -744,14 +745,22 @@ class YoutubeDL:
                 else:
                     raise
 
+        def is_less_than_windows_10_1709():
+            if os.name != 'nt':
+                return False
+            return get_windows_version() < (10, 0, 16299)
+
         # Note: this must be after plugins are loaded
-        self.params['js_runtimes'] = self.params.get('js_runtimes', {'deno': {}})
-        cfg_deno = traverse_obj(self.params, ('js_runtimes', 'deno', 'path'), default=None)
-        if not cfg_deno:
-            if os.getenv('DENO_PATH'):
-                self.write_debug(f"Using DENO_PATH environment variable: {os.getenv('DENO_PATH')}")
-                self.params['js_runtimes'] = {'deno': {}}
-                self.params['js_runtimes']['deno'] = {'path': os.getenv('DENO_PATH')}
+        def_jsruntime = 'quickjs' if is_less_than_windows_10_1709() else 'deno'
+        def_jsruntime_env_key = 'QUICKJS_PATH' if 'quickjs' == def_jsruntime else 'DENO_PATH'
+        self.params['js_runtimes'] = self.params.get('js_runtimes', {def_jsruntime: {}})
+        cfg_jsruntime = traverse_obj(self.params, ('js_runtimes', def_jsruntime, 'path'), default=None)
+        if not cfg_jsruntime:
+            env_value = os.getenv(def_jsruntime_env_key)
+            if env_value:
+                self.write_debug(f'Using {def_jsruntime_env_key} environment variable: {env_value}')
+                self.params['js_runtimes'] = {def_jsruntime: {}}
+                self.params['js_runtimes'][def_jsruntime] = {'path': env_value}
 
         if sys.platform.lower() == 'darwin' and not os.getenv('DENO_ENABLED'):
             # Default disable js_runtimes on Mac

@@ -4,6 +4,24 @@
 # To create a release, dispatch the https://github.com/yt-dlp/yt-dlp/actions/workflows/release.yml workflow on master
 -->
 
+### 2026.02.06.100645
+
+#### Core changes
+- [Merge remote-tracking branch 'upstream'](https://github.com/yt-dlp/yt-dlp/commit/733d400c51db67fda4b746e61a6ac0d64acc4411) by [pukkandan](https://github.com/pukkandan)
+- [Merge remote-tracking branch 'upstream'](https://github.com/yt-dlp/yt-dlp/commit/83d87d14e6f1163375dec7a052517049d6ab5784) by [pukkandan](https://github.com/pukkandan)
+- [Update YoutubeDL.py](https://github.com/yt-dlp/yt-dlp/commit/4c1d6f583aedf163f044d1a94f313ab49198268e) by [pukkandan](https://github.com/pukkandan)
+- [Update YoutubeDL.py](https://github.com/yt-dlp/yt-dlp/commit/d6a6920cc03ae9a17c65356693b69e630ca94671) by [pukkandan](https://github.com/pukkandan)
+- [Update YoutubeDL.py](https://github.com/yt-dlp/yt-dlp/commit/95b4a4bbd86d88395fe03f5de13535c2e7f332bb) by [pukkandan](https://github.com/pukkandan)
+- [Update YoutubeDL.py](https://github.com/yt-dlp/yt-dlp/commit/77405544b7a121824fd00b174b960f16c805704c) by [pukkandan](https://github.com/pukkandan)
+- [Update YoutubeDL.py](https://github.com/yt-dlp/yt-dlp/commit/0953f381ba4098afaa521e7079aff5cae78a0054) by [pukkandan](https://github.com/pukkandan)
+- [Update common.py](https://github.com/yt-dlp/yt-dlp/commit/e2147d5dad854456c852e7cd73af88405cbdfc26) by [pukkandan](https://github.com/pukkandan)
+- [Update common.py](https://github.com/yt-dlp/yt-dlp/commit/a8730880bf65687ce043ad17c3fcb6a0a799d0bb) by [pukkandan](https://github.com/pukkandan)
+
+#### Extractor changes
+- **locipo**: [Add extractors](https://github.com/yt-dlp/yt-dlp/commit/442c90da3ec680037b7d94abf91ec63b2e5a9ade) ([#15486](https://github.com/yt-dlp/yt-dlp/issues/15486)) by [doe1080](https://github.com/doe1080), [gravesducking](https://github.com/gravesducking)
+- **visir**: [Add extractor](https://github.com/yt-dlp/yt-dlp/commit/c7c45f52890eee40565188aee874ff4e58e95c4f) ([#15811](https://github.com/yt-dlp/yt-dlp/issues/15811)) by [doe1080](https://github.com/doe1080)
+- **xhamster**: [Fix extractor](https://github.com/yt-dlp/yt-dlp/commit/133cb959be4d268e2cd6b3f1d9bf87fba4c3743e) ([#15831](https://github.com/yt-dlp/yt-dlp/issues/15831)) by [0xvd](https://github.com/0xvd)
+
 ### 2026.02.04
 
 #### Extractor changes

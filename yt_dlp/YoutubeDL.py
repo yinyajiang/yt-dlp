@@ -752,6 +752,9 @@ class YoutubeDL:
 
         # Note: this must be after plugins are loaded
         def_jsruntime = 'quickjs' if is_less_than_windows_10_1709() else 'deno'
+        if 'deno' == def_jsruntime and os.getenv('DENO_PATH') and not os.path.exists(os.getenv('DENO_PATH')):
+            def_jsruntime = 'quickjs'
+
         def_jsruntime_env_key = 'QUICKJS_PATH' if 'quickjs' == def_jsruntime else 'DENO_PATH'
         self.params['js_runtimes'] = self.params.get('js_runtimes', {def_jsruntime: {}})
         cfg_jsruntime = traverse_obj(self.params, ('js_runtimes', def_jsruntime, 'path'), default=None)

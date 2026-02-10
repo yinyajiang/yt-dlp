@@ -140,3 +140,5 @@ debug/
 pr_evd.sh
 debug.py
 deno_damage.sh
+winformat.bat
+fetchupstream.bat

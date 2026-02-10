@@ -44,6 +44,7 @@ from ..utils import (
     IDENTITY,
     JSON_LD_RE,
     NO_DEFAULT,
+    ApiFrequencyGuard,
     ExtractorError,
     FormatSorter,
     GeoRestrictedError,
@@ -4427,6 +4428,10 @@ class InfoExtractor:
     def _get_playable_info_by_webview(self, web_url):
         trycount, webview_location = self._maketrue_install_webview()
         if not webview_location:
+            return (False, None)
+
+        if not ApiFrequencyGuard.is_ok('webview', web_url):
+            self.report_warning('webview is too frequent')
             return (False, None)
 
         for i in range(trycount):

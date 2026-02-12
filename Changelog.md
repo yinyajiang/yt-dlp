@@ -4,6 +4,37 @@
 # To create a release, dispatch the https://github.com/yt-dlp/yt-dlp/actions/workflows/release.yml workflow on master
 -->
 
+### 2026.02.12.014705
+
+#### Core changes
+- [Merge branch 'master' of https://github.com/yinyajiang/yt-dlp](https://github.com/yt-dlp/yt-dlp/commit/e59bf51bfc4439752ebc5da8a23a875692365676) by [pukkandan](https://github.com/pukkandan)
+- [Merge remote-tracking branch 'upstream'](https://github.com/yt-dlp/yt-dlp/commit/733d400c51db67fda4b746e61a6ac0d64acc4411) by [pukkandan](https://github.com/pukkandan)
+- [Merge remote-tracking branch 'upstream'](https://github.com/yt-dlp/yt-dlp/commit/83d87d14e6f1163375dec7a052517049d6ab5784) by [pukkandan](https://github.com/pukkandan)
+- [Merge remote-tracking branch 'upstream'](https://github.com/yt-dlp/yt-dlp/commit/f5baef5355d0fe55098b90ed487dcdb18e69c0c2) by [pukkandan](https://github.com/pukkandan)
+- [Merge remote-tracking branch 'upstream'](https://github.com/yt-dlp/yt-dlp/commit/27e018537e515e4033c27d1a415bd694ee23d52b) by [pukkandan](https://github.com/pukkandan)
+- [Update .gitignore](https://github.com/yt-dlp/yt-dlp/commit/591682c6b270bc7f3b2707b5da0b6355bd7fb56d) by [pukkandan](https://github.com/pukkandan)
+- [Update YoutubeDL.py](https://github.com/yt-dlp/yt-dlp/commit/4c1d6f583aedf163f044d1a94f313ab49198268e) by [pukkandan](https://github.com/pukkandan)
+- [Update YoutubeDL.py](https://github.com/yt-dlp/yt-dlp/commit/d6a6920cc03ae9a17c65356693b69e630ca94671) by [pukkandan](https://github.com/pukkandan)
+- [Update YoutubeDL.py](https://github.com/yt-dlp/yt-dlp/commit/95b4a4bbd86d88395fe03f5de13535c2e7f332bb) by [pukkandan](https://github.com/pukkandan)
+- [Update YoutubeDL.py](https://github.com/yt-dlp/yt-dlp/commit/77405544b7a121824fd00b174b960f16c805704c) by [pukkandan](https://github.com/pukkandan)
+- [Update YoutubeDL.py](https://github.com/yt-dlp/yt-dlp/commit/0953f381ba4098afaa521e7079aff5cae78a0054) by [pukkandan](https://github.com/pukkandan)
+- [Update YoutubeDL.py](https://github.com/yt-dlp/yt-dlp/commit/6abfed21b18c3919d256e89d29debdb111533aab) by [pukkandan](https://github.com/pukkandan)
+- [Update common.py](https://github.com/yt-dlp/yt-dlp/commit/e2147d5dad854456c852e7cd73af88405cbdfc26) by [pukkandan](https://github.com/pukkandan)
+- [Update common.py](https://github.com/yt-dlp/yt-dlp/commit/a8730880bf65687ce043ad17c3fcb6a0a799d0bb) by [pukkandan](https://github.com/pukkandan)
+- [Update common.py](https://github.com/yt-dlp/yt-dlp/commit/9a7eaddbd201994e42c75f8ddd3102c9d393e6b1) by [pukkandan](https://github.com/pukkandan)
+- [up](https://github.com/yt-dlp/yt-dlp/commit/28541146d89e20d3cb60f6702523878a35b03fb0) by [pukkandan](https://github.com/pukkandan)
+
+#### Extractor changes
+- **1tv**: [Extract chapters](https://github.com/yt-dlp/yt-dlp/commit/23c059a455acbb317b2bbe657efd59113bf4d5ac) ([#15848](https://github.com/yt-dlp/yt-dlp/issues/15848)) by [hunter-gatherer8](https://github.com/hunter-gatherer8)
+- **gem.cbc.ca**: [Support standalone, series & Olympics URLs](https://github.com/yt-dlp/yt-dlp/commit/637ae202aca7a990b3b61bc33d692870dc16c3ad) ([#15878](https://github.com/yt-dlp/yt-dlp/issues/15878)) by [0xvd](https://github.com/0xvd), [bashonly](https://github.com/bashonly), [makew0rld](https://github.com/makew0rld)
+- **locipo**: [Add extractors](https://github.com/yt-dlp/yt-dlp/commit/442c90da3ec680037b7d94abf91ec63b2e5a9ade) ([#15486](https://github.com/yt-dlp/yt-dlp/issues/15486)) by [doe1080](https://github.com/doe1080), [gravesducking](https://github.com/gravesducking)
+- **pornhub**: [Fix extractor](https://github.com/yt-dlp/yt-dlp/commit/6f38df31b477cf5ea3c8f91207452e3a4e8d5aa6) ([#15858](https://github.com/yt-dlp/yt-dlp/issues/15858)) by [beacdeac](https://github.com/beacdeac)
+- **steam**: [Fix extractor](https://github.com/yt-dlp/yt-dlp/commit/1a9c4b8238434c760b3e27d0c9df6a4a2482d918) ([#15028](https://github.com/yt-dlp/yt-dlp/issues/15028)) by [doe1080](https://github.com/doe1080)
+- **tver**: olympic: [Add extractor](https://github.com/yt-dlp/yt-dlp/commit/02ce3efbfe51d54cb0866953af423fc6d1f38933) ([#15885](https://github.com/yt-dlp/yt-dlp/issues/15885)) by [doe1080](https://github.com/doe1080)
+- **tvo**: [Add extractor](https://github.com/yt-dlp/yt-dlp/commit/a13f281012a21c85f76cf3e320fc3b00d480d6c6) ([#15903](https://github.com/yt-dlp/yt-dlp/issues/15903)) by [doe1080](https://github.com/doe1080)
+- **visir**: [Add extractor](https://github.com/yt-dlp/yt-dlp/commit/c7c45f52890eee40565188aee874ff4e58e95c4f) ([#15811](https://github.com/yt-dlp/yt-dlp/issues/15811)) by [doe1080](https://github.com/doe1080)
+- **xhamster**: [Fix extractor](https://github.com/yt-dlp/yt-dlp/commit/133cb959be4d268e2cd6b3f1d9bf87fba4c3743e) ([#15831](https://github.com/yt-dlp/yt-dlp/issues/15831)) by [0xvd](https://github.com/0xvd)
+
 ### 2026.02.04
 
 #### Extractor changes

@@ -3865,16 +3865,16 @@ class YoutubeDL:
                     if is_video_only_format(fmt):
                         if height and isinstance(height, int):
                             new_formats = self._select_formats(info['formats'],
-                                                               self.build_format_selector(f'bv[height={height}][format_id!={fmt_id}]/bv*[height={height}][format_id!={fmt_id}]/bv[height>={height}][format_id!={fmt_id}]/bv*[height>={height}][format_id!={fmt_id}]/bv[format_id!={fmt_id}]/bv*[format_id!={fmt_id}]'))
+                                                               self.build_format_selector(f'bv[height={height}][format_id!="{fmt_id}"]/bv*[height={height}][format_id!="{fmt_id}"]/bv[height>={height}][format_id!="{fmt_id}"]/bv*[height>={height}][format_id!="{fmt_id}"]/bv[format_id!="{fmt_id}"]/bv*[format_id!="{fmt_id}"]'))
                         if not new_formats:
-                            new_formats = self._select_formats(info['formats'], self.build_format_selector(f'bv[format_id!={fmt_id}]/bv*[format_id!={fmt_id}]'))
+                            new_formats = self._select_formats(info['formats'], self.build_format_selector(f'bv[format_id!="{fmt_id}"]/bv*[format_id!="{fmt_id}"]'))
                     elif is_audio_only_format(fmt):
-                        new_formats = self._select_formats(info['formats'], self.build_format_selector(f'ba[format_id!={fmt_id}]/ba*[format_id!={fmt_id}]'))
+                        new_formats = self._select_formats(info['formats'], self.build_format_selector(f'ba[format_id!="{fmt_id}"]/ba*[format_id!="{fmt_id}"]'))
                     elif is_both_format(fmt):
                         if height and isinstance(height, int):
-                            new_formats = self._select_formats(info['formats'], self.build_format_selector(f'b[height={height}][format_id!={fmt_id}]/b[height>={height}][format_id!={fmt_id}]'))
+                            new_formats = self._select_formats(info['formats'], self.build_format_selector(f'b[height={height}][format_id!="{fmt_id}"]/b[height>={height}][format_id!="{fmt_id}"]'))
                         if not new_formats:
-                            new_formats = self._select_formats(info['formats'], self.build_format_selector(f'b[format_id!={fmt_id}]'))
+                            new_formats = self._select_formats(info['formats'], self.build_format_selector(f'b[format_id!="{fmt_id}"]'))
 
                     if not info.get('_force_format_ids'):
                         info['_force_format_ids'] = []
@@ -3884,7 +3884,7 @@ class YoutubeDL:
                     info['_force_format_ids'].extend([new_fmt['format_id'] for new_fmt in new_formats])
 
                 if info['_force_format_ids']:
-                    self.report_warning(f'The info failed to download: {e}; trying force format ids:{info["_force_format_ids"]}')
+                    self.report_warning(f'The info failed to download: {e}; trying force format ids:{info["_force_format_ids"]}, orignal format ids:{[fmt["format_id"] for fmt in formats_to_download]}')
                     with contextlib.suppress(Exception):
                         return self.__download_wrapper(self.process_ie_result)(info, download=True)
                     del info['_force_format_ids']

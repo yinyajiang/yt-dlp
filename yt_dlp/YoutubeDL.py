@@ -3261,6 +3261,10 @@ class YoutubeDL:
         if normal_subtitles and self.params.get('writesubtitles'):
             available_subs.update(normal_subtitles)
             normal_sub_langs = tuple(normal_subtitles.keys())
+
+        if not normal_subtitles and self.params.get('writesubtitles'):
+            self.params['writeautomaticsub'] = True
+
         if automatic_captions and self.params.get('writeautomaticsub'):
             for lang, cap_info in automatic_captions.items():
                 if lang not in available_subs:
@@ -3857,6 +3861,15 @@ class YoutubeDL:
                 if not isinstance(e, EntryNotInPlaylist):
                     self.to_stderr('\r')
 
+                webpage_url = info.get('webpage_url')
+
+                if 'Unable to download video subtitles' in str(e):
+                    if webpage_url:
+                        self.download([webpage_url])
+                    else:
+                        raise
+                    continue
+
                 if 'Forbidden' not in str(e):
                     with contextlib.suppress(Exception):
                         return self.__download_wrapper(self.process_ie_result)(info, download=True)
@@ -3894,10 +3907,9 @@ class YoutubeDL:
                     with contextlib.suppress(Exception):
                         return self.__download_wrapper(self.process_ie_result)(info, download=True)
                     del info['_force_format_ids']
-                webpage_url = info.get('webpage_url')
+
                 if webpage_url is None:
                     raise
-                self.report_warning(f'The info failed to download: {e}; trying with URL {webpage_url}')
 
                 # record empty_selector
                 empty_selectors = []
@@ -3920,6 +3932,7 @@ class YoutubeDL:
                 webpage_url = smuggle_url(webpage_url, {'empty_selectors': empty_selectors})
 
                 os.environ['DISABLE_SEARCHALTER'] = '1'
+                self.report_warning(f'The info failed to download: {e}; trying with URL {webpage_url}')
                 self.download([webpage_url])
             except ExtractorError as e:
                 self.report_error(e)

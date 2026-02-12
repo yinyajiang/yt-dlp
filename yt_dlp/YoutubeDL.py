@@ -1127,7 +1127,9 @@ class YoutubeDL:
                 self.to_stderr(tb)
         if not is_error:
             return
-        if not self.params.get('ignoreerrors'):
+
+        ignoreerrors = self.params.get('ignoreerrors')
+        if not ignoreerrors or str(ignoreerrors) == 'only_download':
             if sys.exc_info()[0] and hasattr(sys.exc_info()[1], 'exc_info') and sys.exc_info()[1].exc_info[0]:
                 exc_info = sys.exc_info()[1].exc_info
             else:

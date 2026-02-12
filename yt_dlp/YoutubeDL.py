@@ -3856,6 +3856,10 @@ class YoutubeDL:
                 if not isinstance(e, EntryNotInPlaylist):
                     self.to_stderr('\r')
 
+                if 'Forbidden' not in str(e):
+                    with contextlib.suppress(Exception):
+                        return self.__download_wrapper(self.process_ie_result)(info, download=True)
+
                 formats_to_download = self._formats_to_download(info)
 
                 # reselect formats

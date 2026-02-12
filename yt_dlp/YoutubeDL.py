@@ -296,7 +296,7 @@ class YoutubeDL:
                        This option has no effect when running on Windows
     ignoreerrors:      Do not stop on download/postprocessing errors.
                        Can be 'only_download' to ignore only download errors.
-                       Default is 'only_download' for CLI, but False for API
+                       Default is False
     skip_playlist_after_errors: Number of allowed failures until the rest of
                        the playlist is skipped
     allowed_extractors:  List of regexes to match against extractor names that are allowed
@@ -1128,8 +1128,7 @@ class YoutubeDL:
         if not is_error:
             return
 
-        ignoreerrors = self.params.get('ignoreerrors')
-        if not ignoreerrors or str(ignoreerrors) == 'only_download':
+        if not self.params.get('ignoreerrors'):
             if sys.exc_info()[0] and hasattr(sys.exc_info()[1], 'exc_info') and sys.exc_info()[1].exc_info[0]:
                 exc_info = sys.exc_info()[1].exc_info
             else:

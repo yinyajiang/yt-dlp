@@ -152,7 +152,7 @@ def set_compat_opts(opts):
             setattr(opts, opt_name, default)
         return None
 
-    set_default_compat('abort-on-error', 'ignoreerrors', 'only_download')
+    set_default_compat('abort-on-error', 'ignoreerrors', False)
     set_default_compat('no-playlist-metafiles', 'allow_playlist_files')
     set_default_compat('no-clean-infojson', 'clean_infojson')
     if 'no-attach-info-json' in opts.compat_opts:

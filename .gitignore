@@ -142,3 +142,7 @@ debug.py
 deno_damage.sh
 winformat.bat
 fetchupstream.bat
+windebug.py
+格式化.bat
+构建并替换本地.bat
+拉取上流.bat

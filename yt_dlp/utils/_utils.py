@@ -6023,6 +6023,31 @@ def is_both_format(format: dict):
     return not is_none_codec(format.get('vcodec')) and not is_none_codec(format.get('acodec'))
 
 
+def msg_box(msg):
+    """Show a native message box with the given text. No-op if not supported."""
+    if not msg:
+        return
+    try:
+        if sys.platform == 'win32':
+            import ctypes
+            ctypes.windll.user32.MessageBoxW(None, msg, 'yt-dlp', 0x40)  # MB_ICONINFORMATION
+        elif sys.platform == 'darwin':
+            esc = msg.replace('\\', '\\\\').replace('"', '\\"').replace('\n', ' ')
+            subprocess.run(
+                ['osascript', '-e', f'display dialog "{esc}" with title "yt-dlp" buttons {{"OK"}} default button "OK" with icon note'],
+                check=False, capture_output=True, timeout=10)
+        else:
+            for cmd in (['zenity', '--info', '--text', msg, '--title', 'yt-dlp'],
+                        ['kdialog', '--msgbox', msg, '--title', 'yt-dlp']):
+                try:
+                    subprocess.run(cmd, check=False, capture_output=True, timeout=10)
+                    break
+                except (OSError, FileNotFoundError):
+                    continue
+    except Exception:
+        pass
+
+
 class ApiFrequencyGuard:
 
     @staticmethod

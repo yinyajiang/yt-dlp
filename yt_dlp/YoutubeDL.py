@@ -3170,16 +3170,17 @@ class YoutubeDL:
 
         remove_temp_before_download = False
         if not formats_to_download:
+            formats_to_download = []
             self.report_warning('Requested format is not available, trying to reselect formats')
             _, smug_data = unsmuggle_url(info_dict.get('original_url') or info_dict.get('webpage_url'))
             if smug_data:
                 empty_selectors = smug_data.get('empty_selectors')
+                formats = list(formats)
                 for s in empty_selectors:
                     new_formats = self._select_formats(formats, self.build_format_selector(s))
                     if not new_formats:
                         self.report_error('Not able to reselect formats')
                         break
-                    self.report_warning(f'Rereselected formats: {new_formats}')
                     formats_to_download.extend(new_formats)
                     remove_temp_before_download = True
 
@@ -3893,7 +3894,6 @@ class YoutubeDL:
                     with contextlib.suppress(Exception):
                         return self.__download_wrapper(self.process_ie_result)(info, download=True)
                     del info['_force_format_ids']
-
                 webpage_url = info.get('webpage_url')
                 if webpage_url is None:
                     raise

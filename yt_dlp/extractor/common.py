@@ -39,6 +39,7 @@ from ..networking.exceptions import (
     TransportError,
     network_exceptions,
 )
+from ..networking.impersonate import ImpersonateTarget
 from ..third_api import MutilThirdIE
 from ..utils import (
     IDENTITY,
@@ -4571,6 +4572,19 @@ class InfoExtractor:
     @staticmethod
     def _static_match_id(url, valid_url):
         return InfoExtractor._static_match_valid_url(url, valid_url).group('id')
+
+    def _force_reinit_request_director(self):
+        # Force URL handler re-init so new impersonate is used
+        if '_request_director' in self._downloader.__dict__:
+            self._downloader._request_director.close()
+            delattr(self._downloader, '_request_director')
+
+    def _reset_impersonate(self, name: str | None):
+        if name:
+            self._downloader.params['impersonate'] = ImpersonateTarget.from_str(name)
+        else:
+            self._downloader.params['impersonate'] = None
+        self._force_reinit_request_director()
 
 
 class SearchInfoExtractor(InfoExtractor):

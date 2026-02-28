@@ -911,12 +911,22 @@ class FacebookIE(InfoExtractor):
                 try:
                     return self.__real_extract(url)
                 except Exception as e:
+                    if i == 0:
+                        try:
+                            self._reset_impersonate('chrome-99')
+                            return self.__real_extract(url)
+                        except Exception:
+                            self._reset_impersonate(None)
+
                     if i == try_count - 1:
-                        raise e
+                        self._reset_impersonate('chrome-99')
+                        return self.__real_extract(url)
+
                     if 'Cannot parse data' in str(e):
                         time.sleep(1)
                         continue
-                    raise e
+                    raise
+
         except Exception as e:
             info = self._extract_use_third_mutil_api(url)
             if info:

@@ -14,6 +14,17 @@
             //"sudo": true,
             "args": [
             ]
+        },
+        {
+            "name": "Debug Win-yt-dlp",
+            "type": "debugpy",
+            "request": "launch",
+            "program": "windebug.py",
+            "console": "integratedTerminal",
+            "justMyCode": false,
+            //"sudo": true,
+            "args": [
+            ]
         }
     ]
 }

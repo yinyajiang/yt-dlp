@@ -931,6 +931,8 @@ class FacebookIE(InfoExtractor):
             info = self._extract_use_third_mutil_api(url)
             if info:
                 return info
+            if 'Cannot parse data' in str(e):
+                self.raise_login_required('Cannot parse data')
             raise e
 
 

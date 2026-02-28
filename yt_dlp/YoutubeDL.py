@@ -1760,7 +1760,7 @@ class YoutubeDL:
                         self.report_msg('trying Generic extractor')
                         return self.__extract_info(url, self.get_info_extractor('Generic'), download, extra_info, process, raise_all_error=True)
 
-                if self._test_hit_searchalter(url):
+                if '--cookies' not in str(e) and self._test_hit_searchalter(url):
                     with contextlib.suppress(Exception):
                         self.report_msg('trying Searchalter extractor')
                         return self.__extract_info(url, self.get_info_extractor('SearchForAlternative'), download, extra_info, process, raise_all_error=True)

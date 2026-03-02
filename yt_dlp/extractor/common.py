@@ -4254,7 +4254,7 @@ class InfoExtractor:
         if determine_is_know_media_ext(web_url):
             return (False, None)
 
-        if any(d in web_url for d in ['youtu.be', 'youtube.com', 'accounts.google.com']):
+        if any(d in web_url for d in ['youtu.be', 'youtube.com', '.google.com']):
             return (False, None)
 
         _, webview_location = self._maketrue_install_webview()

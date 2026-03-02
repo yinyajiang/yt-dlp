@@ -4,6 +4,22 @@
 # To create a release, dispatch the https://github.com/yt-dlp/yt-dlp/actions/workflows/release.yml workflow on master
 -->
 
+### 2026.03.02.013437
+
+#### Core changes
+- [Merge remote-tracking branch 'upstream'](https://github.com/yt-dlp/yt-dlp/commit/1d740debbda40263bc8280d6388a96dd723af895) by [pukkandan](https://github.com/pukkandan)
+- [Update YoutubeDL.py](https://github.com/yt-dlp/yt-dlp/commit/3bea51fe3c6055035b657dff7ea936838bf210cf) by [pukkandan](https://github.com/pukkandan)
+- [Update common.py](https://github.com/yt-dlp/yt-dlp/commit/ea49a35e6c5d8fe0287ba925ef98888c58794051) by [pukkandan](https://github.com/pukkandan)
+- [Update pyproject.toml](https://github.com/yt-dlp/yt-dlp/commit/2fca3cc9a26744aea349730249780ae876690233) by [pukkandan](https://github.com/pukkandan)
+- [up](https://github.com/yt-dlp/yt-dlp/commit/0e93cfc5f0cb48ab1abb3e78c6b1a8db5fa2fbdf) by [pukkandan](https://github.com/pukkandan)
+- [up](https://github.com/yt-dlp/yt-dlp/commit/f0cc5774af019abe18e27f110abf21a46990effb) by [pukkandan](https://github.com/pukkandan)
+- [up](https://github.com/yt-dlp/yt-dlp/commit/d5395e487765691f930a72f1cc588b9445d98bce) by [pukkandan](https://github.com/pukkandan)
+
+#### Extractor changes
+- **aenetworks**: [Fix extraction](https://github.com/yt-dlp/yt-dlp/commit/338dbebdb8627a95bd8f72ed86fdc2d50c8e2d14) ([#16036](https://github.com/yt-dlp/yt-dlp/issues/16036)) by [bashonly](https://github.com/bashonly)
+- **thechosen**: [Rework extractor](https://github.com/yt-dlp/yt-dlp/commit/e3118604aa99a5514342d6a002c9b4a3fe1235b4) ([#16021](https://github.com/yt-dlp/yt-dlp/issues/16021)) by [0xvd](https://github.com/0xvd)
+- **zapiks**: [Improve extraction](https://github.com/yt-dlp/yt-dlp/commit/6f796a2bff332f72c3f250207cdf10db852f6016) ([#16030](https://github.com/yt-dlp/yt-dlp/issues/16030)) by [doe1080](https://github.com/doe1080)
+
 ### 2026.02.21
 
 #### Important changes

@@ -3196,7 +3196,7 @@ class YoutubeDL:
 
         requested_ranges = tuple(self.params.get('download_ranges', lambda *_: [{}])(info_dict, self))
         best_format, downloaded_formats = formats_to_download[-1], []
-        if download:
+        if download and not self.params.get('skip_download'):
             if best_format and requested_ranges:
                 def to_screen(*msg):
                     self.to_screen(f'[info] {info_dict["id"]}: {" ".join(", ".join(variadic(m)) for m in msg)}')
@@ -4813,6 +4813,8 @@ class YoutubeDL:
 
             max_format = None
             for fmt in info_dict['formats']:
+                if fmt.get('has_drm', False) and not self.params.get('allow_unplayable_formats') and not info_dict.get('__will_decrypt', False):
+                    continue
                 if not max_format or getForamtValue(fmt) > getForamtValue(max_format):
                     max_format = fmt
 

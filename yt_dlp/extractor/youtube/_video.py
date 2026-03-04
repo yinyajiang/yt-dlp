@@ -4670,6 +4670,10 @@ class YoutubeIE(YoutubeBaseInfoExtractor):
             exclude.extend(['web_music', 'android_vr'])
         return self._extract_by_clients(url, clients=None, exclude=exclude)
 
+    def _extract_by_all_clients(self, url):
+        clients = [name for name, cfg in INNERTUBE_CLIENTS.items() if (not cfg.get('REQUIRE_AUTH', False))]
+        return self._extract_by_clients(url, clients=clients)
+
     def _extract_by_clients(self, url, clients, exclude=None):
         if not exclude:
             exclude = []
@@ -4736,18 +4740,28 @@ class YoutubeIE(YoutubeBaseInfoExtractor):
                         result = no_jsc_result
 
             result_type = result.get('_type', 'video')
-            if result_type == 'video' and not self._downloader._has_formats_to_download(result) and not self._has_config_potoken():
+            if False and result_type == 'video' and not self._downloader._has_formats_to_download(result) and not self._has_config_potoken():
                 # try to use potoken
                 out_additional_info['has_invalid_potoken_client'] = True
             elif not self._downloader._has_above_wh_format(result, (1920 + 1), (1080 + 1)) and out_additional_info.get('has_sabr_only', False):
                 max_result = result
+                self.report_msg(f'default client result, max: {self._downloader._get_max_format_wh(max_result)}')
 
-                all_clients_info = self._extract_by_not_default_clients(url)
-                if all_clients_info and self._downloader._get_max_format_wh_value(all_clients_info) > self._downloader._get_max_format_wh_value(max_result):
-                    max_result = all_clients_info
+                try_not_default_clients_count = 1
+                while try_not_default_clients_count > 0:
+                    try_not_default_clients_count -= 1
+                    not_default_clients_info = self._extract_by_not_default_clients(url)
+                    self.report_msg(f'not default clients info, max: {self._downloader._get_max_format_wh(not_default_clients_info)}')
+                    if self._downloader._get_max_format_wh_value(not_default_clients_info) > self._downloader._get_max_format_wh_value(max_result):
+                        max_result = not_default_clients_info
+                        break
+                    if try_not_default_clients_count > 0:
+                        self._sleep(2, 'try not default clients')
 
                 if not self._downloader._has_above_wh_format(max_result, (640 + 1), (360 + 1)):
                     thirdapi_info = self._extract_by_thirdapi(url)
+                    if thirdapi_info:
+                        self.report_msg(f'thirdapi info, max: {self._downloader._get_max_format_wh(thirdapi_info)}')
                     if thirdapi_info and self._downloader._get_max_format_wh_value(thirdapi_info) > self._downloader._get_max_format_wh_value(max_result):
                         max_result = thirdapi_info
 
@@ -4763,18 +4777,18 @@ class YoutubeIE(YoutubeBaseInfoExtractor):
         is_bot = 'Sign in to confirm you’re not a bot.' in str(first_execption)
 
         if not is_bot:
-            all_clients_info = self._extract_by_not_default_clients(url)
-            if all_clients_info:
-                return all_clients_info
+            not_default_clients_info = self._extract_by_not_default_clients(url)
+            if not_default_clients_info:
+                return not_default_clients_info
 
         thirdapi_info = self._extract_by_thirdapi(url)
         if thirdapi_info:
             return thirdapi_info
 
         if is_bot:
-            all_clients_info = self._extract_by_not_default_clients(url)
-            if all_clients_info:
-                return all_clients_info
+            not_default_clients_info = self._extract_by_not_default_clients(url)
+            if not_default_clients_info:
+                return not_default_clients_info
 
         raise first_execption
 

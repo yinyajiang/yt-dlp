@@ -4657,6 +4657,7 @@ class YoutubeIE(YoutubeBaseInfoExtractor):
             if not video_id:
                 return None
             info = rapidApi.extract_video_info(video_id)
+
             self.report_msg('use thirdapi')
             return info
         except Exception:
@@ -4738,7 +4739,7 @@ class YoutubeIE(YoutubeBaseInfoExtractor):
             if result_type == 'video' and not self._downloader._has_formats_to_download(result) and not self._has_config_potoken():
                 # try to use potoken
                 out_additional_info['has_invalid_potoken_client'] = True
-            elif not self._downloader._has_above_wh_formats_to_download(result, 640, 370) and out_additional_info.get('has_sabr_only', False):
+            elif not self._downloader._has_above_wh_formats_to_download(result, (1920+10), (1080+10)) and out_additional_info.get('has_sabr_only', False):
                 all_clients_info = self._extract_by_not_default_clients(url)
                 if all_clients_info:
                     return all_clients_info

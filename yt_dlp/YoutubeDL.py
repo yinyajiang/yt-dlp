@@ -4791,29 +4791,38 @@ class YoutubeDL:
             return False
 
     def _has_formats_to_download(self, info_dict):
-        return len(self._formats_to_download(info_dict)) > 0
+        with contextlib.suppress(Exception):
+            req_format = self._default_format_spec(info_dict) or 'bv*+ba/b'
+            format_selector = self.build_format_selector(req_format)
+            formats = self._select_formats(info_dict['formats'], format_selector)
+            return len(formats) > 0
+        return False
 
-    def _has_above_wh_formats_to_download(self, info_dict, iw, ih):
-        formats = self._formats_to_download(info_dict)
-        haswh = False
-        for fmt in formats:
-            w = fmt.get('width')
-            h = fmt.get('height')
-            if w and h:
-                haswh = True
-                if w * h >= iw * ih:
-                    return True
-        return not haswh
+    def _has_above_wh_format(self, info_dict, iw, ih):
+        w, h = self._get_max_format_wh(info_dict)
+        if w and h:
+            return w * h >= iw * ih
+        return True
 
-    def _formats_to_download(self, info_dict):
-        try:
-            format_selector = self.format_selector
-            if format_selector is None:
-                req_format = self._default_format_spec(info_dict)
-                format_selector = self.build_format_selector(req_format)
-            return self._select_formats(info_dict['formats'], format_selector)
-        except Exception:
-            return []
+    def _get_max_format_wh(self, info_dict):
+        with contextlib.suppress(Exception):
+            def getForamtValue(fmt):
+                w = fmt.get('width')
+                h = fmt.get('height')
+                return w * h if w and h else 0
+
+            max_format = None
+            for fmt in info_dict['formats']:
+                if not max_format or getForamtValue(fmt) > getForamtValue(max_format):
+                    max_format = fmt
+
+            return (max_format.get('width'), max_format.get('height')) if max_format else (0, 0)
+
+        return (0, 0)
+
+    def _get_max_format_wh_value(self, info_dict):
+        w, h = self._get_max_format_wh(info_dict)
+        return w * h
 
     def has_suitable_ie(self, url):
         return any(ie.suitable(url) and key.lower() != 'generic' for key, ie in self._ies.items())

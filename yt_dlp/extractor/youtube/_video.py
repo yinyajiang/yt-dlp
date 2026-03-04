@@ -4656,11 +4656,12 @@ class YoutubeIE(YoutubeBaseInfoExtractor):
             video_id = self._match_id(url)
             if not video_id:
                 return None
-            info = rapidApi.extract_video_info(video_id)
-
-            self.report_msg('use thirdapi')
+            info = rapidApi.extract_video_info(video_id, url)
+            if info:
+                self.report_msg('use thirdapi')
             return info
-        except Exception:
+        except Exception as e:
+            self.report_warning(f'YoutubeThirdIE extract video info failed: {e}')
             return None
 
     def _extract_by_not_default_clients(self, url, exclude=None):
@@ -4748,6 +4749,7 @@ class YoutubeIE(YoutubeBaseInfoExtractor):
                 self.report_msg(f'default client result, max: {self._downloader._get_max_format_wh(max_result)}')
 
                 try_not_default_clients_count = 1
+                not_default_clients_info = None
                 while try_not_default_clients_count > 0:
                     try_not_default_clients_count -= 1
                     not_default_clients_info = self._extract_by_not_default_clients(url)
@@ -4758,7 +4760,7 @@ class YoutubeIE(YoutubeBaseInfoExtractor):
                     if try_not_default_clients_count > 0:
                         self._sleep(2, 'try not default clients')
 
-                if not self._downloader._has_above_wh_format(max_result, (640 + 1), (360 + 1)):
+                if (not self._downloader._has_above_wh_format(max_result, (640 + 1), (360 + 1))) or (not self._downloader._has_above_wh_format(max_result, (1920 + 1), (1080 + 1)) and not_default_clients_info and not self._downloader._has_above_wh_format(not_default_clients_info, (640 + 1), (360 + 1))):
                     thirdapi_info = self._extract_by_thirdapi(url)
                     if thirdapi_info:
                         self.report_msg(f'thirdapi info, max: {self._downloader._get_max_format_wh(thirdapi_info)}')

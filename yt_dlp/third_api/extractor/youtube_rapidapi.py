@@ -157,6 +157,9 @@ class YoutubeRapidApi:
             errorId = node.get('errorId', None)
             if errorId and errorId.lower() != 'success':
                 return f'{errorId}, {node.get("reason", "error")}'
+            message = node.get('message', None)
+            if message:
+                return message
             return None
 
         rootError = __get_error(info)

@@ -40,7 +40,11 @@ def extract_video_info(ie, url, api=None, video_id=None):
         video_id = video_id or data.get('__video_id__') or call_ie_func(ie, '_youtube_video_id', '', url)
         if not video_id:
             raise ExtractorError('YoutubeRapidApi use video_id')
-        return YoutubeRapidApi(ie).extract_video_info(video_id=video_id)
+        try:
+            return YoutubeRapidApi(ie).extract_video_info(video_id=video_id)
+        except Exception as e:
+            if 'You have exceeded' in str(e):
+                return AllInOneMutilRapidApi(ie).extract_video_info(url)
     elif api == InstagramHikerApi.API_NAME:
         raise ExtractorError('InstagramHikerApi not <extract_video_info> implemented')
     elif api == SnapMutilRapidApi.API_NAME:

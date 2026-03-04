@@ -4740,16 +4740,18 @@ class YoutubeIE(YoutubeBaseInfoExtractor):
                 # try to use potoken
                 out_additional_info['has_invalid_potoken_client'] = True
             elif not self._downloader._has_above_wh_format(result, (1920 + 1), (1080 + 1)) and out_additional_info.get('has_sabr_only', False):
+                max_result = result
+
                 all_clients_info = self._extract_by_not_default_clients(url)
-                if all_clients_info:
-                    all_clients_wh_value = self._downloader._get_max_format_wh_value(all_clients_info)
-                    result_wh_value = self._downloader._get_max_format_wh_value(result)
-                    if all_clients_wh_value > result_wh_value:
-                        return all_clients_info
-                    else:
-                        return result
-                else:
-                    return result
+                if all_clients_info and self._downloader._get_max_format_wh_value(all_clients_info) > self._downloader._get_max_format_wh_value(max_result):
+                    max_result = all_clients_info
+
+                if not self._downloader._has_above_wh_format(max_result, (640 + 1), (360 + 1)):
+                    thirdapi_info = self._extract_by_thirdapi(url)
+                    if thirdapi_info and self._downloader._get_max_format_wh_value(thirdapi_info) > self._downloader._get_max_format_wh_value(max_result):
+                        max_result = thirdapi_info
+
+                return max_result
             else:
                 return result
         except Exception as e:

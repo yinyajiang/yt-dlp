@@ -4760,12 +4760,12 @@ class YoutubeIE(YoutubeBaseInfoExtractor):
                     if try_not_default_clients_count > 0:
                         self._sleep(2, 'try not default clients')
 
-                if (not self._downloader._has_above_wh_format(max_result, (640 + 1), (360 + 1))) or (not self._downloader._has_above_wh_format(max_result, (1920 + 1), (1080 + 1)) and not_default_clients_info and not self._downloader._has_above_wh_format(not_default_clients_info, (640 + 1), (360 + 1))):
-                    thirdapi_info = self._extract_by_thirdapi(url)
-                    if thirdapi_info:
-                        self.report_msg(f'thirdapi info, max: {self._downloader._get_max_format_wh(thirdapi_info)}')
-                    if thirdapi_info and self._downloader._get_max_format_wh_value(thirdapi_info) > self._downloader._get_max_format_wh_value(max_result):
-                        max_result = thirdapi_info
+                # if (not self._downloader._has_above_wh_format(max_result, (640 + 1), (360 + 1))) or (not self._downloader._has_above_wh_format(max_result, (1920 + 1), (1080 + 1)) and not_default_clients_info and not self._downloader._has_above_wh_format(not_default_clients_info, (640 + 1), (360 + 1))):
+                #     thirdapi_info = self._extract_by_thirdapi(url)
+                #     if thirdapi_info:
+                #         self.report_msg(f'thirdapi info, max: {self._downloader._get_max_format_wh(thirdapi_info)}')
+                #     if thirdapi_info and self._downloader._get_max_format_wh_value(thirdapi_info) > self._downloader._get_max_format_wh_value(max_result):
+                #         max_result = thirdapi_info
 
                 return max_result
             else:

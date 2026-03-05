@@ -57,6 +57,21 @@ def remove_third_api_params(video_url):
     return remove_query_params(video_url, ['__force_third_api__', '__third_api__'])
 
 
+def check_fmt_url_valid(ie, url):
+    """Return False if the URL returns 403, True otherwise (e.g. 200). Request failures return False."""
+    try:
+        resp = ie._request_webpage(
+            url, 'url_check', fatal=False,
+            expected_status=(200, 403),
+            method='HEAD',
+        )
+        if resp is None:
+            return True
+        return getattr(resp, 'status', getattr(resp, 'getcode', lambda: 0)()) != 403
+    except Exception:
+        return True
+
+
 class ThirdApiGuard:
 
     @staticmethod

@@ -4658,7 +4658,7 @@ class YoutubeIE(YoutubeBaseInfoExtractor):
                 return None
             info = rapidApi.extract_video_info(video_id, url)
             if info:
-                self.report_msg('use thirdapi')
+                self.report_msg('Use YoutubeThirdIE successfully')
             return info
         except Exception as e:
             self.report_warning(f'YoutubeThirdIE extract video info failed: {e}')

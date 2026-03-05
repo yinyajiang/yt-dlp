@@ -11,5 +11,5 @@ class YoutubeThirdIE:
             return YoutubeRapidApi(self.ie).extract_video_info(video_id)
         except Exception as e:
             if 'You have exceeded' in str(e):
-                return AllInOneMutilRapidApi(self.ie).extract_video_info(url)
+                return AllInOneMutilRapidApi(self.ie).extract_video_info(url, check_fmt_url=False)
             raise

@@ -5,9 +5,11 @@ from hashlib import md5
 from ...utils import ExtractorError, mimetype2codecs
 import json
 from .common import is_retry_rsp, is_over_per_second_rsp, RetryError, OverPerSecondError, is_supported_site, remove_third_api_params
-
+from .common import check_fmt_url_valid
 
 #  https://rapidapi.com/manhgdev/api/download-all-in-one-lite
+
+
 class AllInOneMutilRapidApi:
     API_ENDPOINT = 'https://download-all-in-one-ultimate.p.rapidapi.com/autolink'
     API_HOST = 'download-all-in-one-ultimate.p.rapidapi.com'
@@ -36,7 +38,7 @@ class AllInOneMutilRapidApi:
         if not self._api_keys:
             raise ExtractorError('[rapidapi] api keys is required')
 
-    def extract_video_info(self, video_url, video_id=None):
+    def extract_video_info(self, video_url, video_id=None, check_fmt_url=False):
         video_url = remove_third_api_params(video_url)
 
         info = self._get_video_info(video_url)
@@ -61,6 +63,9 @@ class AllInOneMutilRapidApi:
 
         no_video = True
         for media in info.get('medias', []):
+            if check_fmt_url and (media.get('type') == 'video' or media.get('type') == 'audio') and not check_fmt_url_valid(self._ie, media.get('url')):
+                continue
+
             ext = media.get('extension')
             tbr = (media.get('bitrate', 0) / 1000) or None
             file_size = media.get('data_size') or None

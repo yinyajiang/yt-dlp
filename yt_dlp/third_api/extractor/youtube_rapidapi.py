@@ -8,7 +8,7 @@ from ...utils import (
 from ...cookies import YoutubeDLCookieJar
 import random
 import time
-from .common import is_retry_rsp, is_over_per_second_rsp, RetryError, OverPerSecondError
+from .common import is_retry_rsp, is_over_per_second_rsp, RetryError, OverPerSecondError, check_fmt_url_valid
 
 
 def _date_convert(date_str):
@@ -36,7 +36,7 @@ class YoutubeRapidApi:
         if not self._api_keys:
             raise ExtractorError('[rapidapi] api keys is required')
 
-    def extract_video_info(self, video_id):
+    def extract_video_info(self, video_id, check_fmt_url=False):
         info = self._get_video_info(video_id)
 
         ytb_info = {
@@ -90,6 +90,8 @@ class YoutubeRapidApi:
             ytb_info['formats'].extend(audio_formats)
 
         if videos := traverse_obj(info, ('videos', 'items'), default=None):
+            if check_fmt_url:
+                videos = [video for video in videos if check_fmt_url_valid(self._ie, video.get('url'))]
             video_formats = [
                 {
                     'url': video.get('url'),

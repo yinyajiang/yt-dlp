@@ -4128,7 +4128,7 @@ class InfoExtractor:
         '''
         ie_key = ie_key if isinstance(ie_key, str) else (ie_key or self).ie_key()
         val = traverse_obj(self._downloader.params, ('extractor_args', ie_key.lower(), key))
-        if val is None:
+        if val is None or (isinstance(val, list) and not val):
             if enable_env:
                 val = os.getenv(key)
                 if val is not None:

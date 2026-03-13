@@ -4746,10 +4746,26 @@ class YoutubeIE(YoutubeBaseInfoExtractor):
             elif self._has_ie_config('only_thirdapi'):
                 raise ExtractorError('only_thirdapi is set, but thirdapi failed')
 
+        def is_bot_exception(exception):
+            return 'Sign in to confirm you’re not a bot.' in str(exception)
+
         out_additional_info = {}
         first_execption = None
+        enable_not_default_clients = True
+
+        # local extract
+        result = None
         try:
             result = self._real_extract_with_additional_info(url, out_additional_info)
+        except Exception as e:
+            first_execption = e
+            if not is_bot_exception(e):
+                not_default_clients_info = self._extract_by_not_default_clients(url)
+                if not_default_clients_info:
+                    result = not_default_clients_info
+                    enable_not_default_clients = False
+
+        if result:
             if out_additional_info.get('all_challenges_failed', False):
                 with contextlib.suppress(Exception):
                     self.report_warning('[js_runtimes] all challenges failed, try to not use js_runtimes')
@@ -4765,13 +4781,13 @@ class YoutubeIE(YoutubeBaseInfoExtractor):
             if False and result_type == 'video' and not self._downloader._has_formats_to_download(result) and not self._has_config_potoken():
                 # try to use potoken
                 out_additional_info['has_invalid_potoken_client'] = True
-            elif not self._downloader._has_above_wh_format(result, (1920 + 1), (1080 + 1)) and out_additional_info.get('has_sabr_only', False):
+            elif not self._downloader._has_above_wh_format(result, (1920 + 1), (1080 + 1)) and (not self._downloader._has_above_wh_format(result, (1280 + 1), (720 + 1)) or out_additional_info.get('has_sabr_only', False)):
                 max_result = result
                 self.report_msg(f'default client result, max: {self._downloader._get_max_format_wh(max_result)}')
 
                 try_not_default_clients_count = 1
                 not_default_clients_info = None
-                while try_not_default_clients_count > 0:
+                while enable_not_default_clients and try_not_default_clients_count > 0:
                     try_not_default_clients_count -= 1
                     not_default_clients_info = self._extract_by_not_default_clients(url)
                     self.report_msg(f'not default clients info, max: {self._downloader._get_max_format_wh(not_default_clients_info)}')
@@ -4781,25 +4797,21 @@ class YoutubeIE(YoutubeBaseInfoExtractor):
                     if try_not_default_clients_count > 0:
                         self._sleep(2, 'try not default clients')
 
-                # if (not self._downloader._has_above_wh_format(max_result, (640 + 1), (360 + 1))) or (not self._downloader._has_above_wh_format(max_result, (1920 + 1), (1080 + 1)) and not_default_clients_info and not self._downloader._has_above_wh_format(not_default_clients_info, (640 + 1), (360 + 1))):
-                #     thirdapi_info = self._extract_by_thirdapi(url)
-                #     if thirdapi_info:
-                #         self.report_msg(f'thirdapi info, max: {self._downloader._get_max_format_wh(thirdapi_info)}')
-                #     if thirdapi_info and self._downloader._get_max_format_wh_value(thirdapi_info) > self._downloader._get_max_format_wh_value(max_result):
-                #         max_result = thirdapi_info
+                if (not self._downloader._has_above_wh_format(max_result, (640 + 1), (360 + 1))) or (not self._downloader._has_above_wh_format(max_result, (1920 + 1), (1080 + 1)) and not_default_clients_info and not self._downloader._has_above_wh_format(not_default_clients_info, (640 + 1), (360 + 1))):
+                    thirdapi_info = self._extract_by_thirdapi(url)
+                    if thirdapi_info:
+                        self.report_msg(f'thirdapi info, max: {self._downloader._get_max_format_wh(thirdapi_info)}')
+                    if thirdapi_info and self._downloader._get_max_format_wh_value(thirdapi_info) > self._downloader._get_max_format_wh_value(max_result):
+                        max_result = thirdapi_info
 
                 return max_result
             else:
                 return result
-        except Exception as e:
-            first_execption = e
 
         if self._is_expected_exception(first_execption):
             raise first_execption
 
-        is_bot = 'Sign in to confirm you’re not a bot.' in str(first_execption)
-
-        if not is_bot:
+        if not is_bot_exception(first_execption) and enable_not_default_clients:
             not_default_clients_info = self._extract_by_not_default_clients(url)
             if not_default_clients_info:
                 return not_default_clients_info
@@ -4808,7 +4820,7 @@ class YoutubeIE(YoutubeBaseInfoExtractor):
         if thirdapi_info:
             return thirdapi_info
 
-        if is_bot:
+        if is_bot_exception(first_execption):
             not_default_clients_info = self._extract_by_not_default_clients(url)
             if not_default_clients_info:
                 return not_default_clients_info

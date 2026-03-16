@@ -4787,7 +4787,7 @@ class YoutubeIE(YoutubeBaseInfoExtractor):
             if False and result_type == 'video' and not self._downloader._has_formats_to_download(result) and not self._has_config_potoken():
                 # try to use potoken
                 out_additional_info['has_invalid_potoken_client'] = True
-            elif not self._downloader._has_above_wh_format(result, (1920 + 1), (1080 + 1)) and (not self._downloader._has_above_wh_format(result, (1280 + 1), (720 + 1)) or out_additional_info.get('has_sabr_only', False)):
+            elif not self._downloader._has_above_resolution(result, '1080p') and (not self._downloader._has_above_resolution(result, '720p') or out_additional_info.get('has_sabr_only', False)):
                 max_result = result
                 self.report_msg(f'default client result, max: {self._downloader._get_max_format_wh(max_result)}')
 
@@ -4803,7 +4803,7 @@ class YoutubeIE(YoutubeBaseInfoExtractor):
                     if try_not_default_clients_count > 0:
                         self._sleep(2, 'try not default clients')
 
-                if (not self._downloader._has_above_wh_format(max_result, (854 + 1), (480 + 1))) or (not self._downloader._has_above_wh_format(max_result, (1920 + 1), (1080 + 1)) and not_default_clients_info and not self._downloader._has_above_wh_format(not_default_clients_info, (854 + 1), (480 + 1))):
+                if (not self._downloader._has_above_resolution(max_result, '480p')) or (not self._downloader._has_above_resolution(max_result, '1080p') and not_default_clients_info and not self._downloader._has_above_resolution(not_default_clients_info, '480p')):
                     thirdapi_info = self._extract_by_thirdapi(url)
                     if thirdapi_info:
                         self.report_msg(f'thirdapi info, max: {self._downloader._get_max_format_wh(thirdapi_info)}')

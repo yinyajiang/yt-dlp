@@ -4804,6 +4804,39 @@ class YoutubeDL:
             return w * h >= iw * ih
         return True
 
+    def _has_above_resolution(self, info_dict, resolution: str, include_self: bool = False):
+        resolution = resolution.lower()
+
+        w, h = 0, 0
+        mw, mh = self._get_max_format_wh(info_dict)
+        if mw > mh:
+            if resolution == '360p':
+                w, h = 640, 360
+            elif resolution == '480p':
+                w, h = 854, 480
+            elif resolution == '720p':
+                w, h = 1280, 720
+            elif resolution == '1080p':
+                w, h = 1920, 1080
+            elif resolution == '2160p':
+                w, h = 3840, 2160
+        else:
+            # Vertical (e.g. Shorts) 9:16; p-number refers to height
+            if resolution == '360p':
+                w, h = 202, 360
+            elif resolution == '480p':
+                w, h = 270, 480
+            elif resolution == '720p':
+                w, h = 405, 720
+            elif resolution == '1080p':
+                w, h = 607, 1080
+            elif resolution == '2160p':
+                w, h = 1215, 2160
+
+        if not include_self:
+            w, h = w + 1, h + 1
+        return self._has_above_wh_format(info_dict, w, h)
+
     def _get_max_format_wh(self, info_dict):
         with contextlib.suppress(Exception):
             def getForamtValue(fmt):

@@ -3238,6 +3238,7 @@ class YoutubeIE(YoutubeBaseInfoExtractor):
         }
         itags, stream_ids = collections.defaultdict(set), []
         itag_qualities, res_qualities = {}, {0: None}
+        is_falldown = out_additional_info and out_additional_info.get('falldown', False)
         subtitles = {}
         q = qualities([
             # Normally tiny is the smallest video-only formats. But
@@ -3355,11 +3356,11 @@ class YoutubeIE(YoutubeBaseInfoExtractor):
                     'challenge solver script distribution installed. '
                     'Review any warnings presented before this message. '
                     f'For more details, refer to  {_EJS_WIKI_URL}')
-                if s_challenges:
+                if s_challenges and not is_falldown:
                     self.report_warning(
                         f'Signature solving failed: Some formats may be missing. {help_message}',
                         video_id=video_id, only_once=True)
-                if n_challenges:
+                if n_challenges and not is_falldown:
                     self.report_warning(
                         f'n challenge solving failed: Some formats may be missing. {help_message}',
                         video_id=video_id, only_once=True)
@@ -3746,7 +3747,7 @@ class YoutubeIE(YoutubeBaseInfoExtractor):
                     if client_name not in gvs_pots:
                         gvs_pots[client_name] = po_token
 
-                if require_po_token and not po_token and 'missing_pot' not in self._configuration_arg('formats'):
+                if require_po_token and not po_token and 'missing_pot' not in self._configuration_arg('formats') and not is_falldown:
                     self._report_pot_format_skipped(video_id, client_name, 'dash')
                 elif solved_n or not n_challenge:
                     dash_manifest_url = update_url(dash_manifest_url, path=manifest_path)
@@ -4766,7 +4767,9 @@ class YoutubeIE(YoutubeBaseInfoExtractor):
         result = None
         try:
             result = self._real_extract_with_additional_info(url, out_additional_info)
+            out_additional_info['falldown'] = True
         except Exception as e:
+            out_additional_info['falldown'] = True
             first_execption = e
             if not is_bot_exception(e):
                 not_default_clients_info = self._extract_by_not_default_clients(url)

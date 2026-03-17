@@ -175,6 +175,8 @@ from .utils import (
     is_audio_only_format,
     is_both_format,
     get_windows_version,
+    resolution_to_width_height,
+    resolution_decrease_with_height,
 )
 from .utils._utils import _UnsafeExtensionError, _YDLLogger, _ProgressState
 from .utils.networking import (
@@ -3875,6 +3877,7 @@ class YoutubeDL:
                         return self.__download_wrapper(self.process_ie_result)(info, download=True)
 
                 formats_to_download = self._formats_to_download(info)
+                final_try_selector = None
 
                 # reselect formats
                 for fmt in formats_to_download:
@@ -3883,14 +3886,23 @@ class YoutubeDL:
                     height = fmt.get('height')
                     if is_video_only_format(fmt):
                         if height and isinstance(height, int):
+                            final_try_selector = (final_try_selector + '+') if final_try_selector else ''
+                            _, h = resolution_decrease_with_height(fmt.get('width'), height)
+                            final_try_selector += f'bv[height<={h}]/bv*[height<={h}]'
+
                             new_formats = self._select_formats(info['formats'],
                                                                self.build_format_selector(f'bv[height={height}][format_id!="{fmt_id}"]/bv*[height={height}][format_id!="{fmt_id}"]/bv[height>={height}][format_id!="{fmt_id}"]/bv*[height>={height}][format_id!="{fmt_id}"]/bv[format_id!="{fmt_id}"]/bv*[format_id!="{fmt_id}"]'))
                         if not new_formats:
                             new_formats = self._select_formats(info['formats'], self.build_format_selector(f'bv[format_id!="{fmt_id}"]/bv*[format_id!="{fmt_id}"]'))
                     elif is_audio_only_format(fmt):
+                        final_try_selector = (final_try_selector + '+') if final_try_selector else ''
+                        final_try_selector += 'ba/ba*'
                         new_formats = self._select_formats(info['formats'], self.build_format_selector(f'ba[format_id!="{fmt_id}"]/ba*[format_id!="{fmt_id}"]'))
                     elif is_both_format(fmt):
                         if height and isinstance(height, int):
+                            _, h = resolution_decrease_with_height(fmt.get('width'), height)
+                            final_try_selector = f'b[height<={h}]'
+
                             new_formats = self._select_formats(info['formats'], self.build_format_selector(f'b[height={height}][format_id!="{fmt_id}"]/b[height>={height}][format_id!="{fmt_id}"]'))
                         if not new_formats:
                             new_formats = self._select_formats(info['formats'], self.build_format_selector(f'b[format_id!="{fmt_id}"]'))
@@ -3933,7 +3945,15 @@ class YoutubeDL:
 
                 os.environ['DISABLE_SEARCHALTER'] = '1'
                 self.report_warning(f'The info failed to download: {e}; trying with URL {webpage_url}')
-                self.download([webpage_url])
+                try:
+                    self.download([webpage_url])
+                except Exception as e:
+                    if 'Forbidden' in str(e) and final_try_selector:
+                        self.format_selector = self.build_format_selector(final_try_selector)
+                        self.report_warning(f'Trying with selector {final_try_selector}')
+                        self.download([webpage_url])
+                    else:
+                        raise
             except ExtractorError as e:
                 self.report_error(e)
         return self._download_retcode
@@ -4804,34 +4824,8 @@ class YoutubeDL:
         return True
 
     def _has_above_resolution(self, info_dict, resolution: str, include_self: bool = False):
-        resolution = resolution.lower()
-
-        w, h = 0, 0
         mw, mh = self._get_max_format_wh(info_dict)
-        if mw > mh:
-            if resolution == '360p':
-                w, h = 640, 360
-            elif resolution == '480p':
-                w, h = 854, 480
-            elif resolution == '720p':
-                w, h = 1280, 720
-            elif resolution == '1080p':
-                w, h = 1920, 1080
-            elif resolution == '2160p':
-                w, h = 3840, 2160
-        else:
-            # Vertical (e.g. Shorts) 9:16; p-number refers to height
-            if resolution == '360p':
-                w, h = 202, 360
-            elif resolution == '480p':
-                w, h = 270, 480
-            elif resolution == '720p':
-                w, h = 405, 720
-            elif resolution == '1080p':
-                w, h = 607, 1080
-            elif resolution == '2160p':
-                w, h = 1215, 2160
-
+        w, h = resolution_to_width_height(resolution, mw < mh)
         if not include_self:
             w, h = w + 1, h + 1
         return self._has_above_wh_format(info_dict, w, h)

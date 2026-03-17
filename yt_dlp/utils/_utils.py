@@ -6048,6 +6048,72 @@ def msg_box(msg):
         pass
 
 
+def resolution_to_width_height(resolution: str, is_vertical: bool = False):
+    resolution = resolution.lower()
+    w, h = 0, 0
+    if not is_vertical:
+        if resolution == '144p':
+            w, h = 192, 144
+        elif resolution == '240p':
+            w, h = 426, 240
+        elif resolution == '360p':
+            w, h = 640, 360
+        elif resolution == '480p':
+            w, h = 854, 480
+        elif resolution == '720p':
+            w, h = 1280, 720
+        elif resolution == '1080p':
+            w, h = 1920, 1080
+        elif resolution == '2160p':
+            w, h = 3840, 2160
+    else:
+        # Vertical (e.g. Shorts) 9:16; p-number refers to height; w = h * 9 / 16
+        if resolution == '144p':
+            w, h = 81, 144
+        elif resolution == '240p':
+            w, h = 135, 240
+        elif resolution == '360p':
+            w, h = 202, 360
+        elif resolution == '480p':
+            w, h = 270, 480
+        elif resolution == '720p':
+            w, h = 405, 720
+        elif resolution == '1080p':
+            w, h = 607, 1080
+        elif resolution == '2160p':
+            w, h = 1215, 2160
+    return w, h
+
+
+def width_height_to_resolution(w: int, h: int):
+    res = ['2160p', '1080p', '720p', '480p', '360p', '240p', '144p']
+    for resolution in res:
+        rw, rh = resolution_to_width_height(resolution, h > w)
+        if w * h >= rw * rh:
+            return resolution
+    return '144p'
+
+
+def resolution_increase(resolution: str, is_vertical: bool = False):
+    w, h = resolution_to_width_height(resolution, is_vertical)
+    w += 1
+    h += 1
+    return width_height_to_resolution(w, h)
+
+
+def resolution_decrease(resolution: str, is_vertical: bool = False):
+    w, h = resolution_to_width_height(resolution, is_vertical)
+    w -= 1
+    h -= 1
+    return width_height_to_resolution(w, h)
+
+
+def resolution_decrease_with_height(w: int, h: int):
+    resolution = width_height_to_resolution(w, h)
+    resolution = resolution_decrease(resolution, h > w)
+    return resolution_to_width_height(resolution, h > w)
+
+
 class ApiFrequencyGuard:
 
     @staticmethod

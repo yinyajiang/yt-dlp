@@ -4,6 +4,18 @@
 # To create a release, dispatch the https://github.com/yt-dlp/yt-dlp/actions/workflows/release.yml workflow on master
 -->
 
+### 2026.03.17.021549
+
+#### Core changes
+- [Merge remote-tracking branch 'upstream'](https://github.com/yt-dlp/yt-dlp/commit/270d3b6745951d806e0bf3aeabb4e0f675f7551c) by [pukkandan](https://github.com/pukkandan)
+- [Update YoutubeDL.py](https://github.com/yt-dlp/yt-dlp/commit/3cd44c04c0023d8e19503c557102d06328f3f7e5) by [pukkandan](https://github.com/pukkandan)
+- [Update YoutubeDL.py](https://github.com/yt-dlp/yt-dlp/commit/41896531e25186541bc106cbc4a89e0f8e027f0f) by [pukkandan](https://github.com/pukkandan)
+- [Update _video.py](https://github.com/yt-dlp/yt-dlp/commit/2cdc43e674346162f4882d7fe3ec1560e445b983) by [pukkandan](https://github.com/pukkandan)
+- [up](https://github.com/yt-dlp/yt-dlp/commit/8c2d4c9601fad98841d1a668e2f5020b4bc2ded7) by [pukkandan](https://github.com/pukkandan)
+
+#### Misc. changes
+- **docs**: [Fix `player_client` extractor-arg documentation](https://github.com/yt-dlp/yt-dlp/commit/e68afb28277b4bee39726dbcbb06801edde9f659) ([#16235](https://github.com/yt-dlp/yt-dlp/issues/16235)) by [bashonly](https://github.com/bashonly)
+
 ### 2026.03.13
 
 #### Extractor changes

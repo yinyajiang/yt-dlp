@@ -4679,11 +4679,14 @@ class YoutubeIE(YoutubeBaseInfoExtractor):
 
     def _extract_by_thirdapi(self, url):
         try:
+            url, data = unsmuggle_url(url, {})
+            prefer_downloaded = not data.get('_is_searchalter', False) or self._downloader._is_enable_searchalter_download()
+
             rapidApi = YoutubeThirdIE(self)
             video_id = self._match_id(url)
             if not video_id:
                 return None
-            info = rapidApi.extract_video_info(video_id, url)
+            info = rapidApi.extract_video_info(video_id, url, prefer_downloaded=prefer_downloaded)
             if info:
                 self.report_msg('Use YoutubeThirdIE successfully')
             return info

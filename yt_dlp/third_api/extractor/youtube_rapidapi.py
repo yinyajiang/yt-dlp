@@ -37,6 +37,8 @@ class YoutubeRapidApi:
             raise ExtractorError('[rapidapi] api keys is required')
 
     def extract_video_info(self, video_id, check_fmt_url=False):
+        if not video_id:
+            raise ExtractorError('YoutubeRapidApi use video_id')
         info = self._get_video_info(video_id)
 
         ytb_info = {

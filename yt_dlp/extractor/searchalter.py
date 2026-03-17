@@ -3,6 +3,8 @@ import platform
 import random
 import urllib.parse
 
+from yt_dlp.utils._utils import smuggle_url
+
 from .common import InfoExtractor
 from ..utils import ApiFrequencyGuard, ExtractorError
 
@@ -19,6 +21,8 @@ class SearchForAlternativeIE(InfoExtractor):
         u = self._search_video(search_title)
         if not u:
             raise ExtractorError('No video urls searched')
+
+        u = smuggle_url(u, {'_is_searchalter': True})
         return self.url_result(
             u,
             url_transparent=True,

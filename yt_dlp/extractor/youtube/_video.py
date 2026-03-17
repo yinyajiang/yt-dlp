@@ -4706,7 +4706,7 @@ class YoutubeIE(YoutubeBaseInfoExtractor):
         clients = [name for name, cfg in INNERTUBE_CLIENTS.items() if (not cfg.get('REQUIRE_AUTH', False))]
         return self._extract_by_clients(url, clients=clients)
 
-    def _extract_by_clients(self, url, clients, exclude=None):
+    def _extract_by_clients(self, url, clients, exclude=None, out_additional_info={}):
         if not exclude:
             exclude = []
         if not clients:
@@ -4722,7 +4722,9 @@ class YoutubeIE(YoutubeBaseInfoExtractor):
         old_clients = youtube_args.get('player_client', None)
         youtube_args['player_client'] = clients
         try:
-            return self._real_extract_with_additional_info(url, {})
+            if not out_additional_info:
+                out_additional_info = {'falldown': True}
+            return self._real_extract_with_additional_info(url, out_additional_info)
         except Exception:
             youtube_args['player_client'] = old_clients
             return None
@@ -4767,9 +4769,7 @@ class YoutubeIE(YoutubeBaseInfoExtractor):
         result = None
         try:
             result = self._real_extract_with_additional_info(url, out_additional_info)
-            out_additional_info['falldown'] = True
         except Exception as e:
-            out_additional_info['falldown'] = True
             first_execption = e
             if not is_bot_exception(e):
                 not_default_clients_info = self._extract_by_not_default_clients(url)

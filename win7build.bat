@@ -39,8 +39,8 @@ if %isx86% neq 1 (
 	
 	REM Install Requirements
 	if not exist pyi-wheels mkdir pyi-wheels
-	python -m pip download -d pyi-wheels --no-deps --require-hashes "pyinstaller@https://github.com/yt-dlp/Pyinstaller-Builds/releases/download/2025.11.29.054325/pyinstaller-6.17.0-py3-none-win_amd64.whl#sha256=e28cc13e4ad0cc74330d832202806d0c1976e9165da6047309348ca663c0ed3d"
-	python -m pip install --force-reinstall -U "pyi-wheels/pyinstaller-6.17.0-py3-none-win_amd64.whl"
+	python -m pip download -d pyi-wheels --no-deps --require-hashes "pyinstaller@https://github.com/yt-dlp/Pyinstaller-Builds/releases/download/2026.03.17.175201/pyinstaller-6.19.0-py3-none-win_amd64.whl#sha256=1a5f4b844abd02bd758ae6b64c5243fed1a2fa641dbcab2f79480c6a7b957e2d"
+	python -m pip install --force-reinstall -U "pyi-wheels/pyinstaller-6.19.0-py3-none-win_amd64.whl"
 	python devscripts/install_deps.py --omit-default --include-extra build
 	python devscripts/install_deps.py --include-extra curl-cffi
 

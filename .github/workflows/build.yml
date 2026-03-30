@@ -382,7 +382,7 @@ jobs:
       - name: Install Certificate
         env:
           APPLE_CERTIFICATE: ${{ secrets.APPLE_CERTIFICATE }}
-        if: env.APPLE_CERTIFICATE != ''
+        if: ${{ env.APPLE_CERTIFICATE != '' }}
         run: |
           echo "Import apple develop apple_certificate: start"
           echo "${{ secrets.APPLE_CERTIFICATE }}" > apple_certificate.p12.enc
@@ -397,7 +397,7 @@ jobs:
           
           echo "Listing certificates in keychain:"
           security find-identity -v -p codesigning build.keychain
-	  
+
       - name: Prepare
         run: |
           python3 devscripts/update-version.py -c "${CHANNEL}" -r "${ORIGIN}" "${VERSION}"
@@ -406,7 +406,7 @@ jobs:
       - name: Build With Certificate
         env:
           APPLE_CERTIFICATE_NAME: ${{ secrets.APPLE_CERTIFICATE_NAME }}
-        if: env.APPLE_CERTIFICATE_NAME != ''
+        if: ${{ env.APPLE_CERTIFICATE_NAME != '' }}
         run: |
           source ~/yt-dlp-build-venv/bin/activate
           python3 -m bundle.pyinstaller --target-architecture universal2 --onedir -n yt-dlp
@@ -418,7 +418,7 @@ jobs:
       - name: Remove Certificate
         env:
           APPLE_CERTIFICATE: ${{ secrets.APPLE_CERTIFICATE }}
-        if: env.APPLE_CERTIFICATE != ''
+        if: ${{ env.APPLE_CERTIFICATE != '' }}
         run: |
           security delete-keychain build.keychain
 

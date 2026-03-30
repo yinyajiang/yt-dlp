@@ -39,16 +39,15 @@ if %isx86% neq 1 (
 	
 	REM Install Requirements
 	if not exist pyi-wheels mkdir pyi-wheels
-	python -m pip download -d pyi-wheels --no-deps --require-hashes "pyinstaller@https://github.com/yt-dlp/Pyinstaller-Builds/releases/download/2026.03.17.175201/pyinstaller-6.19.0-py3-none-win_amd64.whl#sha256=1a5f4b844abd02bd758ae6b64c5243fed1a2fa641dbcab2f79480c6a7b957e2d"
-	python -m pip install --force-reinstall -U "pyi-wheels/pyinstaller-6.19.0-py3-none-win_amd64.whl"
-	python devscripts/install_deps.py --omit-default --include-extra build
-	python devscripts/install_deps.py --include-extra curl-cffi
+	python -m pip install -U --require-hashes -r "bundle/requirements/requirements-pip.txt"
+    python -m pip install -U --require-hashes -r "bundle/requirements/requirements-win-x64-pyinstaller.txt"
+    python -m pip install -U --require-hashes -r "bundle/requirements/requirements-win-x64.txt"
 
 	REM Prepare
-	python devscripts/update-version.py "2024.01.01"
-	python devscripts/make_lazy_extractors.py
-		  
-	REM Prepare
+	python devscripts/update-version.py -c "stable" -r "yt-dlp/yt-dlp" "2024.01.01"
+    python devscripts/make_lazy_extractors.py
+
+	REM Build
 	python -m bundle.pyinstaller --onedir -n yt-dlp
 	powershell -Command "Compress-Archive -Force -Path ./dist/yt-dlp/* -DestinationPath ./dist/yt-dlp_win7.zip"
 
@@ -61,7 +60,7 @@ if %isx86% neq 1 (
 	python -m pip install -U "https://yt-dlp.github.io/Pyinstaller-Builds/i686/pyinstaller-6.10.0-py3-none-any.whl"
 
 	REM Prepare
-	python devscripts/update-version.py "2024.01.01"
+	python devscripts/update-version.py -c "stable" -r "yt-dlp/yt-dlp" "2024.01.01"
 	python devscripts/make_lazy_extractors.py
 
 	REM Build

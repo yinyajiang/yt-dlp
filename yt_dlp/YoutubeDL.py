@@ -2974,12 +2974,14 @@ class YoutubeDL:
         for cc_kind in ('subtitles', 'automatic_captions'):
             cc = info_dict.get(cc_kind)
             if cc:
-                for _, subtitle in cc.items():
+                for k, subtitle in cc.items():
                     for subtitle_format in subtitle:
                         if subtitle_format.get('url'):
                             subtitle_format['url'] = sanitize_url(subtitle_format['url'])
                         if subtitle_format.get('ext') is None:
                             subtitle_format['ext'] = determine_ext(subtitle_format['url']).lower()
+                        if not subtitle_format.get('name') and str(k).startswith('en-'):
+                            subtitle_format['name'] = 'English'
 
         automatic_captions = info_dict.get('automatic_captions')
         subtitles = info_dict.get('subtitles')

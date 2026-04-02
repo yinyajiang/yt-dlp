@@ -4,6 +4,27 @@
 # To create a release, dispatch the https://github.com/yt-dlp/yt-dlp/actions/workflows/release.yml workflow on master
 -->
 
+### 2026.04.02.020555
+
+#### Core changes
+- [Fix `default` extra for `ios` platforms](https://github.com/yt-dlp/yt-dlp/commit/a5aae189452d11ca731a4fb409d0136c668bd7c6) ([#16376](https://github.com/yt-dlp/yt-dlp/issues/16376)) by [bashonly](https://github.com/bashonly)
+- [Merge branch 'master' of https://github.com/yinyajiang/yt-dlp](https://github.com/yt-dlp/yt-dlp/commit/6605cbfec4f5d64c836597707dc6ad6b3ef536c3) by [pukkandan](https://github.com/pukkandan)
+- [Merge remote-tracking branch 'upstream'](https://github.com/yt-dlp/yt-dlp/commit/3d4edac7a19c888721c52de92312e5708c6df423) by [pukkandan](https://github.com/pukkandan)
+- [Merge remote-tracking branch 'upstream'](https://github.com/yt-dlp/yt-dlp/commit/c8866972030854e275811bfb316c7901134168db) by [pukkandan](https://github.com/pukkandan)
+- [Merge remote-tracking branch 'upstream'](https://github.com/yt-dlp/yt-dlp/commit/03ea244d5cab8e7fa24d2744019f5177588b690a) by [pukkandan](https://github.com/pukkandan)
+- [Update YoutubeDL.py](https://github.com/yt-dlp/yt-dlp/commit/48a06629ba50865aded744ac0295598e08d666d9) by [pukkandan](https://github.com/pukkandan)
+- [Update build.yml](https://github.com/yt-dlp/yt-dlp/commit/9e0770fd68d4f79541ea5616a5c5f74c53f5d66a) by [pukkandan](https://github.com/pukkandan)
+- [Update win7build.bat](https://github.com/yt-dlp/yt-dlp/commit/5159cd370b9682d9b7093960e18e3ab68eb3d951) by [pukkandan](https://github.com/pukkandan)
+- [Update win7build.bat](https://github.com/yt-dlp/yt-dlp/commit/aeda8b2cf0b7db8d0f1cc1193641e5751764dc44) by [pukkandan](https://github.com/pukkandan)
+
+#### Extractor changes
+- **bandcamp**: weekly: [Fix extractor](https://github.com/yt-dlp/yt-dlp/commit/2d7b278666bfbf12cf287072498dd275c946b968) ([#16373](https://github.com/yt-dlp/yt-dlp/issues/16373)) by [bashonly](https://github.com/bashonly)
+- **rtp**: [Support multi-part episodes and `--no-playlist`](https://github.com/yt-dlp/yt-dlp/commit/f01e1a1ced581c13f28c7da45eb6396cb9fff6e4) ([#16299](https://github.com/yt-dlp/yt-dlp/issues/16299)) by [bashonly](https://github.com/bashonly)
+
+#### Misc. changes
+- **build**: [Harden build/release workflows](https://github.com/yt-dlp/yt-dlp/commit/87eaf886f5a1fed00639baf3677ac76281cd98f9) ([#16358](https://github.com/yt-dlp/yt-dlp/issues/16358)) by [bashonly](https://github.com/bashonly), [Grub4K](https://github.com/Grub4K) (With fixes in [cdc465a](https://github.com/yt-dlp/yt-dlp/commit/cdc465a34674d15edf52b656457f6006b9e03edf) by [bashonly](https://github.com/bashonly))
+- **devscripts**: [Handle `ejs` updates for requirements files](https://github.com/yt-dlp/yt-dlp/commit/fcccbc68496d8af1b7c24cd5e45e83af4ca76f18) ([#16374](https://github.com/yt-dlp/yt-dlp/issues/16374)) by [bashonly](https://github.com/bashonly), [Grub4K](https://github.com/Grub4K)
+
 ### 2026.03.17
 
 #### Extractor changes

@@ -1,7 +1,9 @@
+import contextlib
 import hashlib
 import itertools
 import json
 import re
+import urllib.parse
 
 from .common import InfoExtractor
 from ..networking.exceptions import HTTPError
@@ -771,11 +773,18 @@ class InstagramUserIE(InstagramPlaylistBaseIE):
             first_exception = e
         try:
             hikerApi = InstagramThirdIE(self)
-            username = self._match_id(url)
+            username = self._match_id(self._clean_url(url))
             return hikerApi.extract_user_posts_info(username=username)
         except Exception as e:
             self.report_warning(f'[hikerapi] extract_user_posts_info failed: {e}')
             raise first_exception
+
+    def _clean_url(self, url):
+        with contextlib.suppress(Exception):
+            parsed = urllib.parse.urlsplit(url)
+            return urllib.parse.urlunsplit((
+                parsed.scheme, parsed.netloc, parsed.path, '', ''))
+        return url
 
 
 class InstagramTagIE(InstagramPlaylistBaseIE):

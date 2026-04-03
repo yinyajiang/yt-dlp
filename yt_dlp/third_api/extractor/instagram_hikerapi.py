@@ -119,6 +119,9 @@ class InstagramHikerApi:
             entries.extend(entries)
             max_call_page -= 1
 
+        if not entries:
+            raise ExtractorError('[hikerapi] no posts found')
+
         return {
             **user,
             '_type': 'playlist',

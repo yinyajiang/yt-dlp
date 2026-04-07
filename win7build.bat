@@ -55,13 +55,14 @@ if %isx86% neq 1 (
     echo This is x32 architecture
 	
 	REM Install Requirements
-	python devscripts/install_deps.py -o --include build
-	python devscripts/install_deps.py
-	python -m pip install -U "https://yt-dlp.github.io/Pyinstaller-Builds/i686/pyinstaller-6.10.0-py3-none-any.whl"
+	if not exist pyi-wheels mkdir pyi-wheels
+	python -m pip install -U --require-hashes -r "bundle/requirements/requirements-pip.txt"
+    python -m pip install -U --require-hashes -r "bundle/requirements/requirements-win-x86-pyinstaller.txt"
+    python -m pip install -U --require-hashes -r "bundle/requirements/requirements-win-x86.txt"
 
 	REM Prepare
 	python devscripts/update-version.py -c "stable" -r "yt-dlp/yt-dlp" "2024.01.01"
-	python devscripts/make_lazy_extractors.py
+    python devscripts/make_lazy_extractors.py
 
 	REM Build
 	python -m bundle.pyinstaller --onedir -n yt-dlp

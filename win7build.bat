@@ -39,9 +39,9 @@ if %isx86% neq 1 (
 	
 	REM Install Requirements
 	if not exist pyi-wheels mkdir pyi-wheels
-	python -m pip install -U --require-hashes -r "bundle/requirements/requirements-pip.txt"
-    python -m pip install -U --require-hashes -r "bundle/requirements/requirements-win-x64-pyinstaller.txt"
-    python -m pip install -U --require-hashes -r "bundle/requirements/requirements-win-x64.txt"
+	python -m pip install -U --require-hashes -r "bundle/requirements/pip.txt"
+    python -m pip install -U --require-hashes -r "bundle/requirements/win-x64-pyinstaller.txt"
+    python -m pip install -U --require-hashes -r "bundle/requirements/curl-cffi.txt"
 
 	REM Prepare
 	python devscripts/update-version.py -c "stable" -r "yt-dlp/yt-dlp" "2024.01.01"
@@ -56,9 +56,9 @@ if %isx86% neq 1 (
 	
 	REM Install Requirements
 	if not exist pyi-wheels mkdir pyi-wheels
-	python -m pip install -U --require-hashes -r "bundle/requirements/requirements-pip.txt"
-    python -m pip install -U --require-hashes -r "bundle/requirements/requirements-win-x86-pyinstaller.txt"
-    python -m pip install -U --require-hashes -r "bundle/requirements/requirements-win-x86.txt"
+	python -m pip install -U --require-hashes -r "bundle/requirements/pip.txt"
+    python -m pip install -U --require-hashes -r "bundle/requirements/win-x86-pyinstaller.txt"
+    python -m pip install -U --require-hashes -r "bundle/requirements/default.txt"
 
 	REM Prepare
 	python devscripts/update-version.py -c "stable" -r "yt-dlp/yt-dlp" "2024.01.01"

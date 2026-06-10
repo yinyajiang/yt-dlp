@@ -1272,8 +1272,8 @@ from .neteasemusic import (
     NetEaseMusicMvIE,
     NetEaseMusicProgramIE,
     NetEaseMusicSingerIE,
-from .netflix import NetflixIE, NetflixPageIE
 )
+from .netflix import NetflixIE, NetflixPageIE
 from .netzkino import NetzkinoIE
 from .newgrounds import (
     NewgroundsIE,

@@ -1085,7 +1085,7 @@ class BiliBiliBangumiIE(BilibiliBaseIE):
             'duration': float_or_none(video_info.get('timelength'), scale=1000),
             'subtitles': self.extract_subtitles(episode_id, episode_info.get('cid'), aid=aid),
             '__post_extractor': self.extract_comments(aid),
-            'http_headers': {'Referer': url},
+            'http_headers': self._HEADERS,
         }
 
 

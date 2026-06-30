@@ -50,8 +50,7 @@ class InstagramBaseIE(InfoExtractor):
         'ios': '124024574287414',
         'web': '936619743392459',  # default
     }
-    def _has_session_id(self):
-        return self._get_cookies('https://www.instagram.com/').get('sessionid')
+
 
     @property
     def _is_logged_in(self):
@@ -152,8 +151,9 @@ class InstagramBaseIE(InfoExtractor):
         dash = traverse_obj(product_media, ('video_dash_manifest', {str}))
         if dash:
             formats.extend(self._parse_mpd_formats(self._parse_xml(dash, video_id), mpd_id='dash'))
-       images_list = traverse_obj(product_media, ('image_versions2', 'candidates'))
-       if media_type == 1:
+
+        images_list = traverse_obj(product_media, ('image_versions2', 'candidates'))
+        if media_type == 1:
             media_type = 'PHOTO'
             formats.extend([{
                 'format_id': 'photo-' + str(item.get('width', '')) + '-' + str(item.get('height', '')),
@@ -204,7 +204,7 @@ class InstagramBaseIE(InfoExtractor):
             'http_headers': {
                 'Referer': 'https://www.instagram.com/',
             },
-        }  
+        }
 
         if webpage_is_post and product_info.get('code'):
             info_dict['webpage_url'] = f"https://www.instagram.com/p/{product_info.get('code')}/"
@@ -217,7 +217,7 @@ class InstagramBaseIE(InfoExtractor):
                 '_type': 'playlist',
                 '_playlist_media_type': 'CAROUSEL',
                 **info_dict,
-                'title': product_info.get('title') or format_field(info_dict, 'channel', 'Post by %s', default=None) ,
+                'title': product_info.get('title') or format_field(info_dict, 'channel', 'Post by %s', default=None),
                 'entries': [{
                     **info_dict,
                     **self._extract_product_media(product_media),

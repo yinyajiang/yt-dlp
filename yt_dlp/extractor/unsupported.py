@@ -317,7 +317,7 @@ class KnownPiracyIE(UnsupportedInfoExtractor):
         # 'url': 'https://thisav.com/en/terms',
         # 'only_matching': True,
         # },
-		# {
+        # {
         # 'url': 'https://gofile.io/d/',
         # 'only_matching': True,
         # }
@@ -343,17 +343,18 @@ class KnownLiabilityIE(UnsupportedInfoExtractor):
     )
 
     _TESTS = [
-   # {
+        # {
         # 'url': 'https://motherless.com/',
         # 'only_matching': True,
-   #  }, {
-       # 'url': 'https://suno.com/song/',
-       # 'only_matching': True,
-   # }, {
-       # 'url': 'https://www.udio.com/songs/',
-       # 'only_matching': True,
-   # }
-   ]
+        #  }, {
+        # 'url': 'https://suno.com/song/',
+        # 'only_matching': True,
+        # },
+        # {
+        # 'url': 'https://www.udio.com/songs/',
+        # 'only_matching': True,
+        # }
+    ]
 
     def _real_extract(self, url):
         raise ExtractorError(

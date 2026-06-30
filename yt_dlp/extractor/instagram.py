@@ -51,7 +51,6 @@ class InstagramBaseIE(InfoExtractor):
         'web': '936619743392459',  # default
     }
 
-
     @property
     def _is_logged_in(self):
         return bool(self._get_cookies(self._BASE_URL).get('sessionid'))

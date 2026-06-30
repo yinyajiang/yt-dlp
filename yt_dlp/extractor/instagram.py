@@ -552,7 +552,7 @@ class InstagramPlaylistBaseIE(InstagramBaseIE):
                     r'sharedData\s*=\s*({.+?})\s*;\s*[<\n]', webpage, 'data'),
                 item_id)
         except ExtractorError as e:
-            if not self._has_session_id():
+            if not self._is_logged_in:
                 self.raise_login_required()
             else:
                 raise e
@@ -716,7 +716,7 @@ class InstagramUserIE(InstagramPlaylistBaseIE):
                 'uploader_id': userdata.get('user', {}).get('id', username),
             })
 
-        if not info_data and not self._has_session_id():
+        if not info_data and not self._is_logged_in:
             self.raise_login_required()
 
         return self.playlist_result(info_data, playlist_id=username, playlist_title=format_field(username, None, 'Posts by %s'))

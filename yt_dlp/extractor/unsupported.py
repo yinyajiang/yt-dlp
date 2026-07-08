@@ -337,7 +337,7 @@ class KnownLiabilityIE(UnsupportedInfoExtractor):
     """
 
     URLS = (
-        # r'motherless\.com',
+        # r'motherless\.\w+',
         # r'suno\.com',
         # r'udio\.com',
     )

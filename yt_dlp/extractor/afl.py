@@ -1,6 +1,6 @@
 from .brightcove import BrightcoveNewIE
 from .common import ExtractorError, InfoExtractor
-from .omnyfm import OmnyFMShowIE
+from .omnyfm import OmnyfmShowIE
 from ..utils import (
     extract_attributes,
     get_element_by_class,
@@ -82,7 +82,7 @@ class AFLPodcastIE(InfoExtractor):
         webpage = self._download_webpage(url, display_id)
         element = get_element_by_class('omny-embed', webpage)
         podcast_url = traverse_obj(extract_attributes(element), ('src', {url_or_none}))
-        return self.url_result(podcast_url, OmnyFMShowIE)
+        return self.url_result(podcast_url, OmnyfmShowIE)
 
 
 class AFCVideoIE(InfoExtractor):

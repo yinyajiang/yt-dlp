@@ -1827,7 +1827,10 @@ from .shouttv import (
     ShoutTVSeasonIE,
     ShoutTVSeriesIE,
 )
-from .showroomlive import ShowRoomLiveIE
+from .showroomlive import (
+    ShowRoomLiveIE,
+    ShowRoomVodIE,
+)
 from .showuptv import ShowupTvIE
 from .sibnet import SibnetEmbedIE
 from .simplecast import (

@@ -46,7 +46,6 @@ import urllib.request
 import xml.etree.ElementTree
 from . import traversal
 
-
 from ..compat import (
     compat_datetime_from_timestamp,
     compat_etree_fromstring,
@@ -6189,6 +6188,17 @@ class ApiFrequencyGuard:
             return True
         except Exception:
             return True
+
+
+def youtube_audio_lang_from_url(url):
+    xtags = urllib.parse.parse_qs(urllib.parse.urlparse(url).query).get('xtags', [None])[0]
+    if not xtags:
+        return None
+    p = dict(s.split('=', 1) for s in xtags.split(':') if '=' in s)
+    lang = p.get('lang')
+    if lang:
+        lang = lang.split('-')[0]
+    return lang
 
 
 class _ProgressState(enum.Enum):

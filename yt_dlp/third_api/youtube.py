@@ -1,5 +1,6 @@
 from yt_dlp.third_api.extractor.snap_mutil_rapidapi import SnapMutilRapidApi
 from .extractor import YoutubeRapidApi, ThirdApiGuard, AllInOneMutilRapidApi
+from yt_dlp.utils import youtube_audio_lang_from_url
 
 
 class YoutubeThirdIE:
@@ -14,13 +15,22 @@ class YoutubeThirdIE:
 def extract_youtube_video_info(ie, video_id, url, prefer_downloaded=True):
     if prefer_downloaded:
         try:
-            return YoutubeRapidApi(ie).extract_video_info(video_id, check_fmt_url=False)
+            info = YoutubeRapidApi(ie).extract_video_info(video_id, check_fmt_url=False)
         except Exception as e:
             if 'You have exceeded' in str(e):
-                return AllInOneMutilRapidApi(ie).extract_video_info(url, check_fmt_url=True)
-            raise
+                info = AllInOneMutilRapidApi(ie).extract_video_info(url, check_fmt_url=True)
+            else:
+                raise
     else:
         try:
-            return AllInOneMutilRapidApi(ie).extract_video_info(url, check_fmt_url=True)
+            info = AllInOneMutilRapidApi(ie).extract_video_info(url, check_fmt_url=True)
         except Exception:
-            SnapMutilRapidApi(ie).extract_video_info(url, video_id)
+            info = SnapMutilRapidApi(ie).extract_video_info(url, video_id)
+
+    if info and isinstance(info, dict) and info.get('formats'):
+        for fmt in info['formats']:
+            if not fmt.get('language'):
+                lang = youtube_audio_lang_from_url(fmt.get('url'))
+                if lang:
+                    fmt['language'] = lang
+    return info
